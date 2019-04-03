@@ -1,26 +1,28 @@
 package com.example.ceedlive.dday;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.ceedlive.dday.activity.DetailActivity;
+import com.example.ceedlive.dday.dto.DdayDto;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity2 extends AppCompatActivity {
 
     /*
      * 디데이 앱
@@ -48,75 +50,39 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private ExpandableListView expandableListView;
-    private Button btnCreate;
-    private ArrayList<String> arrayGroup = new ArrayList<>();
-    private HashMap<String, ArrayList<String>> arrayChild = new HashMap<>();
+    private List<DdayDto> arrayGroup = new ArrayList<>();
+    private List<Map<String, String>> arrayChild = new ArrayList<>();
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initObject();
-        setEvent();
+        findViewById();
+
+        // this: 현재 Activity의 context
+
         setDummyData();// 디데이 일정 더미 데이터 세팅하기 (확장 리스트 뷰 사용)
     }
 
-    private void initObject() {
+    private void findViewById() {
+        handler = new Handler();
         expandableListView = findViewById(R.id.expandableListView);
-        btnCreate = findViewById(R.id.btnCreate);
-    }
-
-    private void setEvent() {
-        // Annoymous class(익명 클래스)를 통한 클릭이벤트
-        btnCreate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 액티비티 전환 코드
-                // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
-                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-                // 인텐트실행
-                startActivity(intent);
-            }
-        });
-        // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
     }
 
     private void setDummyData() {
         // set dummy data
-        for (int i=0; i<100; i++) {
-            if (i % 3 == 0) {
-                arrayGroup.add(i+1 + "번가 피자");
+        for (int i=0; i<300; i++) {
+            arrayGroup.add(new DdayDto(i, i + "번째 일정 제목",
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()),
+                    new Random().nextInt(9999) + ""));
 
-                ArrayList<String> arrayPizza = new ArrayList<>();
-                arrayPizza.add(i+1 + "번가 치즈");
-                arrayPizza.add(i+1 + "번가 고구마");
-                arrayPizza.add(i+1 + "번가 콤비네이션");
-
-                arrayChild.put(arrayGroup.get(i), arrayPizza);
-
-            } else if (i % 3 == 1) {
-                arrayGroup.add(i+1 + "번가 치킨");
-
-                ArrayList<String> arrayChicken = new ArrayList<>();
-                arrayChicken.add(i+1 + "번가 후라이드");
-                arrayChicken.add(i+1 + "번가 양념");
-                arrayChicken.add(i+1 + "번가 반반");
-
-                arrayChild.put(arrayGroup.get(i), arrayChicken);
-
-            } else if (i % 3 == 2) {
-                arrayGroup.add(i+1 + "번가 중식");
-
-                ArrayList<String> arrayChinese = new ArrayList<>();
-                arrayChinese.add(i+1 + "번가 짜장면");
-                arrayChinese.add(i+1 + "번가 짬뽕");
-                arrayChinese.add(i+1 + "번가 볶음밥");
-
-                arrayChild.put(arrayGroup.get(i), arrayChinese);
-            }
+            Map dummy = new HashMap();
+            dummy.put("one", "짜장");
+            dummy.put("two", "짬뽕");
+            arrayChild.add(dummy);
         }
-
         expandableListView.setAdapter(new CustomExpandableListViewAdapter(arrayGroup, arrayChild,this));
     }
 
@@ -130,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
          */
         private List arrayGroup;
 
-        private Map arrayChild;
+        private List arrayChild;
 
         /**
          * ListView에 Item을 세팅할 요청자의 정보가 들어감
@@ -142,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
          * @param arrayGroup
          * @param context
          */
-        public CustomExpandableListViewAdapter(ArrayList arrayGroup, HashMap arrayChild, Context context) {
+        public CustomExpandableListViewAdapter(List arrayGroup, List arrayChild, Context context) {
             this.arrayGroup = arrayGroup;
             this.arrayChild = arrayChild;
             this.context = context;
@@ -159,8 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            ArrayList childrenList = (ArrayList) arrayChild.get( arrayGroup.get(groupPosition) );
-            return childrenList.size();
+            return 0;
         }
 
         /**
@@ -175,9 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Object getChild(int groupPosition, int childPosition) {
-            ArrayList childrenList = (ArrayList) arrayChild.get( arrayGroup.get(groupPosition) );
-            Object child = childrenList.get(childPosition);
-            return child;
+            return arrayChild.get( groupPosition );
         }
 
         /**
@@ -193,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            return childPosition;
+            return 0;
         }
 
         @Override
@@ -229,11 +192,12 @@ public class MainActivity extends AppCompatActivity {
             TextView tvDate = (TextView) convertView.findViewById(R.id.tvDate);
             TextView tvDay = (TextView) convertView.findViewById(R.id.tvDay);
 
-            String groupName = (String) arrayGroup.get(groupPosition);
+            DdayDto dDay = (DdayDto) getGroup(groupPosition);
+            tvTitle.setText(dDay.getTitle());
+            tvDate.setText(dDay.getDate());
+            tvDay.setText(dDay.getDay());
 
-            tvTitle.setText(groupName);
-            tvDate.setText("2019-04-03");
-            tvDay.setText("D-31");
+            Log.d("ceedlive", dDay.toString());
 
             return convertView;
         }
@@ -241,9 +205,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-            String groupName = (String) arrayGroup.get(groupPosition);
-            ArrayList<String> detail = (ArrayList<String>) arrayChild.get(groupName);
-            String childName = detail.get(childPosition);
+            DdayDto ddayVO = (DdayDto) arrayGroup.get(groupPosition);
+            Map detail = (HashMap) arrayChild.get(ddayVO.getId());
 
             if (convertView == null) {
                 // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
@@ -255,7 +218,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             TextView tvChild = (TextView) convertView.findViewById(R.id.tvChild);
-            tvChild.setText(childName);
+            tvChild.setText(detail.get("one").toString());
+
+            Log.d("ceedlive", detail.get("one").toString());
 
             return convertView;
         }
