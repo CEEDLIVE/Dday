@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 리스트 뷰에 들어갈 리스트 아이템 레이아웃 -->
+
+    <TextView
+        android:id="@+id/tvSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Subject"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/tvAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="글쓴이" />
+
+        <TextView
+            android:id="@+id/tvHitCount"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="999" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
