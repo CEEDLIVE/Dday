@@ -68,7 +68,9 @@ public class MainActivity extends BaseActivity {
         btnCreate = findViewById(R.id.btnCreate);
 
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
-        String text = sharedPreferences.getString("text", "");
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        editor.clear();
+//        editor.commit();
 
         // How to get all keys of SharedPreferences programmatically in Android?
         Map<String, ?> allEntries = sharedPreferences.getAll();

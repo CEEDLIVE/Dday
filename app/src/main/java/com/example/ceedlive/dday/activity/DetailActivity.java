@@ -108,6 +108,7 @@ public class DetailActivity extends BaseActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
 
         // How to get all keys of SharedPreferences programmatically in Android?
+        // reference: https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
         Map<String, ?> allEntries = sharedPreferences.getAll();
         String eachKey = "";
         int eachKeyNumber;
@@ -122,8 +123,14 @@ public class DetailActivity extends BaseActivity {
                 keyNumberList.add(eachKeyNumber);
                 continue;
             }
+            keyNumberList.clear();
             keyNumberList.add(0);
             break;
+        }
+
+        // IndexOutOfBoundsException 방지
+        if (keyNumberList.isEmpty()) {
+            keyNumberList.add(0);
         }
 
         // 리스트 역순으로 뒤집기
@@ -147,7 +154,7 @@ public class DetailActivity extends BaseActivity {
         final String jsonStringAnniversaryInfo = gson.toJson(anniversaryInfo, AnniversaryInfo.class);
 
         // key, value를 이용하여 저장하는 형태
-        editor.putString("ceedlive.dday" + maxKeyNumber + 1, jsonStringAnniversaryInfo);
+        editor.putString("ceedlive.dday" + (maxKeyNumber + 1), jsonStringAnniversaryInfo);
 
         // 다양한 형태의 변수값을 저장할 수 있다.
 //        editor.putString();
