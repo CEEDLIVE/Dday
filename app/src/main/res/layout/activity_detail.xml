@@ -19,6 +19,7 @@
         android:layout_gravity="center"/>
 
     <EditText
+        android:id="@+id/detail_et_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -31,7 +32,7 @@
         android:text="날짜"/>
 
     <TextView
-        android:id="@+id/tv_detail_select_date"
+        android:id="@+id/detail_tv_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"

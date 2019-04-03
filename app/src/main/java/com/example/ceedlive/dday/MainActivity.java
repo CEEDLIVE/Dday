@@ -2,8 +2,9 @@ package com.example.ceedlive.dday;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ceedlive.dday.activity.DetailActivity;
 
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     /*
      * 디데이 앱
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
      *      : 디데이 계산
      *
      * 2단계
-     *  데이터베이스 연동
+     *  데이터베이스 연동 (SharedPreferences 사용, 이후 SQLite, 외부 DB 연동 순으로 리팩토링)
      *  - 리스트 조회
      *  - 저장
      *  - 수정
@@ -57,14 +57,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initObject();
+        initialize();
         setEvent();
         setDummyData();// 디데이 일정 더미 데이터 세팅하기 (확장 리스트 뷰 사용)
     }
 
-    private void initObject() {
+    @Override
+    protected void initialize() {
         expandableListView = findViewById(R.id.expandableListView);
         btnCreate = findViewById(R.id.btnCreate);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+        String text = sharedPreferences.getString("text", "");
+
+        // How to get all keys of SharedPreferences programmatically in Android?
+        Map<String, ?> allEntries = sharedPreferences.getAll();
+
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            Log.d("main map values", entry.getKey() + ": " + entry.getValue().toString());
+        }
     }
 
     private void setEvent() {
