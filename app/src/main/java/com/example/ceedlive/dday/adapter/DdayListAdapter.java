@@ -21,9 +21,9 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
     /**
      * ListView에 세팅할 Item 정보들
      */
-    private List<AnniversaryInfo> arrayGroup;
+    private List<AnniversaryInfo> mArrayGroup;
 
-    private Map arrayChild;
+    private Map<String, Map<String, String>> mArrayChild;
 
     /**
      * ListView에 Item을 세팅할 요청자의 정보가 들어감
@@ -35,9 +35,9 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
      * @param arrayGroup
      * @param context
      */
-    public DdayListAdapter(List<AnniversaryInfo> arrayGroup, HashMap arrayChild, Context context) {
-        this.arrayGroup = arrayGroup;
-        this.arrayChild = arrayChild;
+    public DdayListAdapter(List<AnniversaryInfo> arrayGroup, Map<String, Map<String, String>> arrayChild, Context context) {
+        this.mArrayGroup = arrayGroup;
+        this.mArrayChild = arrayChild;
         this.context = context;
     }
 
@@ -47,14 +47,18 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public int getGroupCount() {
-        return arrayGroup.size();
+        return mArrayGroup.size();
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        AnniversaryInfo anniversaryInfo = arrayGroup.get(groupPosition);
-        ArrayList childrenList = (ArrayList) arrayChild.get( anniversaryInfo.getUniqueKey() );
-        return childrenList.size();
+        // HashMap
+        return 1;
+
+        // ArrayList<String> 인 경우 다음 코드 사용
+//        AnniversaryInfo anniversaryInfo = arrayGroup.get(groupPosition);
+//        ArrayList childrenList = (ArrayList) arrayChild.get( anniversaryInfo.getUniqueKey() );
+//        return childrenList.size();
     }
 
     /**
@@ -64,14 +68,14 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public Object getGroup(int groupPosition) {
-        return arrayGroup.get(groupPosition);
+        return mArrayGroup.get(groupPosition);
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        AnniversaryInfo anniversaryInfo = arrayGroup.get(groupPosition);
-        ArrayList childrenList = (ArrayList) arrayChild.get( anniversaryInfo.getUniqueKey() );
-        Object child = childrenList.get(childPosition);
+        AnniversaryInfo anniversaryInfo = mArrayGroup.get(groupPosition);
+        Map<String, String> childrenMap = mArrayChild.get( anniversaryInfo.getUniqueKey() );
+        Object child = childrenMap;
         return child;
     }
 
@@ -124,7 +128,7 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
         TextView tvDate = (TextView) convertView.findViewById(R.id.tvDate);
         TextView tvDay = (TextView) convertView.findViewById(R.id.tvDay);
 
-        AnniversaryInfo anniversaryInfo = arrayGroup.get(groupPosition);
+        AnniversaryInfo anniversaryInfo = mArrayGroup.get(groupPosition);
 
         tvTitle.setText(anniversaryInfo.getTitle());
         tvDate.setText(anniversaryInfo.getDate());
@@ -136,9 +140,9 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-        AnniversaryInfo anniversaryInfo = arrayGroup.get(groupPosition);
-        ArrayList<String> detail = (ArrayList<String>) arrayChild.get(anniversaryInfo.getUniqueKey());
-        String childName = detail.get(childPosition);
+        AnniversaryInfo anniversaryInfo = mArrayGroup.get(groupPosition);
+        Map<String, String> detail = mArrayChild.get(anniversaryInfo.getUniqueKey());
+        String description = detail.get("description");
 
         if (convertView == null) {
             // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
@@ -149,11 +153,8 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.listview_child, parent, false);
         }
 
-        TextView tvChild = (TextView) convertView.findViewById(R.id.tvChild);
-        tvChild.setText(childName);
-
         TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_child_tv_description);
-        tvDescription.setText("description");
+        tvDescription.setText(description);
 
         return convertView;
     }

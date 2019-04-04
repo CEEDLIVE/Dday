@@ -217,7 +217,7 @@ public class MainActivity2 extends AppCompatActivity {
                 convertView = inflater.inflate(R.layout.listview_child, parent, false);
             }
 
-            TextView tvChild = (TextView) convertView.findViewById(R.id.tvChild);
+            TextView tvChild = (TextView) convertView.findViewById(R.id.listview_child_tv_description);
             tvChild.setText(detail.get("one").toString());
 
             Log.d("ceedlive", detail.get("one").toString());

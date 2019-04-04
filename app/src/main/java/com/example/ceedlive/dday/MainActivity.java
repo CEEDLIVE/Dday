@@ -1,15 +1,18 @@
 package com.example.ceedlive.dday;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -28,13 +31,14 @@ public class MainActivity extends BaseActivity {
     /*
      * 디데이 프로젝트 관련 내용은 README.md 에 정리
      */
+    private View mListViewChild;
 
     private LinearLayout mLayoutNoContent;
     private ExpandableListView mListViewContent;
+    private Button mBtnCreate, mBtnEdit, mBtnDelete;
 
-    private Button mBtnCreate;
     private ArrayList<String> mArrayGroup = new ArrayList<>();
-    private HashMap<String, ArrayList<String>> mArrayChild = new HashMap<>();
+    private Map<String, Map<String, String>> mAnniversaryInfoChild = new HashMap<>();
 
     private List<AnniversaryInfo> mAnniversaryInfoList = new ArrayList<>();
     private String mAnniversaryInfoKey;
@@ -57,6 +61,10 @@ public class MainActivity extends BaseActivity {
         mListViewContent = findViewById(R.id.expandableListView);
 
         mBtnCreate = findViewById(R.id.btnCreate);
+
+        // 출처: https://itpangpang.xyz/143 [ITPangPang]
+        // 출처: https://bitnori.tistory.com/entry/Android-다른-레이아웃Layout의-위젯-제어하기-LayoutInflater-사용 [Bitnori's Blog]
+        // https://stackoverflow.com/questions/28193552/null-pointer-exception-on-setonclicklistener
 
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
 
@@ -96,10 +104,41 @@ public class MainActivity extends BaseActivity {
         });
         // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
 
+        // 등록된 일정이 하나도 없는 경우
         mLayoutNoContent.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 moveDetailActivity();
+            }
+        });
+
+        // TODO 다른 레이아웃 위젯 제어하는 방법 찾고 구현해보기
+        FrameLayout add_layout = (FrameLayout) findViewById(R.id.main_center_layout);
+
+        // 인플레이션
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mListViewChild = inflater.inflate(R.layout.listview_child, add_layout, false);
+
+//        mListViewChild = getLayoutInflater().inflate(R.layout.listview_child, null, false);
+        mBtnEdit = (Button) mListViewChild.findViewById(R.id.listview_child_btn_edit);
+        mBtnDelete = (Button) mListViewChild.findViewById(R.id.listview_child_btn_delete);
+
+        // 수정
+        mBtnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Toast.makeText(this, "123", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "수정 버튼 클릭", Toast.LENGTH_SHORT).show();
+                Log.d("mBtnEdit", "수정 버튼 클릭");
+            }
+        });
+
+        // 삭제
+        mBtnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "삭제 버튼 클릭", Toast.LENGTH_SHORT).show();
+                Log.d("mBtnEdit", "삭제 버튼 클릭");
             }
         });
     }
@@ -134,55 +173,11 @@ public class MainActivity extends BaseActivity {
 
     private void setSharedPreferencesData() {
         for (AnniversaryInfo anniversaryInfo : mAnniversaryInfoList) {
-            ArrayList<String> arrayChicken = new ArrayList<>();
-            arrayChicken.add(anniversaryInfo.getTitle());
-            arrayChicken.add(anniversaryInfo.getDate());
-            arrayChicken.add(anniversaryInfo.getDescription());
-            arrayChicken.add(anniversaryInfo.getUniqueKey());
-
-            mArrayChild.put(anniversaryInfo.getUniqueKey(), arrayChicken);
+            Map<String, String> detail = new HashMap();
+            detail.put("description", anniversaryInfo.getDescription());
+            mAnniversaryInfoChild.put(anniversaryInfo.getUniqueKey(), detail);
         }
-        mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, mArrayChild,this));
-    }
-
-    private void setDummyData() {
-        // set dummy data
-        int num = 0;
-        for (int i=0; i<100; i++) {
-            num = i+1;
-            if (i % 3 == 0) {
-                mArrayGroup.add(num + "번가 피자");
-
-                ArrayList<String> arrayPizza = new ArrayList<>();
-                arrayPizza.add(num + "번가 치즈");
-                arrayPizza.add(num + "번가 고구마");
-                arrayPizza.add(num + "번가 콤비네이션");
-
-                mArrayChild.put(mArrayGroup.get(i), arrayPizza);
-
-            } else if (i % 3 == 1) {
-                mArrayGroup.add(num + "번가 치킨");
-
-                ArrayList<String> arrayChicken = new ArrayList<>();
-                arrayChicken.add(num + "번가 후라이드");
-                arrayChicken.add(num + "번가 양념");
-                arrayChicken.add(num + "번가 반반");
-
-                mArrayChild.put(mArrayGroup.get(i), arrayChicken);
-
-            } else if (i % 3 == 2) {
-                mArrayGroup.add(num + "번가 중식");
-
-                ArrayList<String> arrayChinese = new ArrayList<>();
-                arrayChinese.add(num + "번가 짜장면");
-                arrayChinese.add(num + "번가 짬뽕");
-                arrayChinese.add(num + "번가 볶음밥");
-
-                mArrayChild.put(mArrayGroup.get(i), arrayChinese);
-            }
-        }
-
-//        expandableListView.setAdapter(new DdayListAdapter(arrayGroup, arrayChild,this));
+        mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, mAnniversaryInfoChild,this));
     }
 
 }
