@@ -1,19 +1,16 @@
 package com.example.ceedlive.dday;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
 
 import com.example.ceedlive.dday.activity.DetailActivity;
+import com.example.ceedlive.dday.adapter.DdayListAdapter;
+import com.example.ceedlive.dday.dto.AnniversaryInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +30,7 @@ public class MainActivity extends BaseActivity {
      *      : 디데이 계산
      *
      * 2단계
-     *  데이터베이스 연동 (SharedPreferences 사용, 이후 SQLite, 외부 DB 연동 순으로 리팩토링)
+     *  데이터베이스 연동 (SharedPreferences 사용, 이후 SQLite, 외부 DB 연동 순으로 리팩토링 예정)
      *  - 리스트 조회
      *  - 저장
      *  - 수정
@@ -52,14 +49,19 @@ public class MainActivity extends BaseActivity {
     private ArrayList<String> arrayGroup = new ArrayList<>();
     private HashMap<String, ArrayList<String>> arrayChild = new HashMap<>();
 
+    private List<AnniversaryInfo> anniversaryInfoList = new ArrayList<>();
+    private String anniversaryInfoKey;
+    private String anniversaryInfoJsonString;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initialize();
-        setEvent();
-        setDummyData();// 디데이 일정 더미 데이터 세팅하기 (확장 리스트 뷰 사용)
+        initialize();// 변수 초기화
+        setEvent();// 이벤트 설정
+//        setDummyData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
+        setSharedPreferencesData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
     }
 
     @Override
@@ -68,6 +70,8 @@ public class MainActivity extends BaseActivity {
         btnCreate = findViewById(R.id.btnCreate);
 
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+
+        // SharedPreferences 값 삭제
 //        SharedPreferences.Editor editor = sharedPreferences.edit();
 //        editor.clear();
 //        editor.commit();
@@ -77,6 +81,11 @@ public class MainActivity extends BaseActivity {
 
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
             Log.d("main map values", entry.getKey() + ": " + entry.getValue().toString());
+            anniversaryInfoKey = entry.getKey();
+            anniversaryInfoJsonString = entry.getValue().toString();
+            AnniversaryInfo anniversaryInfo = gson.fromJson(anniversaryInfoJsonString, AnniversaryInfo.class);
+            anniversaryInfo.setUniqueKey(anniversaryInfoKey);
+            anniversaryInfoList.add(anniversaryInfo);
         }
     }
 
@@ -93,6 +102,18 @@ public class MainActivity extends BaseActivity {
             }
         });
         // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
+    }
+
+    private void setSharedPreferencesData() {
+        for (AnniversaryInfo anniversaryInfo : anniversaryInfoList) {
+            ArrayList<String> arrayChicken = new ArrayList<>();
+            arrayChicken.add(anniversaryInfo.getTitle());
+            arrayChicken.add(anniversaryInfo.getDate());
+            arrayChicken.add(anniversaryInfo.getUniqueKey());
+
+            arrayChild.put(anniversaryInfo.getUniqueKey(), arrayChicken);
+        }
+        expandableListView.setAdapter(new DdayListAdapter(anniversaryInfoList, arrayChild,this));
     }
 
     private void setDummyData() {
@@ -130,152 +151,7 @@ public class MainActivity extends BaseActivity {
             }
         }
 
-        expandableListView.setAdapter(new CustomExpandableListViewAdapter(arrayGroup, arrayChild,this));
+//        expandableListView.setAdapter(new DdayListAdapter(arrayGroup, arrayChild,this));
     }
 
-    /**
-     * Set Adapter
-     */
-    private class CustomExpandableListViewAdapter extends BaseExpandableListAdapter {
-
-        /**
-         * ListView에 세팅할 Item 정보들
-         */
-        private List arrayGroup;
-
-        private Map arrayChild;
-
-        /**
-         * ListView에 Item을 세팅할 요청자의 정보가 들어감
-         */
-        private Context context;
-
-        /**
-         * 생성자
-         * @param arrayGroup
-         * @param context
-         */
-        public CustomExpandableListViewAdapter(ArrayList arrayGroup, HashMap arrayChild, Context context) {
-            this.arrayGroup = arrayGroup;
-            this.arrayChild = arrayChild;
-            this.context = context;
-        }
-
-        /**
-         * ListView에 세팅할 아이템의 갯수
-         * @return
-         */
-        @Override
-        public int getGroupCount() {
-            return arrayGroup.size();
-        }
-
-        @Override
-        public int getChildrenCount(int groupPosition) {
-            ArrayList childrenList = (ArrayList) arrayChild.get( arrayGroup.get(groupPosition) );
-            return childrenList.size();
-        }
-
-        /**
-         * groupPosition 번째 Item 정보를 가져옴
-         * @param groupPosition
-         * @return
-         */
-        @Override
-        public Object getGroup(int groupPosition) {
-            return arrayGroup.get(groupPosition);
-        }
-
-        @Override
-        public Object getChild(int groupPosition, int childPosition) {
-            ArrayList childrenList = (ArrayList) arrayChild.get( arrayGroup.get(groupPosition) );
-            Object child = childrenList.get(childPosition);
-            return child;
-        }
-
-        /**
-         * 아이템의 index를 가져옴
-         * Item index == i (position)
-         * @param groupPosition
-         * @return
-         */
-        @Override
-        public long getGroupId(int groupPosition) {
-            return groupPosition;
-        }
-
-        @Override
-        public long getChildId(int groupPosition, int childPosition) {
-            return childPosition;
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return false;
-        }
-
-        /**
-         * ListView에 Item을 세팅함
-         * position 번째 있는 아이템을 가져와서 convertView에 넣은 다음 parent에서 보여주면 된다?
-         * @param groupPosition : 현재 보여질 아이템의 인덱스, 0 ~ getCount()까지 증가
-         * @param isExpanded : 현재 보여질 아이템의 인덱스, 0 ~ getCount()까지 증가
-         * @param convertView : ListView의 Item Cell(한 칸) 객체를 가져옴
-         * @param parent : ListView
-         * @return
-         */
-        @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-            /**
-             * 가장 간단한 방법
-             * 사용자가 처음으로 Flicking 을 할 때, 아래쪽에 만들어지는 Cell(한 칸)은 Null이다.
-             */
-            if (convertView == null) {
-                // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-
-                // Item Cell에 Layout을 적용시킨다.
-                // 실제 객체는 이곳에 있다.
-                convertView = inflater.inflate(R.layout.listview_group, parent, false);
-            }
-
-            TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-            TextView tvDate = (TextView) convertView.findViewById(R.id.tvDate);
-            TextView tvDay = (TextView) convertView.findViewById(R.id.tvDay);
-
-            String groupName = (String) arrayGroup.get(groupPosition);
-
-            tvTitle.setText(groupName);
-            tvDate.setText("2019-04-03");
-            tvDay.setText("D-31");
-
-            return convertView;
-        }
-
-        @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
-            String groupName = (String) arrayGroup.get(groupPosition);
-            ArrayList<String> detail = (ArrayList<String>) arrayChild.get(groupName);
-            String childName = detail.get(childPosition);
-
-            if (convertView == null) {
-                // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-
-                // Item Cell에 Layout을 적용시킨다.
-                // 실제 객체는 이곳에 있다.
-                convertView = inflater.inflate(R.layout.listview_child, parent, false);
-            }
-
-            TextView tvChild = (TextView) convertView.findViewById(R.id.tvChild);
-            tvChild.setText(childName);
-
-            return convertView;
-        }
-
-        @Override
-        public boolean isChildSelectable(int groupPosition, int childPosition) {
-            return true;
-        }
-    }
 }

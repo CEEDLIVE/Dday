@@ -1,9 +1,9 @@
 package com.example.ceedlive.dday.dto;
 
 public class AnniversaryInfo {
+    public String uniqueKey;
     public String title;
     public String date;
-    public int index;
 
     public String getTitle() {
         return title;
@@ -21,11 +21,11 @@ public class AnniversaryInfo {
         this.date = date;
     }
 
-    public int getIndex() {
-        return index;
+    public String getUniqueKey() {
+        return uniqueKey;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setUniqueKey(String uniqueKey) {
+        this.uniqueKey = uniqueKey;
     }
 }

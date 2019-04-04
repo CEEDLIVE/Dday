@@ -27,8 +27,6 @@ import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
 
-    private Gson gson;
-
     private TextView tvToday, tvDate;
     private int mYear, mMonth, mDay, mHour, mMinute;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
@@ -67,8 +65,6 @@ public class DetailActivity extends BaseActivity {
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        // TODO Auto-generated method stub
-
                         //사용자가 입력한 값을 가져온뒤
                         mYear = year;
                         mMonth = monthOfYear;
@@ -134,6 +130,7 @@ public class DetailActivity extends BaseActivity {
         }
 
         // 리스트 역순으로 뒤집기
+        Collections.sort(keyNumberList);
         Collections.reverse(keyNumberList);
         maxKeyNumber = keyNumberList.get(0);
 
@@ -143,18 +140,20 @@ public class DetailActivity extends BaseActivity {
         // 사용자가 입력한 저장할 데이터
         final String date = tvDate.getText().toString();
         final String title = etTitle.getText().toString();
+        final String uniqueKey = "ceedlive.dday" + (maxKeyNumber + 1);
 
         AnniversaryInfo anniversaryInfo = new AnniversaryInfo();
         anniversaryInfo.setDate(date);
         anniversaryInfo.setTitle(title);
+        anniversaryInfo.setUniqueKey(uniqueKey);
 
         // Gson 인스턴스 생성
-        gson = new GsonBuilder().create();
+//        gson = new GsonBuilder().create();
         // JSON 으로 변환
         final String jsonStringAnniversaryInfo = gson.toJson(anniversaryInfo, AnniversaryInfo.class);
 
         // key, value를 이용하여 저장하는 형태
-        editor.putString("ceedlive.dday" + (maxKeyNumber + 1), jsonStringAnniversaryInfo);
+        editor.putString(uniqueKey, jsonStringAnniversaryInfo);
 
         // 다양한 형태의 변수값을 저장할 수 있다.
 //        editor.putString();
