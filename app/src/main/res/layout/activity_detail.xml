@@ -40,6 +40,13 @@
         android:text="yyyy/MM/dd"
         android:textSize="24dp" />
 
+    <EditText
+        android:id="@+id/detail_et_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:hint="상세내용을 입력하세요."/>
+
     <Button
         android:id="@+id/btn_detail_merge"
         android:layout_width="match_parent"

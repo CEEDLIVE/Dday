@@ -152,6 +152,9 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
         TextView tvChild = (TextView) convertView.findViewById(R.id.tvChild);
         tvChild.setText(childName);
 
+        TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_child_tv_description);
+        tvDescription.setText("description");
+
         return convertView;
     }
 

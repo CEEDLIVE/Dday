@@ -3,6 +3,7 @@ package com.example.ceedlive.dday.dto;
 public class AnniversaryInfo {
     public String uniqueKey;
     public String title;
+    public String description;
     public String date;
 
     public String getTitle() {
@@ -11,6 +12,14 @@ public class AnniversaryInfo {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getDate() {

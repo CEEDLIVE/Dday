@@ -6,19 +6,63 @@
     android:layout_height="match_parent"
     >
 
-    <ExpandableListView
-        android:id="@+id/expandableListView"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/frame"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/main_center_layout"
+        app:layout_constraintBottom_toTopOf="@+id/main_bottom_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        >
+        <ExpandableListView
+            android:id="@+id/expandableListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+        </ExpandableListView>
 
-    </ExpandableListView>
+        <LinearLayout
+            android:id="@+id/main_ll_no_content"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            >
+
+            <ImageView
+                android:id="@+id/main_iv_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="36dp"
+                android:gravity="center"
+                android:src="@drawable/icon_calendar_signals_32x32"/>
+
+            <TextView
+                android:id="@+id/main_tv_no_content_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:text="@string/main_no_content_header"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/main_tv_no_content_header_sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginBottom="24dp"
+                android:text="@string/main_no_content_header_sub"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
     <LinearLayout
-        android:id="@+id/frame"
+        android:id="@+id/main_bottom_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -49,7 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#009688"
+            android:background="#ffffff"
             android:gravity="center"
             android:text="기념일등록" />
 
