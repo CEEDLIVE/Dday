@@ -1,19 +1,18 @@
 package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
@@ -44,6 +43,8 @@ public class MainActivity extends BaseActivity {
     private List<AnniversaryInfo> mAnniversaryInfoList = new ArrayList<>();
     private String mAnniversaryInfoKey;
     private String mAnniversaryInfoJsonString;
+
+    private String sharedPreferencesDataKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,14 +199,45 @@ public class MainActivity extends BaseActivity {
      * @param view
      */
     public void onClickDelete(View view) {
-        final String sharedPreferencesDataKey = (String) view.getTag();
+        sharedPreferencesDataKey = (String) view.getTag();
         Toast.makeText(getApplicationContext(), sharedPreferencesDataKey + " 삭제", Toast.LENGTH_SHORT).show();
 
+        showDialog();
+    }
 
+    private void deleteItem() {
 
-//        int tag = (String) view.getTag();
-//        TextView v = findViewById(R.id.a);
-//        v.setText("");
+    }
+
+    private void showDialog() {
+        // 다이얼로그
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // 다이얼로그 값/옵션 세팅
+        alertDialogBuilder
+                .setTitle(R.string.alert_title_delete_dday)
+                .setMessage(R.string.alert_message_delete_dday)
+                .setCancelable(false)
+                .setPositiveButton("삭제",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // 일정 삭제
+                                deleteItem();
+                            }
+                        })
+                .setNegativeButton("취소",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // 다이얼로그를 취소한다.
+                                dialog.cancel();
+                            }
+                        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+
+        // reference: https://mainia.tistory.com/2017
+        // reference: https://m.blog.naver.com/PostView.nhn?blogId=sgepyh2916&logNo=221176134263&proxyReferer=https%3A%2F%2Fwww.google.com%2F
     }
 
 }
