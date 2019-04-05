@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
+import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
@@ -31,20 +32,20 @@ public class MainActivity extends BaseActivity {
     /*
      * 디데이 프로젝트 관련 내용은 Dday 프로젝트 README.md 에 정리
      */
-    private View mListViewChild;
 
     private LinearLayout mLayoutNoContent;
     private ExpandableListView mListViewContent;
-    private Button mBtnCreate, mBtnEdit, mBtnDelete;
+    private Button mBtnCreate;
 
-    private ArrayList<String> mArrayGroup = new ArrayList<>();
     private Map<String, Map<String, String>> mAnniversaryInfoChild = new HashMap<>();
 
     private List<AnniversaryInfo> mAnniversaryInfoList = new ArrayList<>();
     private String mAnniversaryInfoKey;
     private String mAnniversaryInfoJsonString;
 
-    private String sharedPreferencesDataKey;
+    private String mSharedPreferencesDataKey;
+
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +54,7 @@ public class MainActivity extends BaseActivity {
 
         initialize();// 변수 초기화
         setEvent();// 이벤트 설정
-//        setDummyData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
-        setSharedPreferencesData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
+        setData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
     }
 
     @Override
@@ -107,6 +107,10 @@ public class MainActivity extends BaseActivity {
         // false일 경우 root는 생성되는 View의 LayoutParam을 생성하는데만 사용된다.
     }
 
+    /**
+     *
+     * @param sharedPreferencesDataKey
+     */
     private void moveDetailActivity(@Nullable String sharedPreferencesDataKey) {
         // 액티비티 전환 코드
         // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
@@ -118,37 +122,43 @@ public class MainActivity extends BaseActivity {
         }
 
         // 인텐트 실행
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, Constant.REQUEST_CODE_MAIN_ACTIVITY);
     }
 
+    /**
+     * 인텐트 실행 결과 처리 메소드
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // requestCode: 송신자 Activity 구별하기 위한 값
         // resultCode: 수신자 Activity 에서 송신자 Activity 로 어떠한 결과코드를 주었는지를 나타냄
         // Intent data: 수신자 Activity 에서 송신자 Activity 로 보낸 결과 데이터
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-//                String jsonStringAddedAnniversaryInfo = data.getStringExtra("newItem");
-//                AnniversaryInfo newItem = gson.fromJson(jsonStringAddedAnniversaryInfo, AnniversaryInfo.class);
-//                mAnniversaryInfoList.add(newItem);
-                setSharedPreferencesData();
+        if (Constant.REQUEST_CODE_MAIN_ACTIVITY == requestCode) {
+            if (Activity.RESULT_OK == resultCode) {
+                setData();
             }
-            if (resultCode == Activity.RESULT_CANCELED) {
+            if (Activity.RESULT_CANCELED == resultCode) {
                 // 만약 반환값이 없을 경우의 코드를 여기에 작성하세요.
                 Toast.makeText(this, "만약 반환값이 없을 경우의 코드를 여기에 작성하세요.", Toast.LENGTH_LONG);
             }
         }
     }
 
-    private void setSharedPreferencesData() {
+    /**
+     * SharedPreferences 에 저장된 key/value pair 데이터 세팅하고 출력하기
+     */
+    private void setData() {
 
         // 출처: https://itpangpang.xyz/143 [ITPangPang]
         // 출처: https://bitnori.tistory.com/entry/Android-다른-레이아웃Layout의-위젯-제어하기-LayoutInflater-사용 [Bitnori's Blog]
         // https://stackoverflow.com/questions/28193552/null-pointer-exception-on-setonclicklistener
         mAnniversaryInfoList.clear();
 
-        SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
 
         // SharedPreferences 값 삭제
 //        SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -156,7 +166,7 @@ public class MainActivity extends BaseActivity {
 //        editor.commit();
 
         // How to get all keys of SharedPreferences programmatically in Android?
-        Map<String, ?> allEntries = sharedPreferences.getAll();
+        Map<String, ?> allEntries = mSharedPreferences.getAll();
 
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
             Log.d("main map values", entry.getKey() + ": " + entry.getValue().toString());
@@ -184,31 +194,44 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     *
+     * 수정 버튼 클릭 시 이벤트 핸들러
      * @param view
      */
     public void onClickEdit(View view) {
-        final String sharedPreferencesDataKey = (String) view.getTag();
-        Toast.makeText(getApplicationContext(), sharedPreferencesDataKey + " 수정", Toast.LENGTH_SHORT).show();
+//        mSharedPreferencesDataKey = (String) view.getTag();
+//        Toast.makeText(getApplicationContext(), mSharedPreferencesDataKey + " 수정", Toast.LENGTH_SHORT).show();
 
-        moveDetailActivity(sharedPreferencesDataKey);
+        if (null != mSharedPreferencesDataKey) {
+            moveDetailActivity(mSharedPreferencesDataKey);
+        }
     }
 
     /**
-     *
+     * 삭제 버튼 클릭 시 이벤트 핸들러
      * @param view
      */
     public void onClickDelete(View view) {
-        sharedPreferencesDataKey = (String) view.getTag();
-        Toast.makeText(getApplicationContext(), sharedPreferencesDataKey + " 삭제", Toast.LENGTH_SHORT).show();
-
         showDialog();
     }
 
-    private void deleteItem() {
+    /**
+     * 일정 삭제
+     * @param sharedPreferencesDataKey
+     */
+    private void doDeleteItem(String sharedPreferencesDataKey) {
+        // How to remove some key/value pair from SharedPreferences?
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.remove(sharedPreferencesDataKey);
+        editor.apply();
 
+        // ? editor.apply VS editor.commit
+
+        setData();
     }
 
+    /**
+     * 다이얼로그 출력
+     */
     private void showDialog() {
         // 다이얼로그
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -218,14 +241,16 @@ public class MainActivity extends BaseActivity {
                 .setTitle(R.string.alert_title_delete_dday)
                 .setMessage(R.string.alert_message_delete_dday)
                 .setCancelable(false)
-                .setPositiveButton("삭제",
+                .setPositiveButton(R.string.btn_delete,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // 일정 삭제
-                                deleteItem();
+                                if (null != mSharedPreferencesDataKey) {
+                                    doDeleteItem(mSharedPreferencesDataKey);
+                                }
                             }
                         })
-                .setNegativeButton("취소",
+                .setNegativeButton(R.string.btn_cancel,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // 다이얼로그를 취소한다.

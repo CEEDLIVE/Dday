@@ -5,8 +5,6 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -22,19 +20,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
 
-    private TextView mTvDate;
+    private TextView mTvToday, mTvDate;
     private int mYear, mMonth, mDay;
     private Button mBtnDetailMerge;
     private EditText mEtTitle, mEtDescription;
 
-    private String sharedPreferencesDataKey;
+    private String mSharedPreferencesDataKey;
+
+    private Calendar mCalendar;
+    private Intent mIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,20 +48,21 @@ public class DetailActivity extends BaseActivity {
     @Override
     protected void initialize() {
 
-        Intent intent = getIntent();
+        mIntent = getIntent();
 
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
-        Calendar cal = new GregorianCalendar();
+        mCalendar = new GregorianCalendar();
 
+        mTvToday = findViewById(R.id.detail_tv_today);
+        mTvDate = findViewById(R.id.detail_tv_date);
         mEtTitle = findViewById(R.id.detail_et_title);
         mEtDescription = findViewById(R.id.detail_et_description);
-        mTvDate = findViewById(R.id.detail_tv_date);
 
-        if (intent.getExtras() != null && intent.getExtras().containsKey("sharedPreferencesDataKey")) {
-            sharedPreferencesDataKey = intent.getStringExtra("sharedPreferencesDataKey");
+        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey("sharedPreferencesDataKey")) {
+            mSharedPreferencesDataKey = mIntent.getStringExtra("sharedPreferencesDataKey");
 
             SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
-            String jsonStringValue = sharedPreferences.getString(sharedPreferencesDataKey, "");
+            String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
 
             AnniversaryInfo anniversaryInfo = gson.fromJson(jsonStringValue, AnniversaryInfo.class);
 
@@ -70,13 +71,13 @@ public class DetailActivity extends BaseActivity {
             String[] arrDate = selectedDate.split("/");
             String year = arrDate[0], month = arrDate[1], day = arrDate[2];
 
-            cal.set(Calendar.YEAR, Integer.parseInt(year));
-            cal.set(Calendar.MONTH, Integer.parseInt(month) - 1);
-            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
+            mCalendar.set(Calendar.YEAR, Integer.parseInt(year));
+            mCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+            mCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
 
-            mYear = cal.get(Calendar.YEAR);
-            mMonth = cal.get(Calendar.MONTH);
-            mDay = cal.get(Calendar.DAY_OF_MONTH);
+            mYear = mCalendar.get(Calendar.YEAR);
+            mMonth = mCalendar.get(Calendar.MONTH);
+            mDay = mCalendar.get(Calendar.DAY_OF_MONTH);
 
             // Set Title
             mEtTitle.setText(anniversaryInfo.getTitle());
@@ -86,9 +87,9 @@ public class DetailActivity extends BaseActivity {
 
         } else {
             // Empty
-            mYear = cal.get(Calendar.YEAR);
-            mMonth = cal.get(Calendar.MONTH);
-            mDay = cal.get(Calendar.DAY_OF_MONTH);
+            mYear = mCalendar.get(Calendar.YEAR);
+            mMonth = mCalendar.get(Calendar.MONTH);
+            mDay = mCalendar.get(Calendar.DAY_OF_MONTH);
         }
 
         mBtnDetailMerge = findViewById(R.id.btn_detail_merge);
@@ -98,7 +99,7 @@ public class DetailActivity extends BaseActivity {
     }
 
     private void setEvent() {
-
+        // 날짜 텍스트뷰 클릭 시 이벤트
         mTvDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,6 +120,7 @@ public class DetailActivity extends BaseActivity {
             }
         });
 
+        // 기념일등록 버튼 클릭 시 이벤트
         mBtnDetailMerge.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,7 +136,6 @@ public class DetailActivity extends BaseActivity {
                 int maxKeyNumber;
                 List<Integer> keyNumberList = new ArrayList<>();
                 for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-                    Log.d("detail map values", entry.getKey() + ": " + entry.getValue().toString());
                     eachKey = entry.getKey();
                     if (!"".equals(eachKey) && eachKey.startsWith(Constant.SHARED_PREFERENCES_KEY_PREFIX)) {
                         // ceedlive 디데이 앱에서 사용하는 SharedPreferences
@@ -164,7 +165,7 @@ public class DetailActivity extends BaseActivity {
                 final String date = mTvDate.getText().toString();
                 final String title = mEtTitle.getText().toString();
                 final String description = mEtDescription.getText().toString();
-                final String uniqueKey = sharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : sharedPreferencesDataKey;
+                final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
 
                 AnniversaryInfo anniversaryInfo = new AnniversaryInfo();
                 anniversaryInfo.setDate(date);
@@ -175,7 +176,7 @@ public class DetailActivity extends BaseActivity {
                 // JSON 으로 변환
                 final String jsonStringAnniversaryInfo = gson.toJson(anniversaryInfo, AnniversaryInfo.class);
 
-                // key, value를 이용하여 저장하는 형태
+                // key/value pair 로 값을 저장하는 형태
                 editor.putString(uniqueKey, jsonStringAnniversaryInfo);
 
                 // 다양한 형태의 변수값을 저장할 수 있다.
@@ -186,8 +187,11 @@ public class DetailActivity extends BaseActivity {
 //        editor.putInt();
 //        editor.putStringSet();
 
-                // 최종 커밋
-                editor.commit();
+                editor.apply();
+
+                // ? editor.commit(); 최종 커밋
+                // Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background less... (Ctrl+F1)
+                // Inspection info:Consider using apply() instead of commit on shared preferences. Whereas commit blocks and writes its data to persistent storage immediately, apply will handle it in the background.
 
                 Intent intent = new Intent();
                 intent.putExtra("newItem", jsonStringAnniversaryInfo);
@@ -198,8 +202,15 @@ public class DetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     *
+     */
     private void doUpdateTextViewDate() {
-        mTvDate.setText(String.format(Locale.getDefault(), "%d/%d/%d", mYear, mMonth + 1, mDay));
+        mTvDate.setText(String.format(Locale.getDefault(),
+                Constant.CALENDAR_STRING_FORMAT_SLASH, mYear, mMonth + 1, mDay));
+
+        // TODO Calendar 두 날짜 간 차이 구하기
+        mTvToday.setText("D-1");
     }
 
 }
