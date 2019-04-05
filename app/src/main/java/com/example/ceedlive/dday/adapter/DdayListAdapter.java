@@ -5,13 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.ceedlive.dday.activity.MainActivity;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -153,8 +153,30 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.listview_child, parent, false);
         }
 
-        TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_child_tv_description);
+        final TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_child_tv_description);
         tvDescription.setText(description);
+
+        final Button mBtnEdit = (Button) convertView.findViewById(R.id.listview_child_btn_edit);
+        final Button mBtnDelete = (Button) convertView.findViewById(R.id.listview_child_btn_delete);
+
+        mBtnEdit.setTag(anniversaryInfo.getUniqueKey());
+        mBtnDelete.setTag(anniversaryInfo.getUniqueKey());
+
+        mBtnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickEdit(mBtnEdit);
+            }
+        });
+
+        mBtnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickDelete(mBtnDelete);
+            }
+        });
 
         return convertView;
     }

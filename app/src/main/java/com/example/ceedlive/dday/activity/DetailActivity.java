@@ -5,7 +5,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,25 +14,27 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.ceedlive.dday.BaseActivity;
+import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
 
-    private TextView mTvToday, mTvDate;
-    private int mYear, mMonth, mDay, mHour, mMinute;
+    private TextView mTvDate;
+    private int mYear, mMonth, mDay;
     private Button mBtnDetailMerge;
     private EditText mEtTitle, mEtDescription;
+
+    private String sharedPreferencesDataKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +47,49 @@ public class DetailActivity extends BaseActivity {
 
     @Override
     protected void initialize() {
+
+        Intent intent = getIntent();
+
+        // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
+        Calendar cal = new GregorianCalendar();
+
         mEtTitle = findViewById(R.id.detail_et_title);
         mEtDescription = findViewById(R.id.detail_et_description);
-        mTvToday = findViewById(R.id.tvToday);
         mTvDate = findViewById(R.id.detail_tv_date);
 
-        // 현재 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
-        Calendar cal = new GregorianCalendar();
-        mYear = cal.get(Calendar.YEAR);
-        mMonth = cal.get(Calendar.MONTH);
-        mDay = cal.get(Calendar.DAY_OF_MONTH);
-        mHour = cal.get(Calendar.HOUR_OF_DAY);
-        mMinute = cal.get(Calendar.MINUTE);
+        if (intent.getExtras() != null && intent.getExtras().containsKey("sharedPreferencesDataKey")) {
+            sharedPreferencesDataKey = intent.getStringExtra("sharedPreferencesDataKey");
+
+            SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+            String jsonStringValue = sharedPreferences.getString(sharedPreferencesDataKey, "");
+
+            AnniversaryInfo anniversaryInfo = gson.fromJson(jsonStringValue, AnniversaryInfo.class);
+
+            // Set Date
+            String selectedDate = anniversaryInfo.getDate();
+            String[] arrDate = selectedDate.split("/");
+            String year = arrDate[0], month = arrDate[1], day = arrDate[2];
+
+            cal.set(Calendar.YEAR, Integer.parseInt(year));
+            cal.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
+
+            mYear = cal.get(Calendar.YEAR);
+            mMonth = cal.get(Calendar.MONTH);
+            mDay = cal.get(Calendar.DAY_OF_MONTH);
+
+            // Set Title
+            mEtTitle.setText(anniversaryInfo.getTitle());
+
+            // Set Description
+            mEtDescription.setText(anniversaryInfo.getDescription());
+
+        } else {
+            // Empty
+            mYear = cal.get(Calendar.YEAR);
+            mMonth = cal.get(Calendar.MONTH);
+            mDay = cal.get(Calendar.DAY_OF_MONTH);
+        }
 
         mBtnDetailMerge = findViewById(R.id.btn_detail_merge);
 
@@ -103,9 +136,9 @@ public class DetailActivity extends BaseActivity {
                 for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
                     Log.d("detail map values", entry.getKey() + ": " + entry.getValue().toString());
                     eachKey = entry.getKey();
-                    if (!"".equals(eachKey) && eachKey.startsWith("ceedlive.dday")) {
+                    if (!"".equals(eachKey) && eachKey.startsWith(Constant.SHARED_PREFERENCES_KEY_PREFIX)) {
                         // ceedlive 디데이 앱에서 사용하는 SharedPreferences
-                        eachKeyNumber = Integer.parseInt(eachKey.replace("ceedlive.dday", ""));
+                        eachKeyNumber = Integer.parseInt(eachKey.replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, ""));
                         keyNumberList.add(eachKeyNumber);
                         continue;
                     }
@@ -131,7 +164,7 @@ public class DetailActivity extends BaseActivity {
                 final String date = mTvDate.getText().toString();
                 final String title = mEtTitle.getText().toString();
                 final String description = mEtDescription.getText().toString();
-                final String uniqueKey = "ceedlive.dday" + (maxKeyNumber + 1);
+                final String uniqueKey = sharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : sharedPreferencesDataKey;
 
                 AnniversaryInfo anniversaryInfo = new AnniversaryInfo();
                 anniversaryInfo.setDate(date);
@@ -139,8 +172,6 @@ public class DetailActivity extends BaseActivity {
                 anniversaryInfo.setDescription(description);
                 anniversaryInfo.setUniqueKey(uniqueKey);
 
-                // Gson 인스턴스 생성
-//        gson = new GsonBuilder().create();
                 // JSON 으로 변환
                 final String jsonStringAnniversaryInfo = gson.toJson(anniversaryInfo, AnniversaryInfo.class);
 

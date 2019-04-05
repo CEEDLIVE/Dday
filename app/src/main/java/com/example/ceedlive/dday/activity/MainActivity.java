@@ -1,4 +1,4 @@
-package com.example.ceedlive.dday;
+package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,11 +12,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
-import com.example.ceedlive.dday.activity.DetailActivity;
+import com.example.ceedlive.dday.BaseActivity;
+import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
 
@@ -29,7 +30,7 @@ import java.util.Map;
 public class MainActivity extends BaseActivity {
 
     /*
-     * 디데이 프로젝트 관련 내용은 README.md 에 정리
+     * 디데이 프로젝트 관련 내용은 Dday 프로젝트 README.md 에 정리
      */
     private View mListViewChild;
 
@@ -61,10 +62,90 @@ public class MainActivity extends BaseActivity {
         mListViewContent = findViewById(R.id.expandableListView);
 
         mBtnCreate = findViewById(R.id.btnCreate);
+    }
+
+    private void setEvent() {
+        // Annoymous class(익명 클래스)를 통한 클릭이벤트
+        mBtnCreate.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                moveDetailActivity(null);
+            }
+        });
+        // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
+
+        // 등록된 일정이 하나도 없는 경우
+        mLayoutNoContent.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                moveDetailActivity(null);
+            }
+        });
+
+        // FIXME 다른 레이아웃 위젯 제어하는 방법 찾고 구현해보기
+        // 부모뷰
+        // ScrollView scrollView = (ScrollView) findViewById(R.id.scrollView);
+
+        // 인플레이터 획득
+        // LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        // 인플레이트 되어서 부모뷰(scrollView)에 붙음
+        // View subLayout = inflater.inflate(R.layout.sub_layout, scrollView);
+
+        // 서브레이아웃에 있는 텍스트뷰 변경 test
+        // TextView subTextView = (TextView) subLayout.findViewById(R.id.textView);
+        // subTextView.setText("서브테스트");
+
+        // root
+        // attachToRoot가 true일경우 생성되는 View가 추가될 부모 뷰
+        // attachToRoot가 false일 경우에는 LayoutParams값을 설정해주기 위한 상위 뷰
+        // null로 설정할경우 android:layout_xxxxx값들이 무시됨.
+
+        // attachToRoot
+        // true일 경우 생성되는 뷰를 root의 자식으로 만든다.
+        // false일 경우 root는 생성되는 View의 LayoutParam을 생성하는데만 사용된다.
+    }
+
+    private void moveDetailActivity(@Nullable String sharedPreferencesDataKey) {
+        // 액티비티 전환 코드
+        // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
+        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+
+        // 수정/삭제
+        if (null != sharedPreferencesDataKey) {
+            intent.putExtra("sharedPreferencesDataKey", sharedPreferencesDataKey);
+        }
+
+        // 인텐트 실행
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // requestCode: 송신자 Activity 구별하기 위한 값
+        // resultCode: 수신자 Activity 에서 송신자 Activity 로 어떠한 결과코드를 주었는지를 나타냄
+        // Intent data: 수신자 Activity 에서 송신자 Activity 로 보낸 결과 데이터
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+//                String jsonStringAddedAnniversaryInfo = data.getStringExtra("newItem");
+//                AnniversaryInfo newItem = gson.fromJson(jsonStringAddedAnniversaryInfo, AnniversaryInfo.class);
+//                mAnniversaryInfoList.add(newItem);
+                setSharedPreferencesData();
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                // 만약 반환값이 없을 경우의 코드를 여기에 작성하세요.
+                Toast.makeText(this, "만약 반환값이 없을 경우의 코드를 여기에 작성하세요.", Toast.LENGTH_LONG);
+            }
+        }
+    }
+
+    private void setSharedPreferencesData() {
 
         // 출처: https://itpangpang.xyz/143 [ITPangPang]
         // 출처: https://bitnori.tistory.com/entry/Android-다른-레이아웃Layout의-위젯-제어하기-LayoutInflater-사용 [Bitnori's Blog]
         // https://stackoverflow.com/questions/28193552/null-pointer-exception-on-setonclicklistener
+        mAnniversaryInfoList.clear();
 
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
 
@@ -92,92 +173,39 @@ public class MainActivity extends BaseActivity {
             mListViewContent.setVisibility(View.VISIBLE);
             mLayoutNoContent.setVisibility(View.INVISIBLE);
         }
-    }
 
-    private void setEvent() {
-        // Annoymous class(익명 클래스)를 통한 클릭이벤트
-        mBtnCreate.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moveDetailActivity();
-            }
-        });
-        // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
-
-        // 등록된 일정이 하나도 없는 경우
-        mLayoutNoContent.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moveDetailActivity();
-            }
-        });
-
-        // TODO 다른 레이아웃 위젯 제어하는 방법 찾고 구현해보기
-        FrameLayout add_layout = (FrameLayout) findViewById(R.id.main_center_layout);
-
-        // 인플레이션
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mListViewChild = inflater.inflate(R.layout.listview_child, add_layout, false);
-
-//        mListViewChild = getLayoutInflater().inflate(R.layout.listview_child, null, false);
-        mBtnEdit = (Button) mListViewChild.findViewById(R.id.listview_child_btn_edit);
-        mBtnDelete = (Button) mListViewChild.findViewById(R.id.listview_child_btn_delete);
-
-        // 수정
-        mBtnEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Toast.makeText(this, "123", Toast.LENGTH_LONG).show();
-                Toast.makeText(getApplicationContext(), "수정 버튼 클릭", Toast.LENGTH_SHORT).show();
-                Log.d("mBtnEdit", "수정 버튼 클릭");
-            }
-        });
-
-        // 삭제
-        mBtnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "삭제 버튼 클릭", Toast.LENGTH_SHORT).show();
-                Log.d("mBtnEdit", "삭제 버튼 클릭");
-            }
-        });
-    }
-
-    private void moveDetailActivity() {
-        // 액티비티 전환 코드
-        // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
-        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-        // 인텐트 실행
-        startActivityForResult(intent, 1);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // requestCode: 송신자 Activity 구별하기 위한 값
-        // resultCode: 수신자 Activity 에서 송신자 Activity 로 어떠한 결과코드를 주었는지를 나타냄
-        // Intent data: 수신자 Activity 에서 송신자 Activity 로 보낸 결과 데이터
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                String jsonStringAddedAnniversaryInfo = data.getStringExtra("newItem");
-                AnniversaryInfo newItem = gson.fromJson(jsonStringAddedAnniversaryInfo, AnniversaryInfo.class);
-                mAnniversaryInfoList.add(newItem);
-                setSharedPreferencesData();
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                // 만약 반환값이 없을 경우의 코드를 여기에 작성하세요.
-                Toast.makeText(this, "만약 반환값이 없을 경우의 코드를 여기에 작성하세요.", Toast.LENGTH_LONG);
-            }
-        }
-    }
-
-    private void setSharedPreferencesData() {
         for (AnniversaryInfo anniversaryInfo : mAnniversaryInfoList) {
             Map<String, String> detail = new HashMap();
             detail.put("description", anniversaryInfo.getDescription());
             mAnniversaryInfoChild.put(anniversaryInfo.getUniqueKey(), detail);
         }
         mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, mAnniversaryInfoChild,this));
+    }
+
+    /**
+     *
+     * @param view
+     */
+    public void onClickEdit(View view) {
+        final String sharedPreferencesDataKey = (String) view.getTag();
+        Toast.makeText(getApplicationContext(), sharedPreferencesDataKey + " 수정", Toast.LENGTH_SHORT).show();
+
+        moveDetailActivity(sharedPreferencesDataKey);
+    }
+
+    /**
+     *
+     * @param view
+     */
+    public void onClickDelete(View view) {
+        final String sharedPreferencesDataKey = (String) view.getTag();
+        Toast.makeText(getApplicationContext(), sharedPreferencesDataKey + " 삭제", Toast.LENGTH_SHORT).show();
+
+
+
+//        int tag = (String) view.getTag();
+//        TextView v = findViewById(R.id.a);
+//        v.setText("");
     }
 
 }
