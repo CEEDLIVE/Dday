@@ -8,8 +8,8 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.ceedlive.dday.activity.MainActivity;
 import com.example.ceedlive.dday.R;
+import com.example.ceedlive.dday.activity.MainActivity;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
 
 import java.util.List;
@@ -132,7 +132,7 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
 
         tvTitle.setText(anniversaryInfo.getTitle());
         tvDate.setText(anniversaryInfo.getDate());
-        tvDay.setText(anniversaryInfo.getUniqueKey());
+        tvDay.setText(anniversaryInfo.getDiffDays());
 
         return convertView;
     }

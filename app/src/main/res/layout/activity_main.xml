@@ -32,11 +32,12 @@
 
             <ImageView
                 android:id="@+id/main_iv_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginBottom="36dp"
                 android:gravity="center"
-                android:src="@drawable/icon_calendar_signals_32x32"/>
+                app:srcCompat="@drawable/ic_baseline_calendar_today_24px"
+                android:scaleType="fitXY"/>
 
             <TextView
                 android:id="@+id/main_tv_no_content_header"

@@ -52,6 +52,9 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = new Intent(this, LoadingActivity.class);
+        startActivity(intent);
+
         initialize();// 변수 초기화
         setEvent();// 이벤트 설정
         setData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
@@ -82,29 +85,6 @@ public class MainActivity extends BaseActivity {
                 moveDetailActivity(null);
             }
         });
-
-        // FIXME 다른 레이아웃 위젯 제어하는 방법 찾고 구현해보기
-        // 부모뷰
-        // ScrollView scrollView = (ScrollView) findViewById(R.id.scrollView);
-
-        // 인플레이터 획득
-        // LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        // 인플레이트 되어서 부모뷰(scrollView)에 붙음
-        // View subLayout = inflater.inflate(R.layout.sub_layout, scrollView);
-
-        // 서브레이아웃에 있는 텍스트뷰 변경 test
-        // TextView subTextView = (TextView) subLayout.findViewById(R.id.textView);
-        // subTextView.setText("서브테스트");
-
-        // root
-        // attachToRoot가 true일경우 생성되는 View가 추가될 부모 뷰
-        // attachToRoot가 false일 경우에는 LayoutParams값을 설정해주기 위한 상위 뷰
-        // null로 설정할경우 android:layout_xxxxx값들이 무시됨.
-
-        // attachToRoot
-        // true일 경우 생성되는 뷰를 root의 자식으로 만든다.
-        // false일 경우 root는 생성되는 View의 LayoutParam을 생성하는데만 사용된다.
     }
 
     /**
@@ -160,11 +140,6 @@ public class MainActivity extends BaseActivity {
 
         mSharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
 
-        // SharedPreferences 값 삭제
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        editor.clear();
-//        editor.commit();
-
         // How to get all keys of SharedPreferences programmatically in Android?
         Map<String, ?> allEntries = mSharedPreferences.getAll();
 
@@ -198,9 +173,7 @@ public class MainActivity extends BaseActivity {
      * @param view
      */
     public void onClickEdit(View view) {
-//        mSharedPreferencesDataKey = (String) view.getTag();
-//        Toast.makeText(getApplicationContext(), mSharedPreferencesDataKey + " 수정", Toast.LENGTH_SHORT).show();
-
+        mSharedPreferencesDataKey = (String) view.getTag();
         if (null != mSharedPreferencesDataKey) {
             moveDetailActivity(mSharedPreferencesDataKey);
         }
@@ -211,7 +184,10 @@ public class MainActivity extends BaseActivity {
      * @param view
      */
     public void onClickDelete(View view) {
-        showDialog();
+        mSharedPreferencesDataKey = (String) view.getTag();
+        if (null != mSharedPreferencesDataKey) {
+            showDialog();
+        }
     }
 
     /**
@@ -245,9 +221,7 @@ public class MainActivity extends BaseActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // 일정 삭제
-                                if (null != mSharedPreferencesDataKey) {
-                                    doDeleteItem(mSharedPreferencesDataKey);
-                                }
+                                doDeleteItem(mSharedPreferencesDataKey);
                             }
                         })
                 .setNegativeButton(R.string.btn_cancel,

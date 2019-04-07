@@ -33,8 +33,9 @@ public class DetailActivity extends BaseActivity {
 
     private String mSharedPreferencesDataKey;
 
-    private Calendar mCalendar;
+    private Calendar mTargetCalendar, mBaseCalendar;
     private Intent mIntent;
+    private String mDiffDays;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +52,8 @@ public class DetailActivity extends BaseActivity {
         mIntent = getIntent();
 
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
-        mCalendar = new GregorianCalendar();
+        mTargetCalendar = new GregorianCalendar();
+        mBaseCalendar = new GregorianCalendar();
 
         mTvToday = findViewById(R.id.detail_tv_today);
         mTvDate = findViewById(R.id.detail_tv_date);
@@ -71,31 +73,25 @@ public class DetailActivity extends BaseActivity {
             String[] arrDate = selectedDate.split("/");
             String year = arrDate[0], month = arrDate[1], day = arrDate[2];
 
-            mCalendar.set(Calendar.YEAR, Integer.parseInt(year));
-            mCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
-            mCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
-
-            mYear = mCalendar.get(Calendar.YEAR);
-            mMonth = mCalendar.get(Calendar.MONTH);
-            mDay = mCalendar.get(Calendar.DAY_OF_MONTH);
+            mTargetCalendar.set(Calendar.YEAR, Integer.parseInt(year));
+            mTargetCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+            mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
 
             // Set Title
             mEtTitle.setText(anniversaryInfo.getTitle());
 
             // Set Description
             mEtDescription.setText(anniversaryInfo.getDescription());
-
-        } else {
-            // Empty
-            mYear = mCalendar.get(Calendar.YEAR);
-            mMonth = mCalendar.get(Calendar.MONTH);
-            mDay = mCalendar.get(Calendar.DAY_OF_MONTH);
         }
+
+        mYear = mTargetCalendar.get(Calendar.YEAR);
+        mMonth = mTargetCalendar.get(Calendar.MONTH);
+        mDay = mTargetCalendar.get(Calendar.DAY_OF_MONTH);
 
         mBtnDetailMerge = findViewById(R.id.btn_detail_merge);
 
         // 텍스트뷰의 값을 업데이트함
-        doUpdateTextViewDate();
+        doUpdateTextViewDate(mYear, mMonth, mDay);
     }
 
     private void setEvent() {
@@ -114,7 +110,7 @@ public class DetailActivity extends BaseActivity {
                                 mDay = dayOfMonth;
 
                                 // 텍스트뷰의 값을 업데이트함
-                                doUpdateTextViewDate();
+                                doUpdateTextViewDate(mYear, mMonth, mDay);
                             }
                         }, mYear, mMonth, mDay).show();
             }
@@ -172,21 +168,13 @@ public class DetailActivity extends BaseActivity {
                 anniversaryInfo.setTitle(title);
                 anniversaryInfo.setDescription(description);
                 anniversaryInfo.setUniqueKey(uniqueKey);
+                anniversaryInfo.setDiffDays(mDiffDays);
 
                 // JSON 으로 변환
                 final String jsonStringAnniversaryInfo = gson.toJson(anniversaryInfo, AnniversaryInfo.class);
 
                 // key/value pair 로 값을 저장하는 형태
                 editor.putString(uniqueKey, jsonStringAnniversaryInfo);
-
-                // 다양한 형태의 변수값을 저장할 수 있다.
-//        editor.putString();
-//        editor.putBoolean();
-//        editor.putFloat();
-//        editor.putLong();
-//        editor.putInt();
-//        editor.putStringSet();
-
                 editor.apply();
 
                 // ? editor.commit(); 최종 커밋
@@ -202,15 +190,47 @@ public class DetailActivity extends BaseActivity {
         });
     }
 
+    private String getDiffDays(int year, int month, int day) {
+        // TODO Calendar 두 날짜 간 차이 구하기
+        mTargetCalendar.set(Calendar.YEAR, year);
+        mTargetCalendar.set(Calendar.MONTH, month);
+        mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
+
+        // 밀리초(1000분의 1초) 단위로 두 날짜 간 차이를 변환 후 초 단위로 다시 변환
+        long diffSec = (mTargetCalendar.getTimeInMillis() - mBaseCalendar.getTimeInMillis()) / 1000;
+        // 1분(60초), 1시간(60분), 1일(24시간) 이므로 다음과 같이 나누어 1일 단위로 다시 변환
+        long diffDays = diffSec / (60 * 60 * 24);
+
+        int flag = diffDays > 0 ? 1 : diffDays < 0 ? -1 : 0;
+
+        String msg = "";
+
+        switch (flag) {
+            case 1:
+                msg = getString(R.string.dday_valid_prefix) + Math.abs(diffDays);
+                break;
+            case 0:
+                msg = getString(R.string.dday_today);
+                break;
+            case -1:
+                msg = getString(R.string.dday_invalid_prefix) + Math.abs(diffDays);
+                break;
+            default:
+                msg = "";
+        }
+
+        return msg;
+    }
+
     /**
      *
      */
-    private void doUpdateTextViewDate() {
+    private void doUpdateTextViewDate(int year, int month, int day) {
         mTvDate.setText(String.format(Locale.getDefault(),
                 Constant.CALENDAR_STRING_FORMAT_SLASH, mYear, mMonth + 1, mDay));
 
-        // TODO Calendar 두 날짜 간 차이 구하기
-        mTvToday.setText("D-1");
+        mDiffDays = getDiffDays(year, month, day);
+        mTvToday.setText(mDiffDays);
     }
 
 }

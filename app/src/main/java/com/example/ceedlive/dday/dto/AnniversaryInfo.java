@@ -5,6 +5,7 @@ public class AnniversaryInfo {
     public String title;
     public String description;
     public String date;
+    public String diffDays;
 
     public String getTitle() {
         return title;
@@ -36,5 +37,13 @@ public class AnniversaryInfo {
 
     public void setUniqueKey(String uniqueKey) {
         this.uniqueKey = uniqueKey;
+    }
+
+    public String getDiffDays() {
+        return diffDays;
+    }
+
+    public void setDiffDays(String diffDays) {
+        this.diffDays = diffDays;
     }
 }
