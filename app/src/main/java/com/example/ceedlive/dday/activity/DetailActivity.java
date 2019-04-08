@@ -310,9 +310,23 @@ public class DetailActivity extends BaseActivity {
 
         Resources res = getResources();
 
+        int requestCode = Integer.parseInt( anniversaryInfo.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+
         Intent notificationIntent = new Intent(this, DetailActivity.class);
         notificationIntent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, anniversaryInfo.getUniqueKey()); //전달할 값
-        PendingIntent mPendingIntent = PendingIntent.getActivity(this, Constant.REQUEST_CODE_DETAIL_ACTIVITY_NOTIFICATION, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent mPendingIntent = PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        // TODO 개별 PendingIntent 생성 더 알아보기
+        // 핵심은 getActivity 파라메터중 두번째 requestCode 와 마지막 flags 이다.
+        // 흔히 requestCode = 0, flags = FLAG_UPDATE_CURRENT 를 사용한다.
+        // 개별적인 작업을 하기 위해서는 pendingIntent를 생성할때마다 requestCode를 다르게 할당하고
+        // 서로의 충돌을 피하기 위해서 flags는 FLAG_CANCEL_CURRENT 로 호출해야 한다.
+
+        // PendingIntent
+        // 인텐트를 포함하는 인텐트, 사용하는 목적은 현재 앱이 아닌 외부의 앱(노티피케이션, 알람 등)이 현재 내가 개발한 앱을 열 수 있도록 허락할 수 있는 인텐트
+        // 펜딩 인텐트 안에는 실제 데이터를 가지고 열 액티비티를 저장한 인텐트를 갖고 있는 것과 같다.
+
+        // 내가 개발한 앱 안에서 A라는 액티비티에서 B라는 액티비티를 열려면 Intent intent = new Intent(A.this, B.class) 로 하여 startActivity(intent) 를 함.
+        // 외부에서는 이 intent 를 포함하고 있는 PendingIntent 를 선언하여 intent 를 품게 한 뒤 사용하게 하는 것이다.
 
         NotificationCompat.Builder notificationBuilder;
 
@@ -324,7 +338,7 @@ public class DetailActivity extends BaseActivity {
         // 오레오에서부터는 이 Notification Channel을 필수로 만들어 주어야 합니다.
         // 오레오에서 Notification Channel을 만들어 주지 않으면 알림이 오지 않습니다.
 
-        // 해당 기기의 OS버전이 오레오이상일때 Notification Channel을 만들어주고 필요한 설정을 해준뒤
+        // 해당 기기의 OS 버전이 오레오 이상일때 Notification Channel 을 만들어주고 필요한 설정을 해준뒤
         // NotificationManager의 createNotificationChannel()을 호출해주면 됩니다.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -340,6 +354,7 @@ public class DetailActivity extends BaseActivity {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
+        // TODO 의미 다시 한번 살펴보기
         // 채널은 한번만 만들면 되기때문에 Notification이 올때마다 만들어줄 필요가 없습니다.
         // Application Class에서 만들어 줘 되고 SharedPreference를 이용해서 한번 만든적이 있다면 그다음부터는 만들지 않도록 해주어도 됩니다.
 

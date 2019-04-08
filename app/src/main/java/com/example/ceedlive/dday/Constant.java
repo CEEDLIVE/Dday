@@ -9,11 +9,6 @@ public class Constant {
      */
     public static final int REQUEST_CODE_MAIN_ACTIVITY = 10;
 
-    /**
-     * 인텐트: 상세화면(상단 노티바 고정 체크 시) 리퀘스트 코드
-     */
-    public static final int REQUEST_CODE_DETAIL_ACTIVITY_NOTIFICATION = 21;
-
     public static final String SHARED_PREFERENCES_NAME = "ceedliveAppDday";
 
     public static final String SHARED_PREFERENCES_KEY_PREFIX = "ceedlive.dday";
