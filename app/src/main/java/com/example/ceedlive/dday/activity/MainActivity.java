@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +24,8 @@ import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +178,9 @@ public class MainActivity extends BaseActivity {
             mAnniversaryInfoList.add(anniversaryInfo);
         }
 
+        SortDescending sortDescending = new SortDescending();
+        Collections.sort(mAnniversaryInfoList, sortDescending);
+
         if (mAnniversaryInfoList.isEmpty()) {
             mLayoutNoContent.setVisibility(View.VISIBLE);
             mListViewContent.setVisibility(View.INVISIBLE);
@@ -189,6 +195,28 @@ public class MainActivity extends BaseActivity {
             mAnniversaryInfoChild.put(anniversaryInfo.getUniqueKey(), detail);
         }
         mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, this));
+    }
+
+    class SortDescending implements Comparator<AnniversaryInfo> {
+        @Override
+        public int compare(AnniversaryInfo anniversaryInfo1, AnniversaryInfo anniversaryInfo2) {
+            int first = Integer.parseInt( anniversaryInfo1.getUniqueKey().replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+            int second = Integer.parseInt( anniversaryInfo2.getUniqueKey().replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+
+            int compareValue = 0;
+
+            if (second > first) {
+                compareValue = 1;
+            }
+            if (second == first) {
+                compareValue = 0;
+            }
+            if (second < first) {
+                compareValue = -1;
+            }
+
+            return compareValue;
+        }
     }
 
     /**
