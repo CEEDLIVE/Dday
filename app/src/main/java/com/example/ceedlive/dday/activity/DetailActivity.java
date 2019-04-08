@@ -2,9 +2,11 @@ package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -28,7 +30,7 @@ public class DetailActivity extends BaseActivity {
 
     private TextView mTvToday, mTvDate;
     private int mYear, mMonth, mDay;
-    private Button mBtnDetailMerge;
+    private Button mBtnSave;
     private EditText mEtTitle, mEtDescription;
 
     private String mSharedPreferencesDataKey;
@@ -88,13 +90,18 @@ public class DetailActivity extends BaseActivity {
         mMonth = mTargetCalendar.get(Calendar.MONTH);
         mDay = mTargetCalendar.get(Calendar.DAY_OF_MONTH);
 
-        mBtnDetailMerge = findViewById(R.id.btn_detail_merge);
+        mBtnSave = findViewById(R.id.detail_btn_save);
 
         // 텍스트뷰의 값을 업데이트함
         doUpdateTextViewDate(mYear, mMonth, mDay);
     }
 
     private void setEvent() {
+        onClickDate();
+        onClickSave();
+    }
+
+    private void onClickDate() {
         // 날짜 텍스트뷰 클릭 시 이벤트
         mTvDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,11 +122,26 @@ public class DetailActivity extends BaseActivity {
                         }, mYear, mMonth, mDay).show();
             }
         });
+    }
 
-        // 기념일등록 버튼 클릭 시 이벤트
-        mBtnDetailMerge.setOnClickListener(new View.OnClickListener() {
+    /**
+     * 저장 버튼 클릭 시 이벤트
+     */
+    private void onClickSave() {
+        mBtnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // 사용자가 입력한 저장할 데이터
+                final String date = mTvDate.getText().toString();
+                final String title = mEtTitle.getText().toString();
+                final String description = mEtDescription.getText().toString();
+
+                // 데이터 유효성 검사
+                if ( "".equals( title.trim() ) ) {
+                    showDialog("경고", "디데이 제목을 입력하세요.");
+                    return;
+                }
 
                 // SharedPreferences를 sFile이름, 기본모드로 설정
                 SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
@@ -157,10 +179,6 @@ public class DetailActivity extends BaseActivity {
                 // 저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                // 사용자가 입력한 저장할 데이터
-                final String date = mTvDate.getText().toString();
-                final String title = mEtTitle.getText().toString();
-                final String description = mEtDescription.getText().toString();
                 final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
 
                 AnniversaryInfo anniversaryInfo = new AnniversaryInfo();
@@ -190,8 +208,41 @@ public class DetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     * 다이얼로그 출력
+     */
+    private void showDialog(String title, String message) {
+        // 다이얼로그
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // 다이얼로그 값/옵션 세팅
+        alertDialogBuilder
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setNegativeButton("확인",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // 다이얼로그를 취소한다.
+                                dialog.cancel();
+                            }
+                        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+
+        // reference: https://mainia.tistory.com/2017
+        // reference: https://m.blog.naver.com/PostView.nhn?blogId=sgepyh2916&logNo=221176134263&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+    }
+
+    /**
+     * 두 날짜 간 차이 구하기
+     * @param year
+     * @param month
+     * @param day
+     * @return
+     */
     private String getDiffDays(int year, int month, int day) {
-        // TODO Calendar 두 날짜 간 차이 구하기
         mTargetCalendar.set(Calendar.YEAR, year);
         mTargetCalendar.set(Calendar.MONTH, month);
         mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);

@@ -60,6 +60,19 @@
 
         </LinearLayout>
 
+        <!-- Floating action button -->
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/main_btn_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="18dp"
+            android:layout_marginRight="18dp"
+            app:srcCompat="@drawable/ic_weekly_calendar"
+            app:backgroundTint="#ffffff"
+            app:elevation="6dp"
+            app:pressedTranslationZ="12dp" />
+
     </FrameLayout>
 
     <LinearLayout
@@ -67,6 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">

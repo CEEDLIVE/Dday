@@ -3,55 +3,57 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/detail_btn_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_save"
+        android:layout_gravity="end"
+        android:background="@color/colorTransparent"
+        android:textSize="14sp"
+        android:textColor="@color/colorBrigntRed"
+        />
+
     <TextView
         android:id="@+id/detail_tv_today"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="today"
-        android:textSize="32sp"
+        android:textSize="48sp"
         android:textStyle="bold"
         android:layout_gravity="center"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="24dp"
+        android:textColor="@color/colorBrigntRed" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="DAY"
-        android:layout_gravity="center"/>
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_gravity="center"
+        android:text="날짜" />
+
+    <TextView
+        android:id="@+id/detail_tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="yyyy/MM/dd"
+        android:textSize="24dp"
+        android:layout_gravity="center" />
 
     <EditText
         android:id="@+id/detail_et_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:hint="제목을 입력하세요."/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="날짜"/>
-
-    <TextView
-        android:id="@+id/detail_tv_date"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginBottom="10dp"
-        android:text="yyyy/MM/dd"
-        android:textSize="24dp" />
+        android:hint="@string/hint_title_detail" />
 
     <EditText
         android:id="@+id/detail_et_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:hint="상세내용을 입력하세요."/>
-
-    <Button
-        android:id="@+id/btn_detail_merge"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="기념일등록"
-        />
+        android:hint="@string/hint_description_detail" />
 
 </LinearLayout>

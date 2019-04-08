@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,7 @@ public class MainActivity extends BaseActivity {
     private LinearLayout mLayoutNoContent;
     private ExpandableListView mListViewContent;
     private Button mBtnCreate;
+    private FloatingActionButton mFabBtn;
 
     private Map<String, Map<String, String>> mAnniversaryInfoChild = new HashMap<>();
 
@@ -66,6 +68,7 @@ public class MainActivity extends BaseActivity {
         mListViewContent = findViewById(R.id.expandableListView);
 
         mBtnCreate = findViewById(R.id.btnCreate);
+        mFabBtn = findViewById(R.id.main_btn_fab);
     }
 
     private void setEvent() {
@@ -77,6 +80,13 @@ public class MainActivity extends BaseActivity {
             }
         });
         // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
+
+        mFabBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                moveDetailActivity(null);
+            }
+        });
 
         // 등록된 일정이 하나도 없는 경우
         mLayoutNoContent.setOnClickListener(new OnClickListener() {

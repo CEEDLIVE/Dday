@@ -12,6 +12,8 @@ import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.MainActivity;
 import com.example.ceedlive.dday.dto.AnniversaryInfo;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,8 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
      */
     private Context context;
 
+    private Calendar mTargetCalendar, mBaseCalendar;
+
     /**
      * 생성자
      * @param arrayGroup
@@ -39,6 +43,10 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
         this.mArrayGroup = arrayGroup;
         this.mArrayChild = arrayChild;
         this.context = context;
+
+        // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
+        this.mTargetCalendar = new GregorianCalendar();
+        this.mBaseCalendar = new GregorianCalendar();
     }
 
     /**
@@ -132,9 +140,58 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
 
         tvTitle.setText(anniversaryInfo.getTitle());
         tvDate.setText(anniversaryInfo.getDate());
-        tvDay.setText(anniversaryInfo.getDiffDays());
+
+        // Set Date
+        String selectedDate = anniversaryInfo.getDate();
+        String[] arrDate = selectedDate.split("/");
+
+        String strYear = arrDate[0];
+        String strMonth = arrDate[1];
+        String strDay = arrDate[2];
+
+        int year = Integer.parseInt(strYear);
+        int month = Integer.parseInt(strMonth);
+        int day = Integer.parseInt(strDay);
+
+        tvDay.setText(getDiffDays(year, month - 1, day));
+
+        mTargetCalendar.set(Calendar.YEAR, year);
+        mTargetCalendar.set(Calendar.MONTH, month - 1);
+        mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
 
         return convertView;
+    }
+
+    private String getDiffDays(int year, int month, int day) {
+        // TODO Calendar 두 날짜 간 차이 구하기
+        mTargetCalendar.set(Calendar.YEAR, year);
+        mTargetCalendar.set(Calendar.MONTH, month);
+        mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
+
+        // 밀리초(1000분의 1초) 단위로 두 날짜 간 차이를 변환 후 초 단위로 다시 변환
+        long diffSec = (mTargetCalendar.getTimeInMillis() - mBaseCalendar.getTimeInMillis()) / 1000;
+        // 1분(60초), 1시간(60분), 1일(24시간) 이므로 다음과 같이 나누어 1일 단위로 다시 변환
+        long diffDays = diffSec / (60 * 60 * 24);
+
+        int flag = diffDays > 0 ? 1 : diffDays < 0 ? -1 : 0;
+
+        String msg = "";
+
+        switch (flag) {
+            case 1:
+                msg = context.getString(R.string.dday_valid_prefix) + Math.abs(diffDays);
+                break;
+            case 0:
+                msg = context.getString(R.string.dday_today);
+                break;
+            case -1:
+                msg = context.getString(R.string.dday_invalid_prefix) + Math.abs(diffDays);
+                break;
+            default:
+                msg = "";
+        }
+
+        return msg;
     }
 
     @Override
