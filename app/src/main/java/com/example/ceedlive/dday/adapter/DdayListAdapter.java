@@ -4,8 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -125,6 +123,15 @@ public class DdayListAdapter extends BaseAdapter {
     }
 
     private void onClickLayout(final View parentView, final View childView) {
+        parentView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                // TODO 롱클릭 이벤트 구현 필요
+                return true;
+                // 롱클릭 시 온클릭 이벤트 발생 방지: return true 이어야 함.
+            }
+        });
+
         parentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
