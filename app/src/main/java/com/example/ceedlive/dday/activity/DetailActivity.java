@@ -2,13 +2,24 @@ package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -32,6 +43,7 @@ public class DetailActivity extends BaseActivity {
     private int mYear, mMonth, mDay;
     private Button mBtnSave;
     private EditText mEtTitle, mEtDescription;
+    private CheckBox mCheckBoxAddNoti;
 
     private String mSharedPreferencesDataKey;
 
@@ -62,10 +74,16 @@ public class DetailActivity extends BaseActivity {
         mEtTitle = findViewById(R.id.detail_et_title);
         mEtDescription = findViewById(R.id.detail_et_description);
 
-        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey("sharedPreferencesDataKey")) {
-            mSharedPreferencesDataKey = mIntent.getStringExtra("sharedPreferencesDataKey");
+        mCheckBoxAddNoti = findViewById(R.id.detail_checkbox_add_noti);
 
-            SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES)) {
+            mSharedPreferencesDataKey = mIntent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
+
+            SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+            // TODO SharedPreferences 더 알아보기
+            // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
+            // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
+
             String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
 
             AnniversaryInfo anniversaryInfo = gson.fromJson(jsonStringValue, AnniversaryInfo.class);
@@ -143,8 +161,8 @@ public class DetailActivity extends BaseActivity {
                     return;
                 }
 
-                // SharedPreferences를 sFile이름, 기본모드로 설정
-                SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+                // SharedPreferences 를 ceedliveAppDday 이름, 기본모드로 설정
+                SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
 
                 // How to get all keys of SharedPreferences programmatically in Android?
                 // reference: https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
@@ -202,6 +220,10 @@ public class DetailActivity extends BaseActivity {
                 Intent intent = new Intent();
                 intent.putExtra("newItem", jsonStringAnniversaryInfo);
                 setResult(Activity.RESULT_OK, intent);
+
+                if ( mCheckBoxAddNoti.isChecked() ) {
+                    NotificationDday(anniversaryInfo);
+                }
 
                 finish();
             }
@@ -282,6 +304,67 @@ public class DetailActivity extends BaseActivity {
 
         mDiffDays = getDiffDays(year, month, day);
         mTvToday.setText(mDiffDays);
+    }
+
+    public void NotificationDday(AnniversaryInfo anniversaryInfo) {
+
+        Resources res = getResources();
+
+        Intent notificationIntent = new Intent(this, DetailActivity.class);
+        notificationIntent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, anniversaryInfo.getUniqueKey()); //전달할 값
+        PendingIntent mPendingIntent = PendingIntent.getActivity(this, Constant.REQUEST_CODE_DETAIL_ACTIVITY_NOTIFICATION, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder notificationBuilder;
+
+        // TODO Notification 개념 더 알아보기
+        // 별로 중요하지 않은 알림은 소리나 진동없이 왔으면 좋겠고 중요하다고 생각하는 알림은 잠금화면에서도 알려준다면?!
+        // 이럴때 유용한게 알림채널(Notification Channel)입니다.
+        // Notification Channel을 통해 Notification을 여러가지 용도로 나누어서 관리할 수 있게 만들어 줍니다.
+        // 사용자가 직접 각 채널별로 알림중요도나 기타 설정을 변경할 수도 있습니다.
+        // 오레오에서부터는 이 Notification Channel을 필수로 만들어 주어야 합니다.
+        // 오레오에서 Notification Channel을 만들어 주지 않으면 알림이 오지 않습니다.
+
+        // 해당 기기의 OS버전이 오레오이상일때 Notification Channel을 만들어주고 필요한 설정을 해준뒤
+        // NotificationManager의 createNotificationChannel()을 호출해주면 됩니다.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel notificationChannel = new NotificationChannel(Constant.NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_DEFAULT);
+
+            // Configure the notification channel.
+            notificationChannel.setDescription("Channel description");
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setVibrationPattern(new long[]{100, 200, 100, 200});
+            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        // 채널은 한번만 만들면 되기때문에 Notification이 올때마다 만들어줄 필요가 없습니다.
+        // Application Class에서 만들어 줘 되고 SharedPreference를 이용해서 한번 만든적이 있다면 그다음부터는 만들지 않도록 해주어도 됩니다.
+
+        notificationBuilder = new NotificationCompat.Builder(this, Constant.NOTIFICATION_CHANNEL_ID);
+
+        notificationBuilder
+                .setContentTitle(anniversaryInfo.getTitle())
+                .setContentText(anniversaryInfo.getDate())
+                .setTicker(anniversaryInfo.getTitle())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
+                .setContentIntent(mPendingIntent)
+                .setAutoCancel(false)
+                .setWhen(System.currentTimeMillis())
+                .setDefaults(Notification.DEFAULT_ALL);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            notificationBuilder
+                    .setCategory(Notification.CATEGORY_MESSAGE)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(Integer.parseInt(anniversaryInfo.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "")), notificationBuilder.build());
     }
 
 }

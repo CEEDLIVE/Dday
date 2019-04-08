@@ -19,4 +19,7 @@
     <string name="dday_invalid_prefix">D+</string>
     <string name="dday_today">D-DAY</string>
 
+    <string name="checkbox_add_noti">상단바 등록</string>
+
+
 </resources>

@@ -57,4 +57,11 @@
         android:layout_margin="10dp"
         android:hint="@string/hint_description_detail" />
 
+    <CheckBox
+        android:id="@+id/detail_checkbox_add_noti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/checkbox_add_noti"
+        android:layout_margin="10dp"/>
+
 </LinearLayout>

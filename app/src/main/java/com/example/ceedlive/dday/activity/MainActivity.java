@@ -121,7 +121,7 @@ public class MainActivity extends BaseActivity {
 
         // 수정/삭제
         if (null != sharedPreferencesDataKey) {
-            intent.putExtra("sharedPreferencesDataKey", sharedPreferencesDataKey);
+            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, sharedPreferencesDataKey);
         }
 
         // 인텐트 실행
@@ -161,7 +161,7 @@ public class MainActivity extends BaseActivity {
         // https://stackoverflow.com/questions/28193552/null-pointer-exception-on-setonclicklistener
         mAnniversaryInfoList.clear();
 
-        mSharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
 
         // How to get all keys of SharedPreferences programmatically in Android?
         Map<String, ?> allEntries = mSharedPreferences.getAll();
