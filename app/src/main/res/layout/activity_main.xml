@@ -15,12 +15,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         >
-        <ExpandableListView
+        <ListView
             android:id="@+id/expandableListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             >
-        </ExpandableListView>
+        </ListView>
 
         <LinearLayout
             android:id="@+id/main_ll_no_content"

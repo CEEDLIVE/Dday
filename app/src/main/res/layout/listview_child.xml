@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- 리스트뷰 사용 시 더 이상 사용되지 않음 (deprecated) -->
     <TextView
         android:id="@+id/listview_child_tv_description"
         android:layout_width="wrap_content"

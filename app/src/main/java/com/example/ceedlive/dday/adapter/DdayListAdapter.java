@@ -4,8 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ceedlive.dday.R;
@@ -15,17 +19,15 @@ import com.example.ceedlive.dday.dto.AnniversaryInfo;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
-public class DdayListAdapter extends BaseExpandableListAdapter {
+public class DdayListAdapter extends BaseAdapter {
     /**
      * ListView에 세팅할 Item 정보들
      */
     private List<AnniversaryInfo> mArrayGroup;
 
-    private Map<String, Map<String, String>> mArrayChild;
 
     /**
      * ListView에 Item을 세팅할 요청자의 정보가 들어감
@@ -39,9 +41,8 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
      * @param arrayGroup
      * @param context
      */
-    public DdayListAdapter(List<AnniversaryInfo> arrayGroup, Map<String, Map<String, String>> arrayChild, Context context) {
+    public DdayListAdapter(List<AnniversaryInfo> arrayGroup, Context context) {
         this.mArrayGroup = arrayGroup;
-        this.mArrayChild = arrayChild;
         this.context = context;
 
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
@@ -49,80 +50,23 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
         this.mBaseCalendar = new GregorianCalendar();
     }
 
-    /**
-     * ListView에 세팅할 아이템의 갯수
-     * @return
-     */
     @Override
-    public int getGroupCount() {
+    public int getCount() {
         return mArrayGroup.size();
     }
 
     @Override
-    public int getChildrenCount(int groupPosition) {
-        // HashMap
-        return 1;
-
-        // ArrayList<String> 인 경우 다음 코드 사용
-//        AnniversaryInfo anniversaryInfo = arrayGroup.get(groupPosition);
-//        ArrayList childrenList = (ArrayList) arrayChild.get( anniversaryInfo.getUniqueKey() );
-//        return childrenList.size();
-    }
-
-    /**
-     * groupPosition 번째 Item 정보를 가져옴
-     * @param groupPosition
-     * @return
-     */
-    @Override
-    public Object getGroup(int groupPosition) {
-        return mArrayGroup.get(groupPosition);
+    public Object getItem(int i) {
+        return mArrayGroup.get(i);
     }
 
     @Override
-    public Object getChild(int groupPosition, int childPosition) {
-        AnniversaryInfo anniversaryInfo = mArrayGroup.get(groupPosition);
-        Map<String, String> childrenMap = mArrayChild.get( anniversaryInfo.getUniqueKey() );
-        Object child = childrenMap;
-        return child;
-    }
-
-    /**
-     * 아이템의 index를 가져옴
-     * Item index == i (position)
-     * @param groupPosition
-     * @return
-     */
-    @Override
-    public long getGroupId(int groupPosition) {
-        return groupPosition;
+    public long getItemId(int i) {
+        return i;
     }
 
     @Override
-    public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return false;
-    }
-
-    /**
-     * ListView에 Item을 세팅함
-     * position 번째 있는 아이템을 가져와서 convertView에 넣은 다음 parent에서 보여주면 된다?
-     * @param groupPosition : 현재 보여질 아이템의 인덱스, 0 ~ getCount()까지 증가
-     * @param isExpanded : 현재 보여질 아이템의 인덱스, 0 ~ getCount()까지 증가
-     * @param convertView : ListView의 Item Cell(한 칸) 객체를 가져옴
-     * @param parent : ListView
-     * @return
-     */
-    @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        /**
-         * 가장 간단한 방법
-         * 사용자가 처음으로 Flicking 을 할 때, 아래쪽에 만들어지는 Cell(한 칸)은 Null이다.
-         */
+    public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -132,14 +76,25 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.listview_group, parent, false);
         }
 
+        AnniversaryInfo anniversaryInfo = mArrayGroup.get(position);
+
+        final RelativeLayout relativeLayout = convertView.findViewById(R.id.listview_group_general);
+        final LinearLayout linearLayout = convertView.findViewById(R.id.listview_group_detail);
+
+        relativeLayout.setTag(false);
+        linearLayout.setVisibility(View.GONE);
+
         TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
         TextView tvDate = (TextView) convertView.findViewById(R.id.tvDate);
         TextView tvDay = (TextView) convertView.findViewById(R.id.tvDay);
+        TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
 
-        AnniversaryInfo anniversaryInfo = mArrayGroup.get(groupPosition);
+        final Button mBtnEdit = (Button) convertView.findViewById(R.id.listview_group_btn_edit);
+        final Button mBtnDelete = (Button) convertView.findViewById(R.id.listview_group_btn_delete);
 
         tvTitle.setText(anniversaryInfo.getTitle());
         tvDate.setText(anniversaryInfo.getDate());
+        tvDescription.setText(anniversaryInfo.getDescription());
 
         // Set Date
         String selectedDate = anniversaryInfo.getDate();
@@ -159,11 +114,60 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
         mTargetCalendar.set(Calendar.MONTH, month - 1);
         mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
 
+        mBtnEdit.setTag(anniversaryInfo.getUniqueKey());
+        mBtnDelete.setTag(anniversaryInfo.getUniqueKey());
+
+        onClickLayout(relativeLayout, linearLayout);
+        onClickButtonEdit(mBtnEdit);
+        onClickButtonDelete(mBtnDelete);
+
         return convertView;
     }
 
+    private void onClickLayout(final View parentView, final View childView) {
+        parentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean isVisible = (boolean) parentView.getTag();
+                if (!isVisible) {
+                    childView.setVisibility(View.VISIBLE);
+
+                    // 안드로이드 레이어 visible 설정 시 사르륵 애니메이션 넣기
+//                    Animation animation = new AlphaAnimation(0, 1);
+//                    animation.setDuration(1000);
+//                    childView.setVisibility(View.VISIBLE);
+//                    childView.setAnimation(animation);
+
+                } else {
+                    childView.setVisibility(View.GONE);
+                }
+                parentView.setTag(!isVisible);
+            }
+        });
+    }
+
+    private void onClickButtonEdit(final View view) {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickEdit(view);
+            }
+        });
+    }
+
+    private void onClickButtonDelete(final View view) {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickDelete(view);
+            }
+        });
+    }
+
     private String getDiffDays(int year, int month, int day) {
-        // TODO Calendar 두 날짜 간 차이 구하기
+        // Calendar 두 날짜 간 차이 구하기
         mTargetCalendar.set(Calendar.YEAR, year);
         mTargetCalendar.set(Calendar.MONTH, month);
         mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
@@ -194,52 +198,4 @@ public class DdayListAdapter extends BaseExpandableListAdapter {
         return msg;
     }
 
-    @Override
-    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
-        AnniversaryInfo anniversaryInfo = mArrayGroup.get(groupPosition);
-        Map<String, String> detail = mArrayChild.get(anniversaryInfo.getUniqueKey());
-        String description = detail.get("description");
-
-        if (convertView == null) {
-            // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-
-            // Item Cell에 Layout을 적용시킨다.
-            // 실제 객체는 이곳에 있다.
-            convertView = inflater.inflate(R.layout.listview_child, parent, false);
-        }
-
-        final TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_child_tv_description);
-        tvDescription.setText(description);
-
-        final Button mBtnEdit = (Button) convertView.findViewById(R.id.listview_child_btn_edit);
-        final Button mBtnDelete = (Button) convertView.findViewById(R.id.listview_child_btn_delete);
-
-        mBtnEdit.setTag(anniversaryInfo.getUniqueKey());
-        mBtnDelete.setTag(anniversaryInfo.getUniqueKey());
-
-        mBtnEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
-                activity.onClickEdit(mBtnEdit);
-            }
-        });
-
-        mBtnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
-                activity.onClickDelete(mBtnDelete);
-            }
-        });
-
-        return convertView;
-    }
-
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
-    }
 }

@@ -5,9 +5,11 @@
 
     <!-- 리스트 뷰에 들어갈 리스트 아이템 레이아웃 -->
     <RelativeLayout
+        android:id="@+id/listview_group_general"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- 디데이 제목 -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
@@ -19,6 +21,7 @@
             android:textStyle="bold"
             />
 
+        <!-- 디데이 날짜 -->
         <TextView
             android:id="@+id/tvDate"
             android:layout_width="wrap_content"
@@ -29,6 +32,7 @@
             android:text="date"
             />
 
+        <!-- 디데이 표현 -->
         <TextView
             android:id="@+id/tvDay"
             android:layout_width="wrap_content"
@@ -43,5 +47,43 @@
             />
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/listview_group_detail"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <View style="@style/Divider"/>
+
+        <TextView
+            android:id="@+id/listview_group_tv_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:text="child"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/listview_group_btn_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_edit"/>
+
+            <Button
+                android:id="@+id/listview_group_btn_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_delete"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

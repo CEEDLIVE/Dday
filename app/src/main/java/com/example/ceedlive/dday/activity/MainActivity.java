@@ -12,8 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
@@ -35,7 +35,7 @@ public class MainActivity extends BaseActivity {
      */
 
     private LinearLayout mLayoutNoContent;
-    private ExpandableListView mListViewContent;
+    private ListView mListViewContent;
     private Button mBtnCreate;
     private FloatingActionButton mFabBtn;
 
@@ -48,6 +48,9 @@ public class MainActivity extends BaseActivity {
     private String mSharedPreferencesDataKey;
 
     private SharedPreferences mSharedPreferences;
+
+    private AlertDialog.Builder mAlertDialogBuilder;
+    private AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,22 +75,32 @@ public class MainActivity extends BaseActivity {
     }
 
     private void setEvent() {
-        // Annoymous class(익명 클래스)를 통한 클릭이벤트
+        onClickButtonCreate();
+        onClickFabButtonCreate();
+        onClickLayoutNoContent();
+    }
+
+    private void onClickButtonCreate() {
         mBtnCreate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 moveDetailActivity(null);
             }
         });
+        // Annoymous class(익명 클래스)를 통한 클릭이벤트
         // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
+    }
 
+    private void onClickFabButtonCreate() {
         mFabBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 moveDetailActivity(null);
             }
         });
+    }
 
+    private void onClickLayoutNoContent() {
         // 등록된 일정이 하나도 없는 경우
         mLayoutNoContent.setOnClickListener(new OnClickListener() {
             @Override
@@ -175,7 +188,7 @@ public class MainActivity extends BaseActivity {
             detail.put("description", anniversaryInfo.getDescription());
             mAnniversaryInfoChild.put(anniversaryInfo.getUniqueKey(), detail);
         }
-        mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, mAnniversaryInfoChild,this));
+        mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, this));
     }
 
     /**
@@ -183,9 +196,13 @@ public class MainActivity extends BaseActivity {
      * @param view
      */
     public void onClickEdit(View view) {
-        mSharedPreferencesDataKey = (String) view.getTag();
-        if (null != mSharedPreferencesDataKey) {
-            moveDetailActivity(mSharedPreferencesDataKey);
+        try {
+            mSharedPreferencesDataKey = (String) view.getTag();
+            if (null != mSharedPreferencesDataKey) {
+                moveDetailActivity(mSharedPreferencesDataKey);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -194,9 +211,13 @@ public class MainActivity extends BaseActivity {
      * @param view
      */
     public void onClickDelete(View view) {
-        mSharedPreferencesDataKey = (String) view.getTag();
-        if (null != mSharedPreferencesDataKey) {
-            showDialog();
+        try {
+            mSharedPreferencesDataKey = (String) view.getTag();
+            if (null != mSharedPreferencesDataKey) {
+                showDialog();
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -220,10 +241,10 @@ public class MainActivity extends BaseActivity {
      */
     private void showDialog() {
         // 다이얼로그
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        mAlertDialogBuilder = new AlertDialog.Builder(this);
 
         // 다이얼로그 값/옵션 세팅
-        alertDialogBuilder
+        mAlertDialogBuilder
                 .setTitle(R.string.alert_title_delete_dday)
                 .setMessage(R.string.alert_message_delete_dday)
                 .setCancelable(false)
@@ -242,8 +263,8 @@ public class MainActivity extends BaseActivity {
                             }
                         });
 
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+        mAlertDialog = mAlertDialogBuilder.create();
+        mAlertDialog.show();
 
         // reference: https://mainia.tistory.com/2017
         // reference: https://m.blog.naver.com/PostView.nhn?blogId=sgepyh2916&logNo=221176134263&proxyReferer=https%3A%2F%2Fwww.google.com%2F

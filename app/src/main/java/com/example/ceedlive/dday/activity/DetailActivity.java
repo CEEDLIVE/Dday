@@ -93,7 +93,7 @@ public class DetailActivity extends BaseActivity {
         mBtnSave = findViewById(R.id.detail_btn_save);
 
         // 텍스트뷰의 값을 업데이트함
-        doUpdateTextViewDate(mYear, mMonth, mDay);
+        doUpdateText(mYear, mMonth, mDay);
     }
 
     private void setEvent() {
@@ -117,7 +117,7 @@ public class DetailActivity extends BaseActivity {
                                 mDay = dayOfMonth;
 
                                 // 텍스트뷰의 값을 업데이트함
-                                doUpdateTextViewDate(mYear, mMonth, mDay);
+                                doUpdateText(mYear, mMonth, mDay);
                             }
                         }, mYear, mMonth, mDay).show();
             }
@@ -276,7 +276,7 @@ public class DetailActivity extends BaseActivity {
     /**
      *
      */
-    private void doUpdateTextViewDate(int year, int month, int day) {
+    private void doUpdateText(int year, int month, int day) {
         mTvDate.setText(String.format(Locale.getDefault(),
                 Constant.CALENDAR_STRING_FORMAT_SLASH, mYear, mMonth + 1, mDay));
 

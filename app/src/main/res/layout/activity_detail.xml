@@ -23,7 +23,8 @@
         android:textStyle="bold"
         android:layout_gravity="center"
         android:layout_marginTop="24dp"
-        android:textColor="@color/colorBrigntRed" />
+        android:textColor="@color/colorBrigntRed"
+        />
 
     <TextView
         android:layout_width="wrap_content"
