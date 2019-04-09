@@ -6,6 +6,7 @@ Author: ceedlive
 ## Development Environment
 + Windows 10
 + Android Studio 3.3.2
++ Visual Studio Code
 + Gradle
 + GitHub
     + Repository: https://github.com/CEEDLIVE/Dday.git
@@ -47,6 +48,26 @@ Author: ceedlive
         - [ ] 서명 키 생성
 
 
+## Topic
+
+### ExpandableListView
+
+### ListView
+
+### Intent
+
+### PendingIntent
+
+### FrameLayout
+
+### ConstraintLayout
+
+### RelativeLayout
+
+### FloatingActionButton (FAB)
+
+
+
 ## Follow Field Naming Conventions
 
 안드로이드 오픈소스는 아래와 같은 Naming Convention 을 따릅니다.
@@ -69,3 +90,15 @@ public class MyClass {
 ```
 
 http://source.android.com/source/code-style.html#follow-field-naming-conventions 위주소에 들어가보시면 더 자세한 규칙들을 보실 수 있어요.
+
+
+## Markdown
+
+
+## References
+Change Size of EditText bottom border  
+https://stackoverflow.com/questions/34592451/change-size-of-edittext-bottom-border  
+
+[안드로이드/Android]8.0 오레오 알림채널(Notification Channel) 대응하기  
+https://gun0912.tistory.com/77
+

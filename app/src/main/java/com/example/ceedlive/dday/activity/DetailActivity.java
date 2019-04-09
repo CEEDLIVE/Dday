@@ -27,7 +27,7 @@ import android.widget.TextView;
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
-import com.example.ceedlive.dday.dto.AnniversaryInfo;
+import com.example.ceedlive.dday.dto.DdayItem;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -86,10 +86,10 @@ public class DetailActivity extends BaseActivity {
 
             String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
 
-            AnniversaryInfo anniversaryInfo = gson.fromJson(jsonStringValue, AnniversaryInfo.class);
+            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
 
             // Set Date
-            String selectedDate = anniversaryInfo.getDate();
+            String selectedDate = ddayItem.getDate();
             String[] arrDate = selectedDate.split("/");
             String year = arrDate[0], month = arrDate[1], day = arrDate[2];
 
@@ -98,10 +98,10 @@ public class DetailActivity extends BaseActivity {
             mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
 
             // Set Title
-            mEtTitle.setText(anniversaryInfo.getTitle());
+            mEtTitle.setText(ddayItem.getTitle());
 
             // Set Description
-            mEtDescription.setText(anniversaryInfo.getDescription());
+            mEtDescription.setText(ddayItem.getDescription());
         }
 
         mYear = mTargetCalendar.get(Calendar.YEAR);
@@ -199,15 +199,15 @@ public class DetailActivity extends BaseActivity {
 
                 final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
 
-                AnniversaryInfo anniversaryInfo = new AnniversaryInfo();
-                anniversaryInfo.setDate(date);
-                anniversaryInfo.setTitle(title);
-                anniversaryInfo.setDescription(description);
-                anniversaryInfo.setUniqueKey(uniqueKey);
-                anniversaryInfo.setDiffDays(mDiffDays);
+                DdayItem ddayItem = new DdayItem();
+                ddayItem.setDate(date);
+                ddayItem.setTitle(title);
+                ddayItem.setDescription(description);
+                ddayItem.setUniqueKey(uniqueKey);
+                ddayItem.setDiffDays(mDiffDays);
 
                 // JSON 으로 변환
-                final String jsonStringAnniversaryInfo = gson.toJson(anniversaryInfo, AnniversaryInfo.class);
+                final String jsonStringAnniversaryInfo = gson.toJson(ddayItem, DdayItem.class);
 
                 // key/value pair 로 값을 저장하는 형태
                 editor.putString(uniqueKey, jsonStringAnniversaryInfo);
@@ -222,7 +222,7 @@ public class DetailActivity extends BaseActivity {
                 setResult(Activity.RESULT_OK, intent);
 
                 if ( mCheckBoxAddNoti.isChecked() ) {
-                    NotificationDday(anniversaryInfo);
+                    NotificationDday(ddayItem);
                 }
 
                 finish();
@@ -306,14 +306,14 @@ public class DetailActivity extends BaseActivity {
         mTvToday.setText(mDiffDays);
     }
 
-    public void NotificationDday(AnniversaryInfo anniversaryInfo) {
+    public void NotificationDday(DdayItem ddayItem) {
 
         Resources res = getResources();
 
-        int requestCode = Integer.parseInt( anniversaryInfo.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+        int requestCode = Integer.parseInt( ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
 
         Intent notificationIntent = new Intent(this, DetailActivity.class);
-        notificationIntent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, anniversaryInfo.getUniqueKey()); //전달할 값
+        notificationIntent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
         PendingIntent mPendingIntent = PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         // FIXME 2019-04-09 Tue
         // Task 연동을 통해서 Github 와 연동 (Jetbrains의 IDE 사용 시 적극 권장) 테스트용 주석입니다.
@@ -365,9 +365,9 @@ public class DetailActivity extends BaseActivity {
         notificationBuilder = new NotificationCompat.Builder(this, Constant.NOTIFICATION_CHANNEL_ID);
 
         notificationBuilder
-                .setContentTitle(anniversaryInfo.getTitle())
-                .setContentText(anniversaryInfo.getDate())
-                .setTicker(anniversaryInfo.getTitle())
+                .setContentTitle(ddayItem.getTitle())
+                .setContentText(ddayItem.getDate())
+                .setTicker(ddayItem.getTitle())
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
                 .setContentIntent(mPendingIntent)
@@ -383,7 +383,7 @@ public class DetailActivity extends BaseActivity {
         }
 
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(Integer.parseInt(anniversaryInfo.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "")), notificationBuilder.build());
+        nm.notify(Integer.parseInt(ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "")), notificationBuilder.build());
     }
 
 }

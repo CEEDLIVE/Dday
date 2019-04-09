@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -21,12 +20,11 @@ import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
-import com.example.ceedlive.dday.dto.AnniversaryInfo;
+import com.example.ceedlive.dday.dto.DdayItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,9 +40,7 @@ public class MainActivity extends BaseActivity {
     private Button mBtnCreate;
     private FloatingActionButton mFabBtn;
 
-    private Map<String, Map<String, String>> mAnniversaryInfoChild = new HashMap<>();
-
-    private List<AnniversaryInfo> mAnniversaryInfoList = new ArrayList<>();
+    private List<DdayItem> mDdayItemList = new ArrayList<>();
     private String mAnniversaryInfoKey;
     private String mAnniversaryInfoJsonString;
 
@@ -162,7 +158,7 @@ public class MainActivity extends BaseActivity {
         // 출처: https://itpangpang.xyz/143 [ITPangPang]
         // 출처: https://bitnori.tistory.com/entry/Android-다른-레이아웃Layout의-위젯-제어하기-LayoutInflater-사용 [Bitnori's Blog]
         // https://stackoverflow.com/questions/28193552/null-pointer-exception-on-setonclicklistener
-        mAnniversaryInfoList.clear();
+        mDdayItemList.clear();
 
         mSharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
 
@@ -173,15 +169,15 @@ public class MainActivity extends BaseActivity {
             Log.d("main map values", entry.getKey() + ": " + entry.getValue().toString());
             mAnniversaryInfoKey = entry.getKey();
             mAnniversaryInfoJsonString = entry.getValue().toString();
-            AnniversaryInfo anniversaryInfo = gson.fromJson(mAnniversaryInfoJsonString, AnniversaryInfo.class);
-            anniversaryInfo.setUniqueKey(mAnniversaryInfoKey);
-            mAnniversaryInfoList.add(anniversaryInfo);
+            DdayItem ddayItem = gson.fromJson(mAnniversaryInfoJsonString, DdayItem.class);
+            ddayItem.setUniqueKey(mAnniversaryInfoKey);
+            mDdayItemList.add(ddayItem);
         }
 
         SortDescending sortDescending = new SortDescending();
-        Collections.sort(mAnniversaryInfoList, sortDescending);
+        Collections.sort(mDdayItemList, sortDescending);
 
-        if (mAnniversaryInfoList.isEmpty()) {
+        if (mDdayItemList.isEmpty()) {
             mLayoutNoContent.setVisibility(View.VISIBLE);
             mListViewContent.setVisibility(View.INVISIBLE);
         } else {
@@ -189,19 +185,14 @@ public class MainActivity extends BaseActivity {
             mLayoutNoContent.setVisibility(View.INVISIBLE);
         }
 
-        for (AnniversaryInfo anniversaryInfo : mAnniversaryInfoList) {
-            Map<String, String> detail = new HashMap();
-            detail.put("description", anniversaryInfo.getDescription());
-            mAnniversaryInfoChild.put(anniversaryInfo.getUniqueKey(), detail);
-        }
-        mListViewContent.setAdapter(new DdayListAdapter(mAnniversaryInfoList, this));
+        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, MainActivity.this));
     }
 
-    class SortDescending implements Comparator<AnniversaryInfo> {
+    class SortDescending implements Comparator<DdayItem> {
         @Override
-        public int compare(AnniversaryInfo anniversaryInfo1, AnniversaryInfo anniversaryInfo2) {
-            int first = Integer.parseInt( anniversaryInfo1.getUniqueKey().replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
-            int second = Integer.parseInt( anniversaryInfo2.getUniqueKey().replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+        public int compare(DdayItem ddayItem1, DdayItem ddayItem2) {
+            int first = Integer.parseInt( ddayItem1.getUniqueKey().replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+            int second = Integer.parseInt( ddayItem2.getUniqueKey().replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
 
             int compareValue = 0;
 

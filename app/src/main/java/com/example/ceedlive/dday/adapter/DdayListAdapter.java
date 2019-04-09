@@ -1,18 +1,20 @@
 package com.example.ceedlive.dday.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.MainActivity;
-import com.example.ceedlive.dday.dto.AnniversaryInfo;
+import com.example.ceedlive.dday.dto.DdayItem;
+import com.example.ceedlive.dday.holder.DdayViewHolder;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -24,8 +26,7 @@ public class DdayListAdapter extends BaseAdapter {
     /**
      * ListView에 세팅할 Item 정보들
      */
-    private List<AnniversaryInfo> mArrayGroup;
-
+    private List<DdayItem> mArrayGroup;
 
     /**
      * ListView에 Item을 세팅할 요청자의 정보가 들어감
@@ -34,12 +35,14 @@ public class DdayListAdapter extends BaseAdapter {
 
     private Calendar mTargetCalendar, mBaseCalendar;
 
+    private DdayViewHolder ddayViewHolder;
+
     /**
      * 생성자
      * @param arrayGroup
      * @param context
      */
-    public DdayListAdapter(List<AnniversaryInfo> arrayGroup, Context context) {
+    public DdayListAdapter(List<DdayItem> arrayGroup, Context context) {
         this.mArrayGroup = arrayGroup;
         this.context = context;
 
@@ -63,8 +66,17 @@ public class DdayListAdapter extends BaseAdapter {
         return i;
     }
 
+    /**
+     * Adapter 가 가지고 있는 data 를 어떻게 보여줄 것인가를 정의하는 데 쓰인다.
+     * 리스트뷰를 예를 들면 하나의 리스트 아이템의 모양을 결정하는 역할을 하는 것이다.
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        // 뷰홀더 패턴 적용
         if (convertView == null) {
             // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -72,30 +84,39 @@ public class DdayListAdapter extends BaseAdapter {
             // Item Cell에 Layout을 적용시킨다.
             // 실제 객체는 이곳에 있다.
             convertView = inflater.inflate(R.layout.listview_group, parent, false);
+            ddayViewHolder = new DdayViewHolder();
+
+            // 화면에 표시될 view로부터 위젯에 대한 데이터 획득
+            ddayViewHolder.checkBox = convertView.findViewById(R.id.lv_group_checkbox);
+            ddayViewHolder.textViewTitle = (TextView) convertView.findViewById(R.id.tvTitle);
+            ddayViewHolder.textViewDate = (TextView) convertView.findViewById(R.id.tvDate);
+            ddayViewHolder.textViewDay = (TextView) convertView.findViewById(R.id.tvDay);
+            ddayViewHolder.textViewDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
+
+            ddayViewHolder.btnEdit = (Button) convertView.findViewById(R.id.listview_group_btn_edit);
+            ddayViewHolder.btnDelete = (Button) convertView.findViewById(R.id.listview_group_btn_delete);
+
+            ddayViewHolder.generalLayout = convertView.findViewById(R.id.listview_group_general);
+            ddayViewHolder.detailLayout = convertView.findViewById(R.id.listview_group_detail);
+
+            convertView.setTag(ddayViewHolder);
+        } else {
+            // 캐시된 뷰가 있을 경우 저장된 뷰홀더를 사용한다.
+            ddayViewHolder = (DdayViewHolder) convertView.getTag();
         }
 
-        AnniversaryInfo anniversaryInfo = mArrayGroup.get(position);
+        ddayViewHolder.position = position;
 
-        final RelativeLayout relativeLayout = convertView.findViewById(R.id.listview_group_general);
-        final LinearLayout linearLayout = convertView.findViewById(R.id.listview_group_detail);
+        // Data Set 에서 position 에 위치한 데이터 획득
+        final DdayItem ddayItem = mArrayGroup.get(position);
 
-        relativeLayout.setTag(false);
-        linearLayout.setVisibility(View.GONE);
-
-        TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-        TextView tvDate = (TextView) convertView.findViewById(R.id.tvDate);
-        TextView tvDay = (TextView) convertView.findViewById(R.id.tvDay);
-        TextView tvDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
-
-        final Button mBtnEdit = (Button) convertView.findViewById(R.id.listview_group_btn_edit);
-        final Button mBtnDelete = (Button) convertView.findViewById(R.id.listview_group_btn_delete);
-
-        tvTitle.setText(anniversaryInfo.getTitle());
-        tvDate.setText(anniversaryInfo.getDate());
-        tvDescription.setText(anniversaryInfo.getDescription());
+        // 각 위젯에 데이터 반영
+        ddayViewHolder.textViewTitle.setText(ddayItem.getTitle());
+        ddayViewHolder.textViewDate.setText(ddayItem.getDate());
+        ddayViewHolder.textViewDescription.setText(ddayItem.getDescription());
 
         // Set Date
-        String selectedDate = anniversaryInfo.getDate();
+        String selectedDate = ddayItem.getDate();
         String[] arrDate = selectedDate.split("/");
 
         String strYear = arrDate[0];
@@ -106,31 +127,119 @@ public class DdayListAdapter extends BaseAdapter {
         int month = Integer.parseInt(strMonth);
         int day = Integer.parseInt(strDay);
 
-        tvDay.setText(getDiffDays(year, month - 1, day));
+        ddayViewHolder.textViewDay.setText(getDiffDays(year, month - 1, day));
 
         mTargetCalendar.set(Calendar.YEAR, year);
         mTargetCalendar.set(Calendar.MONTH, month - 1);
         mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
 
-        mBtnEdit.setTag(anniversaryInfo.getUniqueKey());
-        mBtnDelete.setTag(anniversaryInfo.getUniqueKey());
+        ddayViewHolder.generalLayout.setTag("generalLayout" + position);
+        ddayViewHolder.detailLayout.setTag("detailLayout" + position);
+        ddayViewHolder.checkBox.setTag("checkBox" + position);
+        ddayViewHolder.btnEdit.setTag("btnEdit" + position);
+        ddayViewHolder.btnDelete.setTag("btnDelete" + position);
 
-        onClickLayout(relativeLayout, linearLayout);
-        onClickButtonEdit(mBtnEdit);
-        onClickButtonDelete(mBtnDelete);
+        // 롱클릭/온클릭
+        // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시
+        ddayViewHolder.checkBox.setChecked(ddayItem.getIsChecked());
+        ddayViewHolder.checkBox.setVisibility(ddayItem.getIsChecked() ? View.VISIBLE : View.GONE);
+        ddayViewHolder.detailLayout.setVisibility(ddayItem.getIsVisibleDetail() ? View.VISIBLE : View.GONE);
+
+        // 롱클릭
+
+        ddayViewHolder.generalLayout.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                // TODO 롱클릭 이벤트 구현 필요
+                Log.d("onLongClick parent", "position: " + position);
+
+                CheckBox checkBox = view.findViewWithTag("checkBox" + position);
+                // findViewWithTag
+
+                if ( checkBox.isChecked() ) {
+                    checkBox.setVisibility(View.GONE);
+                    checkBox.setChecked(false);
+                    ddayItem.setIsChecked(false);
+                } else {
+                    checkBox.setVisibility(View.VISIBLE);
+                    checkBox.setChecked(true);
+                    ddayItem.setIsChecked(true);
+                }
+
+                return true;
+                // 롱클릭 시 온클릭 이벤트 발생 방지: return true 이어야 함.
+                // 다음 이벤트 계속 진행 false, 이벤트 완료 true
+            }
+        });
+
+        // 온클릭
+        ddayViewHolder.generalLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LinearLayout parent = (LinearLayout) view.getParent();
+                LinearLayout detail = parent.findViewWithTag("detailLayout" + position);
+
+                // View.GONE: 8 - 값이 0이 아닌 8인 것에 주의
+                if ( View.VISIBLE == detail.getVisibility() ) {
+                    detail.setVisibility(View.GONE);
+                    ddayItem.setIsVisibleDetail(false);
+                } else {
+                    detail.setVisibility(View.VISIBLE);
+                    ddayItem.setIsVisibleDetail(true);
+                }
+            }
+        });
+
+        // 수정
+        ddayViewHolder.btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickEdit(ddayViewHolder.btnEdit);
+
+                Log.d("onClick btnEdit", "position: " + position);
+            }
+        });
+
+        // 삭제
+        ddayViewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickDelete(ddayViewHolder.btnDelete);
+
+                Log.d("onClick btnDelete", "position: " + position);
+            }
+        });
+
+//        onClickLayout(parentLayout, childLayout);
+//        onClickButtonEdit(mBtnEdit);
+//        onClickButtonDelete(mBtnDelete);
 
         return convertView;
     }
 
     private void onClickLayout(final View parentView, final View childView) {
+        // Touch(down) -> OnLongClick -> Touch(up) -> OnClick  순으로 발생한다.
+        // FIXME 체크하지 않았는데도 체크가 되는 버그 수정 필요
         parentView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 // TODO 롱클릭 이벤트 구현 필요
+                CheckBox mCheckBoxEachItem = parentView.findViewById(R.id.lv_group_checkbox);
+                if ( mCheckBoxEachItem.isChecked() ) {
+                    mCheckBoxEachItem.setVisibility(View.GONE);
+                    mCheckBoxEachItem.setChecked(false);
+                } else {
+                    mCheckBoxEachItem.setVisibility(View.VISIBLE);
+                    mCheckBoxEachItem.setChecked(true);
+                }
+
                 return true;
                 // 롱클릭 시 온클릭 이벤트 발생 방지: return true 이어야 함.
             }
         });
+
 
         parentView.setOnClickListener(new View.OnClickListener() {
             @Override

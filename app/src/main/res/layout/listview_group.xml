@@ -4,55 +4,73 @@
     android:layout_height="match_parent">
 
     <!-- 리스트 뷰에 들어갈 리스트 아이템 레이아웃 -->
-    <RelativeLayout
+
+    <LinearLayout
         android:id="@+id/listview_group_general"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- 디데이 제목 -->
-        <TextView
-            android:id="@+id/tvTitle"
+        <CheckBox
+            android:id="@+id/lv_group_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="30dp"
-            android:text="title"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_gravity="center"
             />
 
-        <!-- 디데이 날짜 -->
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tvTitle"
-            android:layout_marginLeft="30dp"
-            android:layout_marginBottom="10dp"
-            android:text="date"
-            />
+            android:layout_weight="1">
+
+            <!-- 디데이 제목 -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:layout_marginLeft="18dp"
+                android:text="title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                />
+
+            <!-- 디데이 날짜 -->
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tvTitle"
+                android:layout_marginLeft="18dp"
+                android:layout_marginBottom="18dp"
+                android:text="date"
+                />
+
+        </LinearLayout>
 
         <!-- 디데이 표현 -->
         <TextView
             android:id="@+id/tvDay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="18dp"
+            android:layout_gravity="center|start"
+            android:layout_marginRight="18dp"
             android:text="day"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/colorBrigntRed"
             />
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/listview_group_detail"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         >
 
         <View style="@style/Divider"/>
