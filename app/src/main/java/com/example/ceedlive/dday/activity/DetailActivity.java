@@ -315,6 +315,10 @@ public class DetailActivity extends BaseActivity {
         Intent notificationIntent = new Intent(this, DetailActivity.class);
         notificationIntent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, anniversaryInfo.getUniqueKey()); //전달할 값
         PendingIntent mPendingIntent = PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        // FIXME 2019-04-09 Tue
+        // Task 연동을 통해서 Github 와 연동 (Jetbrains의 IDE 사용 시 적극 권장) 테스트용 주석입니다.
+        // Issue 기반 Branch 생성 및 커밋 테스트용 주석입니다.
+
         // TODO 개별 PendingIntent 생성 더 알아보기
         // 핵심은 getActivity 파라메터중 두번째 requestCode 와 마지막 flags 이다.
         // 흔히 requestCode = 0, flags = FLAG_UPDATE_CURRENT 를 사용한다.
