@@ -21,6 +21,7 @@ import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.dto.DdayItem;
+import com.example.ceedlive.dday.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -214,9 +215,30 @@ public class MainActivity extends BaseActivity {
      * 수정 버튼 클릭 시 이벤트 핸들러
      * @param view
      */
+    public void onClickNoti(View view) {
+        try {
+            mSharedPreferencesDataKey = (String) view.getTag();
+            if (null != mSharedPreferencesDataKey) {
+                Toast.makeText(getApplicationContext(),"Service 시작", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                startService(intent);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 수정 버튼 클릭 시 이벤트 핸들러
+     * @param view
+     */
     public void onClickEdit(View view) {
         try {
             mSharedPreferencesDataKey = (String) view.getTag();
+
+            // TEST
+            Toast.makeText(getApplicationContext(), "onClickEdit" + mSharedPreferencesDataKey, Toast.LENGTH_SHORT).show();
+
             if (null != mSharedPreferencesDataKey) {
                 moveDetailActivity(mSharedPreferencesDataKey);
             }
@@ -232,6 +254,10 @@ public class MainActivity extends BaseActivity {
     public void onClickDelete(View view) {
         try {
             mSharedPreferencesDataKey = (String) view.getTag();
+
+            // TEST
+            Toast.makeText(getApplicationContext(), "onClickDelete" + mSharedPreferencesDataKey, Toast.LENGTH_SHORT).show();
+
             if (null != mSharedPreferencesDataKey) {
                 showDialog();
             }

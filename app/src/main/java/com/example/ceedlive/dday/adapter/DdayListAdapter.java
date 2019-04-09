@@ -49,6 +49,10 @@ public class DdayListAdapter extends BaseAdapter {
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
         this.mTargetCalendar = new GregorianCalendar();
         this.mBaseCalendar = new GregorianCalendar();
+
+        for (DdayItem ddayItem : arrayGroup) {
+            Log.d("ddayItem.toString()", ddayItem.toString());
+        }
     }
 
     @Override
@@ -95,6 +99,7 @@ public class DdayListAdapter extends BaseAdapter {
 
             ddayViewHolder.btnEdit = (Button) convertView.findViewById(R.id.listview_group_btn_edit);
             ddayViewHolder.btnDelete = (Button) convertView.findViewById(R.id.listview_group_btn_delete);
+            ddayViewHolder.btnNoti = (Button) convertView.findViewById(R.id.listview_group_btn_noti);
 
             ddayViewHolder.generalLayout = convertView.findViewById(R.id.listview_group_general);
             ddayViewHolder.detailLayout = convertView.findViewById(R.id.listview_group_detail);
@@ -136,8 +141,10 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.generalLayout.setTag("generalLayout" + position);
         ddayViewHolder.detailLayout.setTag("detailLayout" + position);
         ddayViewHolder.checkBox.setTag("checkBox" + position);
-        ddayViewHolder.btnEdit.setTag("btnEdit" + position);
-        ddayViewHolder.btnDelete.setTag("btnDelete" + position);
+
+        ddayViewHolder.btnEdit.setTag(ddayItem.getUniqueKey());
+        ddayViewHolder.btnDelete.setTag(ddayItem.getUniqueKey());
+        ddayViewHolder.btnNoti.setTag(ddayItem.getUniqueKey());
 
         // 롱클릭/온클릭
         // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시
@@ -146,12 +153,9 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.detailLayout.setVisibility(ddayItem.getIsVisibleDetail() ? View.VISIBLE : View.GONE);
 
         // 롱클릭
-
         ddayViewHolder.generalLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                // TODO 롱클릭 이벤트 구현 필요
-                Log.d("onLongClick parent", "position: " + position);
 
                 CheckBox checkBox = view.findViewWithTag("checkBox" + position);
                 // findViewWithTag
@@ -190,14 +194,21 @@ public class DdayListAdapter extends BaseAdapter {
             }
         });
 
+        // 노티
+        ddayViewHolder.btnNoti.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) context;
+                activity.onClickNoti(ddayViewHolder.btnNoti);
+            }
+        });
+
         // 수정
         ddayViewHolder.btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
                 activity.onClickEdit(ddayViewHolder.btnEdit);
-
-                Log.d("onClick btnEdit", "position: " + position);
             }
         });
 
@@ -207,79 +218,10 @@ public class DdayListAdapter extends BaseAdapter {
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
                 activity.onClickDelete(ddayViewHolder.btnDelete);
-
-                Log.d("onClick btnDelete", "position: " + position);
             }
         });
-
-//        onClickLayout(parentLayout, childLayout);
-//        onClickButtonEdit(mBtnEdit);
-//        onClickButtonDelete(mBtnDelete);
 
         return convertView;
-    }
-
-    private void onClickLayout(final View parentView, final View childView) {
-        // Touch(down) -> OnLongClick -> Touch(up) -> OnClick  순으로 발생한다.
-        // FIXME 체크하지 않았는데도 체크가 되는 버그 수정 필요
-        parentView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                // TODO 롱클릭 이벤트 구현 필요
-                CheckBox mCheckBoxEachItem = parentView.findViewById(R.id.lv_group_checkbox);
-                if ( mCheckBoxEachItem.isChecked() ) {
-                    mCheckBoxEachItem.setVisibility(View.GONE);
-                    mCheckBoxEachItem.setChecked(false);
-                } else {
-                    mCheckBoxEachItem.setVisibility(View.VISIBLE);
-                    mCheckBoxEachItem.setChecked(true);
-                }
-
-                return true;
-                // 롱클릭 시 온클릭 이벤트 발생 방지: return true 이어야 함.
-            }
-        });
-
-
-        parentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                boolean isVisible = (boolean) parentView.getTag();
-                if (!isVisible) {
-                    childView.setVisibility(View.VISIBLE);
-
-                    // 안드로이드 레이어 visible 설정 시 사르륵 애니메이션 넣기
-//                    Animation animation = new AlphaAnimation(0, 1);
-//                    animation.setDuration(1000);
-//                    childView.setVisibility(View.VISIBLE);
-//                    childView.setAnimation(animation);
-
-                } else {
-                    childView.setVisibility(View.GONE);
-                }
-                parentView.setTag(!isVisible);
-            }
-        });
-    }
-
-    private void onClickButtonEdit(final View view) {
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
-                activity.onClickEdit(view);
-            }
-        });
-    }
-
-    private void onClickButtonDelete(final View view) {
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
-                activity.onClickDelete(view);
-            }
-        });
     }
 
     private String getDiffDays(int year, int month, int day) {

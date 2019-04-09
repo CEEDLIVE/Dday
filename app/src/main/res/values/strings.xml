@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Dday</string>
 
+    <string name="btn_noti">노티</string>
     <string name="btn_save">저장</string>
     <string name="btn_edit">수정</string>
     <string name="btn_delete">삭제</string>

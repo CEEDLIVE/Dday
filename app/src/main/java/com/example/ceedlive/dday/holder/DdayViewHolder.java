@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 public class DdayViewHolder {
 
-    public LinearLayout groupLayout;
     public LinearLayout generalLayout;
     public LinearLayout detailLayout;
 
@@ -19,6 +18,7 @@ public class DdayViewHolder {
 
     public Button btnEdit;
     public Button btnDelete;
+    public Button btnNoti;
 
     public int position;
 

@@ -1,13 +1,13 @@
 package com.example.ceedlive.dday.dto;
 
 public class DdayItem {
-    public String uniqueKey;
-    public String title;
-    public String description;
-    public String date;
-    public String diffDays;
-    public boolean isChecked;
-    public boolean isVisibleDetail;
+    private String uniqueKey;
+    private String title;
+    private String description;
+    private String date;
+    private String diffDays;
+    private boolean isChecked;
+    private boolean isVisibleDetail;
 
     public String getTitle() {
         return title;
@@ -63,5 +63,18 @@ public class DdayItem {
 
     public void setIsVisibleDetail(boolean isVisibleDetail) {
         this.isVisibleDetail = isVisibleDetail;
+    }
+
+    @Override
+    public String toString() {
+        return "DdayItem{" +
+                "uniqueKey='" + uniqueKey + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", date='" + date + '\'' +
+                ", diffDays='" + diffDays + '\'' +
+                ", isChecked=" + isChecked +
+                ", isVisibleDetail=" + isVisibleDetail +
+                '}';
     }
 }
