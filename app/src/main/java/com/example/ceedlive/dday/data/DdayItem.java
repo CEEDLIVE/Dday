@@ -1,4 +1,4 @@
-package com.example.ceedlive.dday.dto;
+package com.example.ceedlive.dday.data;
 
 public class DdayItem {
     private String uniqueKey;

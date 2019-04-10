@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
@@ -27,7 +26,7 @@ import android.widget.TextView;
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
-import com.example.ceedlive.dday.dto.DdayItem;
+import com.example.ceedlive.dday.data.DdayItem;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -344,7 +343,7 @@ public class DetailActivity extends BaseActivity {
 
         // 해당 기기의 OS 버전이 오레오 이상일때 Notification Channel 을 만들어주고 필요한 설정을 해준뒤
         // NotificationManager의 createNotificationChannel()을 호출해주면 됩니다.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationChannel notificationChannel = new NotificationChannel(Constant.NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_DEFAULT);
 

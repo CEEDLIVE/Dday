@@ -20,7 +20,7 @@ import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
-import com.example.ceedlive.dday.dto.DdayItem;
+import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.service.NotificationService;
 
 import java.util.ArrayList;
@@ -212,15 +212,27 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 수정 버튼 클릭 시 이벤트 핸들러
-     * @param view
+     * 노티 버튼 클릭 시 이벤트 핸들러
+     * @param uniqueKey
      */
-    public void onClickNoti(View view) {
+    public void onClickNoti(String uniqueKey) {
         try {
-            mSharedPreferencesDataKey = (String) view.getTag();
+            mSharedPreferencesDataKey = uniqueKey;
             if (null != mSharedPreferencesDataKey) {
-                Toast.makeText(getApplicationContext(),"Service 시작", Toast.LENGTH_SHORT).show();
+
+                SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+                // TODO SharedPreferences 더 알아보기
+                // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
+                // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
+
+                String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
+                DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
+
+                // FIXME TEST 토스트 띄우기
+//                Toast.makeText(getApplicationContext(), ddayItem.getTitle() + " 서비스 시작", Toast.LENGTH_SHORT).show();
+
                 Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
                 startService(intent);
             }
         } catch (NullPointerException e) {
@@ -230,11 +242,11 @@ public class MainActivity extends BaseActivity {
 
     /**
      * 수정 버튼 클릭 시 이벤트 핸들러
-     * @param view
+     * @param uniqueKey
      */
-    public void onClickEdit(View view) {
+    public void onClickEdit(String uniqueKey) {
         try {
-            mSharedPreferencesDataKey = (String) view.getTag();
+            mSharedPreferencesDataKey = uniqueKey;
 
             // TEST
             Toast.makeText(getApplicationContext(), "onClickEdit" + mSharedPreferencesDataKey, Toast.LENGTH_SHORT).show();
@@ -249,11 +261,11 @@ public class MainActivity extends BaseActivity {
 
     /**
      * 삭제 버튼 클릭 시 이벤트 핸들러
-     * @param view
+     * @param uniqueKey
      */
-    public void onClickDelete(View view) {
+    public void onClickDelete(String uniqueKey) {
         try {
-            mSharedPreferencesDataKey = (String) view.getTag();
+            mSharedPreferencesDataKey = uniqueKey;
 
             // TEST
             Toast.makeText(getApplicationContext(), "onClickDelete" + mSharedPreferencesDataKey, Toast.LENGTH_SHORT).show();

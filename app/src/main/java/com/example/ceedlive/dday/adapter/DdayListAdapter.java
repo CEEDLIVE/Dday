@@ -1,7 +1,6 @@
 package com.example.ceedlive.dday.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,7 @@ import android.widget.TextView;
 
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.MainActivity;
-import com.example.ceedlive.dday.dto.DdayItem;
+import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.holder.DdayViewHolder;
 
 import java.util.Calendar;
@@ -49,10 +48,6 @@ public class DdayListAdapter extends BaseAdapter {
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
         this.mTargetCalendar = new GregorianCalendar();
         this.mBaseCalendar = new GregorianCalendar();
-
-        for (DdayItem ddayItem : arrayGroup) {
-            Log.d("ddayItem.toString()", ddayItem.toString());
-        }
     }
 
     @Override
@@ -109,8 +104,6 @@ public class DdayListAdapter extends BaseAdapter {
             // 캐시된 뷰가 있을 경우 저장된 뷰홀더를 사용한다.
             ddayViewHolder = (DdayViewHolder) convertView.getTag();
         }
-
-        ddayViewHolder.position = position;
 
         // Data Set 에서 position 에 위치한 데이터 획득
         final DdayItem ddayItem = mArrayGroup.get(position);
@@ -199,7 +192,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickNoti(ddayViewHolder.btnNoti);
+                activity.onClickNoti(ddayItem.getUniqueKey());
             }
         });
 
@@ -208,7 +201,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickEdit(ddayViewHolder.btnEdit);
+                activity.onClickEdit(ddayItem.getUniqueKey());
             }
         });
 
@@ -217,7 +210,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickDelete(ddayViewHolder.btnDelete);
+                activity.onClickDelete(ddayItem.getUniqueKey());
             }
         });
 
