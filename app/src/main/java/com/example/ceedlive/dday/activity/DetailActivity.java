@@ -84,7 +84,6 @@ public class DetailActivity extends BaseActivity {
             // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
 
             String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
-
             DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
 
             // Set Date

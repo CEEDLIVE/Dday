@@ -63,6 +63,22 @@ public class MainActivity extends BaseActivity {
         initialize();// 변수 초기화
         setEvent();// 이벤트 설정
         setData();// 데이터 세팅 [확장 리스트 뷰 (ExpandableListView) 사용]
+
+        // TEST 다음과 같이 액티비티 메인 쓰레드에서 새로 쓰레드를 생성해서 UI 업데이트를 하면 에러 발생
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                mBtnCreate = findViewById(R.id.btnCreate);
+//                mBtnCreate.setVisibility(View.VISIBLE);
+//                mBtnCreate.setText("asdf");
+//
+//            }
+//        }).start();;
     }
 
     @Override

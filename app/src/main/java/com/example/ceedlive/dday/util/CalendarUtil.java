@@ -8,6 +8,16 @@ import java.util.Calendar;
 
 public class CalendarUtil {
 
+    /**
+     * 두 날짜 간 차이 구하기
+     * @param context
+     * @param mTargetCalendar
+     * @param mBaseCalendar
+     * @param year
+     * @param month
+     * @param day
+     * @return
+     */
     public static String getDiffDays(Context context, Calendar mTargetCalendar, Calendar mBaseCalendar, int year, int month, int day) {
         // Calendar 두 날짜 간 차이 구하기
         mTargetCalendar.set(Calendar.YEAR, year);
