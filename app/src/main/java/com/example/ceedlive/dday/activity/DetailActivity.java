@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -27,6 +28,7 @@ import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.data.DdayItem;
+import com.example.ceedlive.dday.helper.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,6 +40,8 @@ import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
 
+    private DatabaseHelper mDatabaseHelper;
+
     private TextView mTvToday, mTvDate;
     private int mYear, mMonth, mDay;
     private Button mBtnSave;
@@ -45,6 +49,7 @@ public class DetailActivity extends BaseActivity {
     private CheckBox mCheckBoxAddNoti;
 
     private String mSharedPreferencesDataKey;
+    private int mId;
 
     private Calendar mTargetCalendar, mBaseCalendar;
     private Intent mIntent;
@@ -62,6 +67,8 @@ public class DetailActivity extends BaseActivity {
     @Override
     protected void initialize() {
 
+        mDatabaseHelper = DatabaseHelper.getInstance(DetailActivity.this);
+
         mIntent = getIntent();
 
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
@@ -75,31 +82,36 @@ public class DetailActivity extends BaseActivity {
 
         mCheckBoxAddNoti = findViewById(R.id.detail_checkbox_add_noti);
 
-        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES)) {
-            mSharedPreferencesDataKey = mIntent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
+//        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES)) {
+        if ( mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID)) {
+//            mSharedPreferencesDataKey = mIntent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
 
-            SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
-            // TODO SharedPreferences 더 알아보기
-            // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
-            // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
+//            SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+//            // TODO SharedPreferences 더 알아보기
+//            // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
+//            // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
+//
+//            String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
+//            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
 
-            String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
-            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
+            mId = mIntent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
+            DdayItem ddayItem = mId > 0 ? mDatabaseHelper.getDday(mId) : null;
+            if (null != ddayItem) {
+                // Set Date
+                String selectedDate = ddayItem.getDate();
+                String[] arrDate = selectedDate.split("/");
+                String year = arrDate[0], month = arrDate[1], day = arrDate[2];
 
-            // Set Date
-            String selectedDate = ddayItem.getDate();
-            String[] arrDate = selectedDate.split("/");
-            String year = arrDate[0], month = arrDate[1], day = arrDate[2];
+                mTargetCalendar.set(Calendar.YEAR, Integer.parseInt(year));
+                mTargetCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+                mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
 
-            mTargetCalendar.set(Calendar.YEAR, Integer.parseInt(year));
-            mTargetCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
-            mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
+                // Set Title
+                mEtTitle.setText(ddayItem.getTitle());
 
-            // Set Title
-            mEtTitle.setText(ddayItem.getTitle());
-
-            // Set Description
-            mEtDescription.setText(ddayItem.getDescription());
+                // Set Description
+                mEtDescription.setText(ddayItem.getDescription());
+            }
         }
 
         mYear = mTargetCalendar.get(Calendar.YEAR);
@@ -159,73 +171,123 @@ public class DetailActivity extends BaseActivity {
                     return;
                 }
 
-                // SharedPreferences 를 ceedliveAppDday 이름, 기본모드로 설정
-                SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
-
-                // How to get all keys of SharedPreferences programmatically in Android?
-                // reference: https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
-                Map<String, ?> allEntries = sharedPreferences.getAll();
-                String eachKey = "";
-                int eachKeyNumber;
-                int maxKeyNumber;
-                List<Integer> keyNumberList = new ArrayList<>();
-                for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-                    eachKey = entry.getKey();
-                    if (!"".equals(eachKey) && eachKey.startsWith(Constant.SHARED_PREFERENCES_KEY_PREFIX)) {
-                        // ceedlive 디데이 앱에서 사용하는 SharedPreferences
-                        eachKeyNumber = Integer.parseInt(eachKey.replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, ""));
-                        keyNumberList.add(eachKeyNumber);
-                        continue;
-                    }
-                    keyNumberList.clear();
-                    keyNumberList.add(0);
-                    break;
-                }
-
-                // IndexOutOfBoundsException 방지
-                if (keyNumberList.isEmpty()) {
-                    keyNumberList.add(0);
-                }
-
-                // 리스트 역순으로 뒤집기
-                Collections.sort(keyNumberList);
-                Collections.reverse(keyNumberList);
-                maxKeyNumber = keyNumberList.get(0);
-
-                // 저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
-
-                DdayItem ddayItem = new DdayItem();
-                ddayItem.setDate(date);
-                ddayItem.setTitle(title);
-                ddayItem.setDescription(description);
-                ddayItem.setUniqueKey(uniqueKey);
-                ddayItem.setDiffDays(mDiffDays);
-
-                // JSON 으로 변환
-                final String jsonStringAnniversaryInfo = gson.toJson(ddayItem, DdayItem.class);
-
-                // key/value pair 로 값을 저장하는 형태
-                editor.putString(uniqueKey, jsonStringAnniversaryInfo);
-                editor.apply();
-
-                // ? editor.commit(); 최종 커밋
-                // Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background less... (Ctrl+F1)
-                // Inspection info:Consider using apply() instead of commit on shared preferences. Whereas commit blocks and writes its data to persistent storage immediately, apply will handle it in the background.
-
-                Intent intent = new Intent();
-                intent.putExtra("newItem", jsonStringAnniversaryInfo);
-                setResult(Activity.RESULT_OK, intent);
+                DdayItem ddayItem = doSaveSQLite(date, title, description);
+//                DdayItem ddayItem = doSaveSharedPreferencesData(date, title, description);
 
                 if ( mCheckBoxAddNoti.isChecked() ) {
                     NotificationDday(ddayItem);
                 }
 
+                Intent intent = new Intent();
+                setResult(Activity.RESULT_OK, intent);
+
                 finish();
             }
         });
+    }
+
+    /**
+     * SQLite
+     * @param date
+     * @param title
+     * @param description
+     * @return
+     */
+    private DdayItem doSaveSQLite(String date, String title, String description) {
+        DdayItem ddayItem;
+
+        if (mId > 0) {
+            // update
+            ddayItem = mDatabaseHelper.getDday(mId);
+            ddayItem.setDate(date);
+            ddayItem.setTitle(title);
+            ddayItem.setDescription(description);
+
+            int result = mDatabaseHelper.updateDday(ddayItem);
+            if (result > 0) {
+                Log.d("doSave", result + " result update");
+            }
+
+        } else {
+            // create
+            ddayItem = new DdayItem(date, title, description);
+            mDatabaseHelper.addDday(ddayItem);
+        }
+
+        return ddayItem;
+    }
+
+    /**
+     * SharedPreferences
+     * @param date
+     * @param title
+     * @param description
+     * @return
+     */
+    @SuppressWarnings("unused")
+    private DdayItem doSaveSharedPreferencesData(String date, String title, String description) {
+
+        // SharedPreferences 를 ceedliveAppDday 이름, 기본모드로 설정
+        SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+
+        // How to get all keys of SharedPreferences programmatically in Android?
+        // reference: https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
+        Map<String, ?> allEntries = sharedPreferences.getAll();
+        String eachKey = "";
+        int eachKeyNumber;
+        int maxKeyNumber;
+        List<Integer> keyNumberList = new ArrayList<>();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            eachKey = entry.getKey();
+            if (!"".equals(eachKey) && eachKey.startsWith(Constant.SHARED_PREFERENCES_KEY_PREFIX)) {
+                // ceedlive 디데이 앱에서 사용하는 SharedPreferences
+                eachKeyNumber = Integer.parseInt(eachKey.replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, ""));
+                keyNumberList.add(eachKeyNumber);
+                continue;
+            }
+            keyNumberList.clear();
+            keyNumberList.add(0);
+            break;
+        }
+
+        // IndexOutOfBoundsException 방지
+        if (keyNumberList.isEmpty()) {
+            keyNumberList.add(0);
+        }
+
+        // 리스트 역순으로 뒤집기
+        Collections.sort(keyNumberList);
+        Collections.reverse(keyNumberList);
+        maxKeyNumber = keyNumberList.get(0);
+
+        // 저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
+
+        DdayItem ddayItem = new DdayItem();
+        ddayItem.setDate(date);
+        ddayItem.setTitle(title);
+        ddayItem.setDescription(description);
+        ddayItem.setUniqueKey(uniqueKey);
+        ddayItem.setDiffDays(mDiffDays);
+
+        // JSON 으로 변환
+        final String jsonStringAnniversaryInfo = gson.toJson(ddayItem, DdayItem.class);
+
+        // key/value pair 로 값을 저장하는 형태
+        editor.putString(uniqueKey, jsonStringAnniversaryInfo);
+        editor.apply();
+
+        // ? editor.commit(); 최종 커밋
+        // Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background less... (Ctrl+F1)
+        // Inspection info:Consider using apply() instead of commit on shared preferences. Whereas commit blocks and writes its data to persistent storage immediately, apply will handle it in the background.
+
+        Intent intent = new Intent();
+        intent.putExtra("newItem", jsonStringAnniversaryInfo);
+        setResult(Activity.RESULT_OK, intent);
+
+        return ddayItem;
     }
 
     /**

@@ -2,7 +2,7 @@ package com.example.ceedlive.dday;
 
 public class Constant {
 
-    public static final int LOADING_DELAY_MILLIS = 2000;
+    public static final int LOADING_DELAY_MILLIS = 3000;
 
     /**
      * 인텐트: 메인화면 리퀘스트 코드
@@ -15,7 +15,13 @@ public class Constant {
 
     public static final String INTENT_DATA_NAME_SHARED_PREFERENCES = "sharedPreferencesDataKey";
 
+    public static final String INTENT_DATA_SQLITE_TABLE_DDAY_ID = "dday_id";
+
     public static final String CALENDAR_STRING_FORMAT_SLASH = "%d/%d/%d";
 
     public static final String NOTIFICATION_CHANNEL_ID = "my_channel_id_01";
+
+    public static final String SQLITE_DB_FILE_NAME = "dday.db";
+
+    public static final int SQLITE_DB_VERSION = 1;
 }

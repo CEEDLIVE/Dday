@@ -7,7 +7,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
@@ -21,6 +20,7 @@ import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.DetailActivity;
 import com.example.ceedlive.dday.data.DdayItem;
+import com.example.ceedlive.dday.helper.DatabaseHelper;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
@@ -34,6 +34,8 @@ public class NotificationService extends Service {
     // UI가 없으므로 라이프사이클은 다음과 같이 동작한다.
     // onCreate() -> onStart() -> onDestory()
     // 메인스레드에서 관리하기 때문에 UI가 종료되어도 살아서 서비스를 계속한다.
+
+    DatabaseHelper mDatabaseHelper;
 
     NotificationManager mNotificationManager;
     NotificationChannel mNotificationChannel;
@@ -99,22 +101,37 @@ public class NotificationService extends Service {
             @Override
             public void run() {
 
-                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES) ) {
-                    String mSharedPreferencesDataKey = intent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
+//                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES) ) {
+//                    String mSharedPreferencesDataKey = intent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
+//
+//                    SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+//                    // TODO SharedPreferences 더 알아보기
+//                    // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
+//                    // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
+//
+//                    String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
+//                    DdayItem ddayItem = mGson.fromJson(jsonStringValue, DdayItem.class);
+//
+//                    Message message = handler.obtainMessage();
+//                    message.obj = ddayItem;
+//
+//                    handler.sendMessage(message);
+//                }
 
-                    SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
-                    // TODO SharedPreferences 더 알아보기
-                    // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
-                    // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
+                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID) ) {
+                    int mId = intent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
 
-                    String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
-                    DdayItem ddayItem = mGson.fromJson(jsonStringValue, DdayItem.class);
+                    if (mId > 0) {
+                        mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
+                        DdayItem ddayItem = mDatabaseHelper.getDday(mId);
 
-                    Message message = handler.obtainMessage();
-                    message.obj = ddayItem;
+                        Message message = handler.obtainMessage();
+                        message.obj = ddayItem;
 
-                    handler.sendMessage(message);
+                        handler.sendMessage(message);
+                    }
                 }
+
             }
         });
         mThread.start();
@@ -195,13 +212,17 @@ public class NotificationService extends Service {
         @Override
         public void handleMessage(android.os.Message msg) {
 
+            Log.d("handleMessage", "");
+
             final DdayItem ddayItem = (DdayItem) msg.obj;
-            final int requestCode = Integer.parseInt( ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+//            final int requestCode = Integer.parseInt( ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
+            final int requestCode = ddayItem.get_id();
             final int notificationId = requestCode;
 
             // 알림 클릭시 DetailActivity 화면에 띄운다.
             Intent intent = new Intent(NotificationService.this, DetailActivity.class);
-            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
+//            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
+            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
             PendingIntent pendingIntent = PendingIntent.getActivity(NotificationService.this, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             // TODO Notification 개념 더 알아보기

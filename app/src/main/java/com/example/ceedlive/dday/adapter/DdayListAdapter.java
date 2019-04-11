@@ -135,9 +135,9 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.detailLayout.setTag("detailLayout" + position);
         ddayViewHolder.checkBox.setTag("checkBox" + position);
 
-        ddayViewHolder.btnEdit.setTag(ddayItem.getUniqueKey());
-        ddayViewHolder.btnDelete.setTag(ddayItem.getUniqueKey());
-        ddayViewHolder.btnNoti.setTag(ddayItem.getUniqueKey());
+        ddayViewHolder.btnEdit.setTag(ddayItem.get_id());
+        ddayViewHolder.btnDelete.setTag(ddayItem.get_id());
+        ddayViewHolder.btnNoti.setTag(ddayItem.get_id());
 
         // 롱클릭/온클릭
         // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시
@@ -192,7 +192,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickNoti(ddayItem.getUniqueKey());
+                activity.onClickNoti(ddayItem.get_id());
             }
         });
 
@@ -201,7 +201,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickEdit(ddayItem.getUniqueKey());
+                activity.onClickEdit(ddayItem.get_id());
             }
         });
 
@@ -210,7 +210,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickDelete(ddayItem.getUniqueKey());
+                activity.onClickDelete(ddayItem.get_id());
             }
         });
 

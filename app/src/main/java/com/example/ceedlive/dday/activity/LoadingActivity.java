@@ -7,8 +7,11 @@ import android.widget.TextView;
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
+import com.example.ceedlive.dday.helper.DatabaseHelper;
 
 public class LoadingActivity extends BaseActivity {
+
+    private DatabaseHelper mDatabaseHelper;
 
     private String[] mArrWiseSaying;
     private TextView mTvWiseSaying;
@@ -17,8 +20,13 @@ public class LoadingActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
+        createTable();
         loadWiseSaying();
         startLoading();
+    }
+
+    private void createTable() {
+        mDatabaseHelper = DatabaseHelper.getInstance(LoadingActivity.this);
     }
 
     private void loadWiseSaying() {
