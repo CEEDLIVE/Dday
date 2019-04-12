@@ -10,6 +10,10 @@ import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.helper.DatabaseHelper;
 import com.example.ceedlive.dday.http.RetrofitApiService;
+import com.example.ceedlive.dday.http.RetrofitConnection;
+import com.google.gson.JsonObject;
+
+import java.io.IOException;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -31,23 +35,24 @@ public class LoadingActivity extends BaseActivity {
     private Retrofit mRetrofit;
     private RetrofitApiService mRetrofitApiService;
 
+    private RetrofitConnection mRetrofitConnection;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
-//        requestGet();
         createTable();
         loadWiseSaying();
         startLoading();
 
-        mRetrofit = new Retrofit.Builder()
-                .baseUrl(RetrofitApiService.API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
         mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
 
-        retrofitGet();
+//        retrofitGet();
+//        retrofitCreate();
+//        retrofitUpdate();
+        retrofitDelete();
     }
 
     private void createTable() {
@@ -82,15 +87,23 @@ public class LoadingActivity extends BaseActivity {
     }
 
     private void retrofitGet() {
-
-        Call<ResponseBody> comment = mRetrofitApiService.getComment(1);
+        Call<ResponseBody> comment = mRetrofitApiService.getDummyEmployee(24494);
         comment.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call call, Response response) {
                 Log.d(TAG, "onResponse");
                 int responseCode = response.code();
+                ResponseBody responseBody = (ResponseBody) response.body();
+
+                String json = "";
+                try {
+                    json = responseBody.string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
+                Log.e(TAG, "retrofitGet - json: " + json);
             }
 
             @Override
@@ -98,8 +111,106 @@ public class LoadingActivity extends BaseActivity {
                 Log.e(TAG, "retrofitGet - onFailure: ");
             }
         });
+    }
 
+    private void retrofitCreate() {
 
+//        {"name":"test","salary":"123","age":"23"}
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("name", "ceed1");
+        jsonObject.addProperty("salary", "300");
+        jsonObject.addProperty("age", "35");
+
+        Call<ResponseBody> comment = mRetrofitApiService.createDummyEmployee(jsonObject);
+        comment.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                Log.d(TAG, "onResponse");
+                int responseCode = response.code();
+                ResponseBody responseBody = (ResponseBody) response.body();
+
+                String json = "";
+                try {
+                    json = responseBody.string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
+                Log.e(TAG, "retrofitGet - json: " + json);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.e(TAG, "retrofitGet - onFailure: ");
+            }
+        });
+    }
+
+    private void retrofitUpdate() {
+
+//        {"name":"test","salary":"123","age":"23"}
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("name", "ceed10");
+        jsonObject.addProperty("salary", "3000");
+        jsonObject.addProperty("age", "350");
+
+        Call<ResponseBody> comment = mRetrofitApiService.updateDummyEmployee(24494, jsonObject);
+        comment.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                Log.d(TAG, "onResponse");
+                int responseCode = response.code();
+                ResponseBody responseBody = (ResponseBody) response.body();
+
+                String json = "";
+                try {
+                    json = responseBody.string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
+                Log.e(TAG, "retrofitGet - json: " + json);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.e(TAG, "retrofitGet - onFailure: ");
+            }
+        });
+    }
+
+    private void retrofitDelete() {
+
+//        {"name":"test","salary":"123","age":"23"}
+
+        Call<ResponseBody> comment = mRetrofitApiService.deleteDummyEmployee(24494);
+        comment.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                Log.d(TAG, "onResponse");
+                int responseCode = response.code();
+                ResponseBody responseBody = (ResponseBody) response.body();
+
+                String json = "";
+                try {
+                    json = responseBody.string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
+                Log.e(TAG, "retrofitGet - json: " + json);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.e(TAG, "retrofitGet - onFailure: ");
+            }
+        });
     }
 
 //    private void requestGet() {
