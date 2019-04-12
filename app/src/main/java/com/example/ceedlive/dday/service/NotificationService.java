@@ -7,21 +7,20 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.DetailActivity;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.helper.DatabaseHelper;
-import com.google.gson.Gson;
+import com.example.ceedlive.dday.receiver.NotificationReceiver;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -41,10 +40,15 @@ public class NotificationService extends Service {
     NotificationChannel mNotificationChannel;
     Thread mThread;
     NotificationCompat.Builder mNotificationBuilder;
-    Gson mGson = new Gson();
+
+    NotificationReceiver mNotificationReceiver;
+
+//    Gson mGson = new Gson();
 
     Calendar mTargetCalendar = new GregorianCalendar();
     Calendar mBaseCalendar = new GregorianCalendar();
+
+    private static final String TAG = "NotificationService";
 
     boolean mIsRun = true;
 
@@ -94,6 +98,24 @@ public class NotificationService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         // 백그라운드에서 실행되는 동작들이 들어가는 곳입니다.
         // 서비스가 호출될 때마다 실행
+
+        // ======================================================================
+        // TEST
+
+//        if (intent == null) {
+//            // 인텐트 필터 설정
+//            IntentFilter intentFilter = new IntentFilter();
+//            intentFilter.addAction(Intent.ACTION_TIME_TICK);
+//            intentFilter.addAction(Intent.ACTION_DATE_CHANGED);
+//
+//            // 동적리시버 생성
+//            mNotificationReceiver = new NotificationReceiver();
+//
+//            // 위에서 설정한 인텐트필터+리시버정보로 리시버 등록
+//            registerReceiver(mNotificationReceiver, intentFilter);
+//        }
+
+        // ======================================================================
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final InnerNotificationServiceHandler handler = new InnerNotificationServiceHandler();
@@ -163,7 +185,7 @@ public class NotificationService extends Service {
         synchronized (mThread) {
             mIsRun = false;
         }
-        mThread = null;//쓰레기 값을 만들어서 빠르게 회수하라고 null을 넣어줌.
+        mThread = null;// 쓰레기 값을 만들어서 빠르게 회수하라고 null을 넣어줌.
     }
 
     /**
@@ -212,7 +234,7 @@ public class NotificationService extends Service {
         @Override
         public void handleMessage(android.os.Message msg) {
 
-            Log.d("handleMessage", "");
+            Log.d(TAG, "InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)");
 
             final DdayItem ddayItem = (DdayItem) msg.obj;
 //            final int requestCode = Integer.parseInt( ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
@@ -290,20 +312,31 @@ public class NotificationService extends Service {
 
             // FIXME 재귀호출, 브로드캐스트 수신자 사용으로 코드 리팩토링 해보기
             // reference: http://la-stranger.blogspot.com/2013/09/blog-post_26.html
-            Runnable runnable = null;
-            final int delayMillis = 1000 * 60;// 매 1분
 
-            // Warning - The application may be doing too much work on its main thread. 경고 발생 방지 코드
-            // UI 업데이트 시 다음과 같이 코드를 작성하면 경고를 피할 수 있다.
-            if (handler == null) {
-                handler = new Handler(Looper.getMainLooper());
-            }
-            handler.postDelayed(runnable = new Runnable() {
+            // 인텐트 필터 설정
+            IntentFilter intentFilter = new IntentFilter();
+
+            // reference: http://la-stranger.blogspot.com/2013/09/blog-post_26.html
+
+            // TEST 를 위해 임시로 추가한 인텐트
+            // 매 분마다 이벤트가 발생한다.
+            // 이 이벤트는 AndroidManifest에 Intent filter를 적용하는 것으로 캐치할 수 없고 코드내에서 동적으로 등록을 해야 한다.
+            // 아마도 실수로 이 이벤트에 대한 로직을 추가하여 디바이스 배터리 광탈을 막기위한 목적이 아닌가 한다.
+//            intentFilter.addAction(Intent.ACTION_TIME_TICK);
+
+            // 날짜가 변경 될 때 발생한다.
+            // 다시 설명하면 어느 날의 11:59  PM에서 자정으로 넘어가 날짜가 변경되는 경우 브로드캐스트 되는 인텐트
+            intentFilter.addAction(Intent.ACTION_DATE_CHANGED);
+
+            // 동적리시버 생성
+            mNotificationReceiver = new NotificationReceiver();
+
+            // 위에서 설정한 인텐트필터+리시버정보로 리시버 등록
+            registerReceiver(mNotificationReceiver, intentFilter);
+
+            mNotificationReceiver.callback(new NotificationReceiver.ReceiveListener() {
                 @Override
-                public void run() {
-
-                    // ======================================================================
-
+                public void onReceive(String action) {
                     mTargetCalendar.set(Calendar.YEAR, year);
                     mTargetCalendar.set(Calendar.MONTH, month - 1);
                     mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
@@ -313,27 +346,68 @@ public class NotificationService extends Service {
                     sdf.format(today);
                     mBaseCalendar = sdf.getCalendar();
 
-                    Log.d("mTargetCalendar", String.valueOf(mTargetCalendar.getTimeInMillis()));
-                    Log.d("mBaseCalendar", String.valueOf(mBaseCalendar.getTimeInMillis()));
-                    Log.d("diffDays", diffDays);
-
-                    // ======================================================================
-
+//                    mNotificationBuilder.setContentText(diffDays + "/" + ddayItem.get_id() + "/" + today.toString());
                     mNotificationBuilder.setContentText(diffDays);
                     mNotificationManager.notify(notificationId, mNotificationBuilder.build());
-
-                    handler.postDelayed(this, delayMillis);
                 }
-                // execute code that must be run on UI thread
-            }, delayMillis);
+            });
+
+
+//            Intent broadcastIntent = new Intent(Intent.ACTION_TIME_TICK);
+
+            // 수신자에게 보낼 데이터를 준비한다.
+//            broadcastIntent.putExtra("date", selectedDate);
+//            sendBroadcast(broadcastIntent);
+            // sendBroadcast: Receiver 의 우선순위와 관계없이 실행한다.
+            // sendOrderedBroadcast: Receiver 의 우선순위에 따라 순서대로 호출한다.
+
+
+            // FIXME 재귀호출로 매 1분마다 디데이 텍스트 업데이트 하는 예제
+//            Runnable runnable = null;
+//            final int delayMillis = 1000 * 60;// 매 1분
+
+            // Warning - The application may be doing too much work on its main thread. 경고 발생 방지 코드
+            // UI 업데이트 시 다음과 같이 코드를 작성하면 경고를 피할 수 있다.
+//            if (handler == null) {
+//                handler = new Handler(Looper.getMainLooper());
+//            }
+//            handler.postDelayed(runnable = new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                    // ======================================================================
+//
+//                    mTargetCalendar.set(Calendar.YEAR, year);
+//                    mTargetCalendar.set(Calendar.MONTH, month - 1);
+//                    mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
+//
+//                    Date today = new Date();
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+//                    sdf.format(today);
+//                    mBaseCalendar = sdf.getCalendar();
+//
+//                    Log.d(TAG, "mTargetCalendar" + String.valueOf(mTargetCalendar.getTimeInMillis()));
+//                    Log.d(TAG, "mBaseCalendar" + String.valueOf(mBaseCalendar.getTimeInMillis()));
+//                    Log.d(TAG, "diffDays" + diffDays);
+//
+//                    // ======================================================================
+//
+//                    mNotificationBuilder.setContentText(diffDays);
+//                    mNotificationManager.notify(notificationId, mNotificationBuilder.build());
+//
+//                    handler.postDelayed(this, delayMillis);
+//                }
+//                // execute code that must be run on UI thread
+//            }, delayMillis);
 
             // NotificationManager
             // notify(int id, Notification notification): 알림을 발생시킨다. id는 알림을 구분하는 식별자, 존재하는 알림의 id를 사용하면 알림이 update된다.
             // cancel(int id): 주어지는 id에 해당하는 알림을 취소한다.
             // cancelAll(): 현재 발생된 모든 알림을 취소한다.
 
+            Log.d(TAG, "서비스 호출");
             // FIXME TEST 토스트 띄우기
-            Toast.makeText(NotificationService.this, "뜸?", Toast.LENGTH_LONG).show();
+//            Toast.makeText(NotificationService.this, "뜸?", Toast.LENGTH_LONG).show();
         }
     }
 
