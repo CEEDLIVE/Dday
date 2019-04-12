@@ -2,27 +2,52 @@ package com.example.ceedlive.dday.activity;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.helper.DatabaseHelper;
+import com.example.ceedlive.dday.http.RetrofitApiService;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoadingActivity extends BaseActivity {
 
+    private static final String TAG = "LoadingActivity";
     private DatabaseHelper mDatabaseHelper;
 
     private String[] mArrWiseSaying;
     private TextView mTvWiseSaying;
 
+    private Thread mThread;
+
+    private Retrofit mRetrofit;
+    private RetrofitApiService mRetrofitApiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
+
+//        requestGet();
         createTable();
         loadWiseSaying();
         startLoading();
+
+        mRetrofit = new Retrofit.Builder()
+                .baseUrl(RetrofitApiService.API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
+
+        retrofitGet();
     }
 
     private void createTable() {
@@ -55,4 +80,79 @@ public class LoadingActivity extends BaseActivity {
             }
         }, Constant.LOADING_DELAY_MILLIS);
     }
+
+    private void retrofitGet() {
+
+        Call<ResponseBody> comment = mRetrofitApiService.getComment(1);
+        comment.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                Log.d(TAG, "onResponse");
+                int responseCode = response.code();
+
+                Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.e(TAG, "retrofitGet - onFailure: ");
+            }
+        });
+
+
+    }
+
+//    private void requestGet() {
+//        httpConnection = OkHttpConnection.getInstance();
+//        mThread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                httpConnection.requestGet(new Callback() {
+//                    @Override
+//                    public void onFailure(Call call, IOException e) {
+//                        Log.e(TAG, "onFailure: " + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onResponse(Call call, Response response) {
+//                        try {
+//                            String result = response.body().string();
+//                            Log.e(TAG, "onResponse: " + result);
+//
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                });
+//            }
+//        });
+//        mThread.start();
+//    }
+
+//    private void requestPost() {
+//        httpConnection = OkHttpConnection.getInstance();
+//        mThread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                httpConnection.requestPost(new Callback() {
+//                    @Override
+//                    public void onFailure(Call call, IOException e) {
+//                        Log.e(TAG, "onFailure: " + e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onResponse(Call call, Response response) {
+//                        try {
+//                            String result = response.body().string();
+//                            Log.e(TAG, "onResponse: " + result);
+//
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                });
+//            }
+//        });
+//        mThread.start();
+//    }
 }
