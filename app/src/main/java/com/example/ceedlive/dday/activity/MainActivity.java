@@ -5,14 +5,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -42,7 +49,6 @@ public class MainActivity extends BaseActivity {
 
     private LinearLayout mLayoutNoContent;
     private ListView mListViewContent;
-    private Button mBtnCreate;
     private FloatingActionButton mFabBtn;
 
     private List<DdayItem> mDdayItemList = new ArrayList<>();
@@ -57,12 +63,25 @@ public class MainActivity extends BaseActivity {
     private AlertDialog.Builder mAlertDialogBuilder;
     private AlertDialog mAlertDialog;
 
+    private MenuInflater mMmenuInflater;
+
+    private FrameLayout mFrameLayout;
+    private DrawerLayout mDrawerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_outline_menu_24px);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);// 기본 타이틀 보여줄지 말지 설정
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         initialize();// 변수 초기화
+
+
         setEvent();// 이벤트 설정
 
 //        setSharedPreferencesData();// 데이터 세팅 (SharedPreferences 사용)
@@ -86,11 +105,58 @@ public class MainActivity extends BaseActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                mBtnCreate = findViewById(R.id.btnCreate);
-                mBtnCreate.setVisibility(View.VISIBLE);
-                mBtnCreate.setText("Thread test");
             }
         }).start();;
+    }
+
+    /**
+     *
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mMmenuInflater = getMenuInflater();
+        mMmenuInflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    // https://developer.android.com/guide/topics/ui/menus?hl=ko
+
+    /**
+     * 앱바(App Bar)에 표시된 액션 또는 오버플로우 메뉴가 선택되면, 액티비티의 onOptionsItemSelected() 메서드가 호출됩니다.
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        Log.e("item.getItemId", item.getItemId() + "");
+
+        switch ( item.getItemId() ) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);   // 내비게이션 드로어 열기
+//                mDrawerLayout.setEnabled(false);
+                mFrameLayout.setEnabled(false);
+                mFrameLayout.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        return true;
+                    }
+                });
+
+                // 출처: https://liveonthekeyboard.tistory.com/entry/안드로이드-네비게이션-드로어-Navigation-drawer-사용법 [키위남]
+            case R.id.menu_search:
+//                mDrawerLayout.openDrawer(GravityCompat.START);   // 내비게이션 드로어 열기
+                Log.d("menu_search", "내비게이션 드로어 열기");
+
+//            case R.id.menu_account:
+//                if (item.isChecked()) item.setChecked(false);
+//                else item.setChecked(true);
+//                return true;
+            default:
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -98,25 +164,15 @@ public class MainActivity extends BaseActivity {
         mLayoutNoContent = findViewById(R.id.main_ll_no_content);
         mListViewContent = findViewById(R.id.expandableListView);
 
-        mBtnCreate = findViewById(R.id.btnCreate);
         mFabBtn = findViewById(R.id.main_btn_fab);
+
+        mDrawerLayout = findViewById(R.id.main_drawer_layout);
+        mFrameLayout = findViewById(R.id.main_center_layout);
     }
 
     private void setEvent() {
-        onClickButtonCreate();
         onClickFabButtonCreate();
         onClickLayoutNoContent();
-    }
-
-    private void onClickButtonCreate() {
-        mBtnCreate.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moveDetailActivity(0);
-            }
-        });
-        // Annoymous class(익명 클래스)를 통한 클릭이벤트
-        // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
     }
 
     /**
@@ -438,6 +494,21 @@ public class MainActivity extends BaseActivity {
 
         // reference: https://mainia.tistory.com/2017
         // reference: https://m.blog.naver.com/PostView.nhn?blogId=sgepyh2916&logNo=221176134263&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+    }
+
+
+    /**
+     * 뒤로가기 버튼으로 네비게이션 닫기
+     * 내비게이션 드로어가 열려 있을 때 뒤로가기 버튼을 누르면 네비게이션을 닫고,
+     * 닫혀 있다면 기존 뒤로가기 버튼으로 작동한다.
+     */
+    @Override
+    public void onBackPressed() {
+        if ( mDrawerLayout.isDrawerOpen(GravityCompat.START) ){
+            mDrawerLayout.closeDrawers();
+        } else {
+            super.onBackPressed();
+        }
     }
 
 }
