@@ -1,5 +1,6 @@
 package com.example.ceedlive.dday.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -51,7 +52,7 @@ public class LoadingActivity extends BaseActivity {
         mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
         mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
 
-        retrofitGet();
+//        retrofitGet();
 //        retrofitCreate();
 //        retrofitUpdate();
 //        retrofitDelete();
@@ -83,6 +84,12 @@ public class LoadingActivity extends BaseActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                Intent intent = new Intent(
+                        getApplicationContext(), // 현재 화면의 제어권자
+                        HelpActivity.class); // 다음 넘어갈 클래스 지정
+                startActivity(intent); // 다음 화면으로 넘어간다
+
+                // 액티비티를 넘어간 후 이전 액티비티를 삭제하고 싶다면 다음의 명령어를 사용한다.
                 finish();
             }
         }, Constant.LOADING_DELAY_MILLIS);
