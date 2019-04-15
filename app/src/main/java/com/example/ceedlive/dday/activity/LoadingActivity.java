@@ -49,10 +49,10 @@ public class LoadingActivity extends BaseActivity {
         mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
         mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
 
-//        retrofitGet();
+        retrofitGet();
 //        retrofitCreate();
 //        retrofitUpdate();
-        retrofitDelete();
+//        retrofitDelete();
     }
 
     private void createTable() {
@@ -87,7 +87,12 @@ public class LoadingActivity extends BaseActivity {
     }
 
     private void retrofitGet() {
-        Call<ResponseBody> comment = mRetrofitApiService.getDummyEmployee(24494);
+//        Call<ResponseBody> comment = mRetrofitApiService.getDummyEmployee(24494);
+        Call<ResponseBody> comment = mRetrofitApiService.getDummyBackend();
+
+        // retrofit의 통신은 background Thread에서 돌아갑니다.
+        // 이렇게 실행된 결과값을 UI Thread에서 사용하기 위해서는 CallBack 함수가 필요합니다.
+
         comment.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call call, Response response) {
@@ -95,22 +100,43 @@ public class LoadingActivity extends BaseActivity {
                 int responseCode = response.code();
                 ResponseBody responseBody = (ResponseBody) response.body();
 
+                try {
+                    String token = response.headers().get("Content-Type");
+                    Log.e("retrofitGet token", token);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 String json = "";
                 try {
                     json = responseBody.string();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
                 }
+
+                mTvWiseSaying.setText(json);
 
                 Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
                 Log.e(TAG, "retrofitGet - json: " + json);
+
+                // onResponse()를 호출하였다 하더라도, 무조건적인 성공이 보장되지는 않는다는 것 입니다.
+                // 기획 또는 서버 개발자의 의도에 따라 서버에서 40x등의 응답코드를 전송할 경우라 할지라도, 실질적으로는 onResponse()를 호출합니다.
+                // 따라서, onResponse() method 에서는 두번째 매개변수로 전달되는 response를 잘 활용하여,
+                // 해당 응답이 20x의 응답코드를 가진 정상적인 응답인지, 40x등의 응답코드를 가진 요청은 정상적이였으나 실패된 응답인지 판단하는 추가적인 코드들은 필요할 수 있습니다.
             }
 
             @Override
             public void onFailure(Call call, Throwable t) {
                 Log.e(TAG, "retrofitGet - onFailure: ");
+
+                // onFailure()의 경우 정말 요청이 실패된 경우에 한해서만 호출이 됩니다.
+                // 즉, 여기서 말하는 정말 요청이 실패된 경우라 하면,
+                // 요청한 API 서버의 다운 / DB Query 중 오류 등와 같은 서버의 비정상적인 동작으로 인해 요청에 대한 응답을 받지 못하는 경우를 말합니다.
             }
         });
+        // reference:
     }
 
     private void retrofitCreate() {
@@ -134,6 +160,8 @@ public class LoadingActivity extends BaseActivity {
                 try {
                     json = responseBody.string();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
 
@@ -170,6 +198,8 @@ public class LoadingActivity extends BaseActivity {
                     json = responseBody.string();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
                 }
 
                 Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
@@ -199,6 +229,8 @@ public class LoadingActivity extends BaseActivity {
                 try {
                     json = responseBody.string();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
 

@@ -352,6 +352,8 @@ public class NotificationService extends Service {
                 }
             });
 
+            // TODO https://academy.realm.io/kr/posts/android-thread-looper-handler/ 살펴보기
+
 
 //            Intent broadcastIntent = new Intent(Intent.ACTION_TIME_TICK);
 

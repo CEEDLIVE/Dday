@@ -2,7 +2,7 @@ package com.example.ceedlive.dday;
 
 public class Constant {
 
-    public static final int LOADING_DELAY_MILLIS = 3000;
+    public static final int LOADING_DELAY_MILLIS = 10000;
 
     /**
      * 인텐트: 메인화면 리퀘스트 코드
