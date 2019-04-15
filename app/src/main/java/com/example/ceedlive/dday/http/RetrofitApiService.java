@@ -14,7 +14,7 @@ import retrofit2.http.Path;
 public interface RetrofitApiService {
 
     // FIXME localhost or 127.0.0.1 호스트로 접근 시 onFailure 떨어짐
-    public static final String API_URL = "http://b2d6c636.ngrok.io";
+    public static final String API_URL = "http://e08ec768.ngrok.io";
 
 //    public static final String API_URL = "http://dummy.restapiexample.com/api/v1/";
 //    public static final String API_URL = "http://localhost:9090";
@@ -38,7 +38,7 @@ public interface RetrofitApiService {
      * OK
      * @return
      */
-    @GET("memo")
+    @GET("posts")
     Call<ResponseBody> getDummyBackend();
 
     /**

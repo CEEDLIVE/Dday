@@ -14,6 +14,10 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/***
+ * 기본적으로 REST API 통신을 위해 구현된 라이브러리입니다.
+ * AsyncTask 없이 background Thread에서 실행되며 callBack을 통해 main thread에서의 UI 업데이트를 간단하게 할수 있도록 제공합니다.
+ */
 public class RetrofitConnection {
 
     private static Retrofit mRetrofit;

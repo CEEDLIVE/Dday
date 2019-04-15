@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+@SuppressWarnings("unused")
 public class OkHttpConnection {
 
     private OkHttpConnection() { this.mOkHttpClient = new OkHttpClient(); }

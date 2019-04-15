@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
@@ -14,6 +15,7 @@ import com.example.ceedlive.dday.http.RetrofitConnection;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -93,6 +95,8 @@ public class LoadingActivity extends BaseActivity {
         // retrofit의 통신은 background Thread에서 돌아갑니다.
         // 이렇게 실행된 결과값을 UI Thread에서 사용하기 위해서는 CallBack 함수가 필요합니다.
 
+        // enqueue()는 비동기로 Request를 보내고 Response가 돌아 왔을 때 콜백으로 앱에게 알립니다.
+        // 이 Request는 비동기식이므로 Retrofit에서 Main UI 스레드가 차단되거나 간섭받지 않도록 Background 스레드에서 Request를 처리합니다.
         comment.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call call, Response response) {
@@ -116,8 +120,6 @@ public class LoadingActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-                mTvWiseSaying.setText(json);
-
                 Log.e(TAG, "retrofitGet - responseCode: " + responseCode);
                 Log.e(TAG, "retrofitGet - json: " + json);
 
@@ -125,6 +127,32 @@ public class LoadingActivity extends BaseActivity {
                 // 기획 또는 서버 개발자의 의도에 따라 서버에서 40x등의 응답코드를 전송할 경우라 할지라도, 실질적으로는 onResponse()를 호출합니다.
                 // 따라서, onResponse() method 에서는 두번째 매개변수로 전달되는 response를 잘 활용하여,
                 // 해당 응답이 20x의 응답코드를 가진 정상적인 응답인지, 40x등의 응답코드를 가진 요청은 정상적이였으나 실패된 응답인지 판단하는 추가적인 코드들은 필요할 수 있습니다.
+
+                if ( response.isSuccessful() ) {
+                    // 상태 코드가 성공을 나타내는 200~300 범위에 있는지 확인
+                    // Do awesome stuff
+                    mTvWiseSaying.setText(json);
+                    Toast.makeText(getApplicationContext(), "Do awesome stuff", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    int statusCode  = response.code();
+                    // handle request errors depending on status code
+
+                    switch (statusCode) {
+                        case HttpURLConnection.HTTP_NOT_FOUND:
+                            // Handle not found
+                            Toast.makeText(getApplicationContext(), "Handle not found", Toast.LENGTH_SHORT).show();
+                            break;
+                        case HttpURLConnection.HTTP_UNAUTHORIZED:
+                            // Handle unauthorized
+                            Toast.makeText(getApplicationContext(), "Handle unauthorized", Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+
             }
 
             @Override
