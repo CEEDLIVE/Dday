@@ -1,6 +1,7 @@
 package com.example.ceedlive.dday.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,8 @@ public class DdayListAdapter extends BaseAdapter {
     private Calendar mTargetCalendar, mBaseCalendar;
 
     private DdayViewHolder ddayViewHolder;
+
+    private int mChedkedItemSize = 0;
 
     /**
      * 생성자
@@ -139,6 +142,9 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.btnDelete.setTag(ddayItem.get_id());
         ddayViewHolder.btnNoti.setTag(ddayItem.get_id());
 
+        boolean isEnabled = ddayItem.getNotification() == 1 ? false : true;
+        ddayViewHolder.btnNoti.setEnabled(isEnabled);
+
         // 롱클릭/온클릭
         // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시
         ddayViewHolder.checkBox.setChecked(ddayItem.getIsChecked());
@@ -157,10 +163,25 @@ public class DdayListAdapter extends BaseAdapter {
                     checkBox.setVisibility(View.GONE);
                     checkBox.setChecked(false);
                     ddayItem.setIsChecked(false);
+
+                    if (mChedkedItemSize > 0) {
+                        mChedkedItemSize--;
+                    }
+
+                    if (mChedkedItemSize < 1) {
+                        Log.e("onLongClick", "전부 체크 해제됨, 삭제 버튼 사라짐");
+                    }
+
+                    Log.e("if checkBox.isChecked()", mChedkedItemSize + "");
+
                 } else {
                     checkBox.setVisibility(View.VISIBLE);
                     checkBox.setChecked(true);
                     ddayItem.setIsChecked(true);
+
+                    mChedkedItemSize++;
+
+                    Log.e("else", mChedkedItemSize + "");
                 }
 
                 return true;

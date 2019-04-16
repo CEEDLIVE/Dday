@@ -8,7 +8,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -19,7 +22,7 @@ import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.DetailActivity;
 import com.example.ceedlive.dday.data.DdayItem;
-import com.example.ceedlive.dday.helper.DatabaseHelper;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.receiver.NotificationReceiver;
 
 import java.text.SimpleDateFormat;
@@ -43,10 +46,12 @@ public class NotificationService extends Service {
 
     NotificationReceiver mNotificationReceiver;
 
-//    Gson mGson = new Gson();
-
     Calendar mTargetCalendar = new GregorianCalendar();
     Calendar mBaseCalendar = new GregorianCalendar();
+
+    IBinder mIBinder = new NotificationBinder();
+
+    Resources mResources;
 
     private static final String TAG = "NotificationService";
 
@@ -55,6 +60,12 @@ public class NotificationService extends Service {
     final String RECEIVER_ACTION_NAME = "NotificationReceiver";
 
     public NotificationService() {
+    }
+
+    public class NotificationBinder extends Binder {
+        public NotificationService getService() {
+            return NotificationService.this;
+        }
     }
 
     /**
@@ -71,6 +82,22 @@ public class NotificationService extends Service {
         // 통신(데이터를 주고받을) 때 사용하는 메서드
         // 데이터를 전달할 필요가 없으면 return null;
         // reference: https://okky.kr/article/533867
+
+        // 액티비티에서 bindService() 를 실행하면 호출됨
+        // 리턴한 IBinder 객체는 서비스와 클라이언트 사이의 인터페이스 정의한다
+
+        // 다른 컴포넌트가 bindService()를 호출해서 서비스와 연결을 시도하면 이 메소드가 호출됩니다.
+        // 이 메소드에서 IBinder를 반환해서 서비스와 컴포넌트가 통신하는데 사용하는 인터페이스를 제공해야 합니다.
+        // 만약 시작 타입의 서비스를 구현한다면 null을 반환하면 됩니다.
+
+        Log.e(TAG, "액티비티에서 bindService() 를 실행하면 호출됨");
+
+        //
+//        sendMessage(intent);
+        //
+
+//        return mIBinder; // 서비스 객체를 리턴
+
         return null;
     }
 
@@ -78,6 +105,7 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
         // 서비스에서 가장 먼저 호출됨(최초에 한번만)
+        mResources = getResources();
     }
 
     // Service와 Thread가 사용될 시점을 생각해 보자.
@@ -99,61 +127,26 @@ public class NotificationService extends Service {
         // 백그라운드에서 실행되는 동작들이 들어가는 곳입니다.
         // 서비스가 호출될 때마다 실행
 
-        // ======================================================================
-        // TEST
+        // 다른 컴포넌트가 startService()를 호출해서 서비스가 시작되면 이 메소드가 호출됩니다.
+        // 만약 연결된 타입의 서비스를 구현한다면 이 메소드는 재정의 할 필요가 없습니다.
 
-//        if (intent == null) {
-//            // 인텐트 필터 설정
-//            IntentFilter intentFilter = new IntentFilter();
-//            intentFilter.addAction(Intent.ACTION_TIME_TICK);
-//            intentFilter.addAction(Intent.ACTION_DATE_CHANGED);
-//
-//            // 동적리시버 생성
-//            mNotificationReceiver = new NotificationReceiver();
-//
-//            // 위에서 설정한 인텐트필터+리시버정보로 리시버 등록
-//            registerReceiver(mNotificationReceiver, intentFilter);
-//        }
-
-        // ======================================================================
+        Log.e(TAG,"onStartCommand()");
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final InnerNotificationServiceHandler handler = new InnerNotificationServiceHandler();
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
-
-//                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES) ) {
-//                    String mSharedPreferencesDataKey = intent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
-//
-//                    SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
-//                    // TODO SharedPreferences 더 알아보기
-//                    // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
-//                    // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
-//
-//                    String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
-//                    DdayItem ddayItem = mGson.fromJson(jsonStringValue, DdayItem.class);
-//
-//                    Message message = handler.obtainMessage();
-//                    message.obj = ddayItem;
-//
-//                    handler.sendMessage(message);
-//                }
-
                 if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID) ) {
                     int mId = intent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
-
                     if (mId > 0) {
                         mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
                         DdayItem ddayItem = mDatabaseHelper.getDday(mId);
-
                         Message message = handler.obtainMessage();
                         message.obj = ddayItem;
-
                         handler.sendMessage(message);
                     }
                 }
-
             }
         });
         mThread.start();
@@ -182,10 +175,33 @@ public class NotificationService extends Service {
      */
     public void onDestroy() {
         // 서비스가 종료될 때 실행되는 함수가 들어갑니다.
-        synchronized (mThread) {
-            mIsRun = false;
-        }
+        Log.e(TAG,"onDestroy()");
+
+//        synchronized (mThread) {
+//            mIsRun = false;
+//        }
         mThread = null;// 쓰레기 값을 만들어서 빠르게 회수하라고 null을 넣어줌.
+    }
+
+    public void sendMessage(Intent intent) {
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        final InnerNotificationServiceHandler handler = new InnerNotificationServiceHandler();
+        mThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID) ) {
+                    int mId = intent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
+                    if (mId > 0) {
+                        mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
+                        DdayItem ddayItem = mDatabaseHelper.getDday(mId);
+                        Message message = handler.obtainMessage();
+                        message.obj = ddayItem;
+                        handler.sendMessage(message);
+                    }
+                }
+            }
+        });
+        mThread.start();
     }
 
     /**
@@ -237,13 +253,11 @@ public class NotificationService extends Service {
             Log.d(TAG, "InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)");
 
             final DdayItem ddayItem = (DdayItem) msg.obj;
-//            final int requestCode = Integer.parseInt( ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
             final int requestCode = ddayItem.get_id();
             final int notificationId = requestCode;
 
             // 알림 클릭시 DetailActivity 화면에 띄운다.
             Intent intent = new Intent(NotificationService.this, DetailActivity.class);
-//            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
             intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
             PendingIntent pendingIntent = PendingIntent.getActivity(NotificationService.this, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -275,15 +289,18 @@ public class NotificationService extends Service {
             mNotificationBuilder = new NotificationCompat.Builder(getApplicationContext(), Constant.NOTIFICATION_CHANNEL_ID);
 
             mNotificationBuilder
-                    .setSmallIcon(R.drawable.ic_weekly_calendar)
                     .setContentTitle(ddayItem.getTitle())
                     .setContentText(ddayItem.getDescription())
+                    .setTicker(ddayItem.getTitle())
+                    .setSmallIcon(R.drawable.ic_weekly_calendar)
+                    .setLargeIcon(BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher))
                     .setBadgeIconType(R.drawable.ic_weekly_calendar)
                     .setOngoing(true)
                     .setShowWhen(true)
                     .setAutoCancel(false)
-                    .setTicker("알림!!!")
-                    .setContentIntent(pendingIntent);
+                    .setContentIntent(pendingIntent)
+                    .setWhen(System.currentTimeMillis())
+                    .setDefaults(Notification.DEFAULT_ALL);
 
             // FIXME 알림 메시지 수량이 늘어나 그룹으로 묶이는 경우 그룹을 스와이프 하면 노티 삭제됨
 

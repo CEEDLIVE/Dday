@@ -1,4 +1,4 @@
-package com.example.ceedlive.dday.helper;
+package com.example.ceedlive.dday.sqlite;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -22,16 +22,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper mDatabaseHelper = null;
 
     private static final String CLT_DDAY = "CLT_DDAY";
-
     private static final String CLT_DDAY_ID = "_ID";
-
     private static final String CLT_DDAY_DATE = "DATE";
-
     private static final String CLT_DDAY_TITLE = "TITLE";
-
     private static final String CLT_DDAY_DESCRIPTION = "DESCRIPTION";
-
     private static final String CLT_DDAY_DIFF_DAYS = "DIFF_DAYS";
+    private static final String CLT_DDAY_NOTIFICATION = "NOTIFICATION";
 
     private static final String TAG = "DatabaseHelper";
 
@@ -46,11 +42,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Is it OK to have one instance of SQLiteOpenHelper shared by all Activities in an Android application?
     // https://stackoverflow.com/questions/8888530/is-it-ok-to-have-one-instance-of-sqliteopenhelper-shared-by-all-activities-in-an
 
+    // super(context, name, factory, version) 함수의 version 값이 올라가면 onUpgrade 함수가 호출된다.
     private DatabaseHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
         this.mContext = context;
 
-        Log.d(TAG, "DatabaseHelper Constructor");
+        Log.e(TAG, "DatabaseHelper Constructor");
+        Log.e(TAG, "DatabaseHelper version: " + version);
     }
 
     public static DatabaseHelper getInstance(Context context) {
@@ -78,13 +76,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sb.append(" DATE TEXT, ");
         sb.append(" TITLE TEXT, ");
         sb.append(" DESCRIPTION TEXT, ");
-        sb.append(" DIFF_DAYS TEXT ");
+        sb.append(" DIFF_DAYS TEXT, ");
+        sb.append(" NOTIFICATION INTEGER ");
         sb.append(" ) ");
 
         // SQLite Database로 쿼리 실행
         sqLiteDatabase.execSQL(sb.toString());
 
-        Log.d(TAG, "onCreate Table 생성완료");
+        Log.e(TAG, "onCreate Table 생성완료");
 
         // 출처: https://cocomo.tistory.com/409 [Cocomo Coding]
     }
@@ -92,13 +91,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Application의 버전이 올라가서 Table 구조가 변경되었을 때 실행된다.
      * @param sqLiteDatabase
-     * @param i
-     * @param i1
+     * @param oldVersion
+     * @param newVersion
      */
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        Toast.makeText(mContext, "버전이 올라갔습니다.", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "onUpgrade 버전이 올라갔습니다.");
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+
+        if (oldVersion == 1) {
+            try {
+
+                Toast.makeText(mContext, "버전이 올라갔습니다.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onUpgrade 버전이 올라갔습니다.");
+
+                sqLiteDatabase.beginTransaction();
+                sqLiteDatabase.execSQL("ALTER TABLE CLT_DDAY ADD COLUMN NOTIFICATION INTEGER DEFAULT 0");
+                sqLiteDatabase.setTransactionSuccessful();
+            } catch (IllegalStateException e) {
+
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+        }
+
     }
 
     @Override
@@ -139,7 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("TITLE", ddayItem.getTitle()); // TITLE 필드명
         values.put("DESCRIPTION", ddayItem.getDescription()); // DESCRIPTION 필드명
         values.put("DATE", ddayItem.getDate()); // DATE 필드명
-//        values.put("DIFF_DAYS", ddayItem.getDiffDays()); // DIFF_DAYS 필드명
+        values.put("NOTIFICATION", ddayItem.getIsChecked() ? 1 : 0); // NOTIFICATION 필드명
 
         try {
             // 새로운 Row 추가
@@ -152,9 +166,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         }
 
-        Log.d("addDday", "INSERT 완료");
+        Log.e("addDday", "INSERT 완료");
 
         return result;
+    }
+
+    /**
+     * How to retrieve the last autoincremented ID from a SQLite table?
+     * How to get the "autoincrement" value from the last insert?
+     * @return
+     */
+    public long getLastAutoIncrementedId() {
+
+        Log.e("DbHelper int", "getLastAutoIncrementedId");
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        long lastId = 0;
+
+        // SELECT ROWID from MYTABLE order by ROWID DESC limit 1
+        try {
+            String sql = "SELECT ROWID FROM CLT_DDAY ORDER BY ROWID DESC LIMIT 1";
+            cursor = db.rawQuery(sql, null);
+            if ( null != cursor && cursor.moveToFirst() ) {
+                lastId = cursor.getLong(0); //The 0 is the column index, we only have 1 column, so the index is 0
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+
+        return lastId;
     }
 
     /**
@@ -201,11 +249,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String date = cursor.getString(cursor.getColumnIndex("DATE"));
                     String title = cursor.getString(cursor.getColumnIndex("TITLE"));
                     String description = cursor.getString(cursor.getColumnIndex("DESCRIPTION"));
+                    int notification = cursor.getInt(cursor.getColumnIndex("NOTIFICATION"));
 
-                    ddayItem = new DdayItem(id, date, title, description);
+                    ddayItem = new DdayItem(id, date, title, description, notification);
                     ddayItemList.add(ddayItem);
 
-                    Log.d("getDdayList", "id: " + id + ", date: " + date + ", title: " + title + ", description: " + description);
+                    Log.e("getDdayList", "id: " + id + ", date: " + date + ", title: " + title + ", description: " + description);
                 }
             }
         } catch (Exception e) {
@@ -229,7 +278,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public DdayItem getDday(int _id) {
 
-        Log.d("DbHelper getDday", _id + " id에 해당하는 DdayItem 객체 얻어오기");
+        Log.e("DbHelper getDday", _id + " id에 해당하는 DdayItem 객체 얻어오기");
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -237,7 +286,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         try {
             cursor = db.query(CLT_DDAY,
-                    new String[] { CLT_DDAY_ID, CLT_DDAY_TITLE, CLT_DDAY_DESCRIPTION, CLT_DDAY_DATE, CLT_DDAY_DIFF_DAYS },
+                    new String[] { CLT_DDAY_ID, CLT_DDAY_TITLE, CLT_DDAY_DESCRIPTION, CLT_DDAY_DATE, CLT_DDAY_DIFF_DAYS, CLT_DDAY_NOTIFICATION },
                     CLT_DDAY_ID + " = ?",
                     new String[] { String.valueOf(_id) }, null, null, null, null);
 
@@ -247,8 +296,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String date = cursor.getString(cursor.getColumnIndex("DATE"));
                 String title = cursor.getString(cursor.getColumnIndex("TITLE"));
                 String description = cursor.getString(cursor.getColumnIndex("DESCRIPTION"));
-
-                ddayItem = new DdayItem(id, date, title, description);
+                int notification = cursor.getInt(cursor.getColumnIndex("NOTIFICATION"));
+                ddayItem = new DdayItem(id, date, title, description, notification);
             }
 
         } catch (Exception e) {
@@ -272,7 +321,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public int updateDday(DdayItem ddayItem) {
 
-        Log.d("DbHelper updateDday", ddayItem.toString());
+        Log.e("DbHelper updateDday", ddayItem.toString());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -282,6 +331,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put("DATE", ddayItem.getDate());
         contentValues.put("TITLE", ddayItem.getTitle());
         contentValues.put("DESCRIPTION", ddayItem.getDescription());
+        contentValues.put("NOTIFICATION", ddayItem.getNotification());
 
         int result = db.update("CLT_DDAY",
                 contentValues,
@@ -315,9 +365,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param _id
      */
     public int deleteDday(int _id) {
-
-        Log.d("DbHelper deleteDday", _id + " 삭제");
-
         SQLiteDatabase db = this.getWritableDatabase();
         int result = 0;
 

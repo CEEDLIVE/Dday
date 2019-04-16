@@ -7,6 +7,8 @@ public class DdayItem {
     private String description;
     private String date;
     private String diffDays;
+    private int notification;
+
     private boolean isChecked;
     private boolean isVisibleDetail;
 
@@ -24,14 +26,26 @@ public class DdayItem {
         this.description = description;
     }
 
+    public DdayItem(String date,
+                    String title,
+                    String description,
+                    int notification) {
+        this.date = date;
+        this.title = title;
+        this.description = description;
+        this.notification = notification;
+    }
+
     public DdayItem(int _id,
                     String date,
                     String title,
-                    String description) {
+                    String description,
+                    int notification) {
         this._id = _id;
         this.date = date;
         this.title = title;
         this.description = description;
+        this.notification = notification;
     }
 
     public DdayItem(int _id,
@@ -39,7 +53,6 @@ public class DdayItem {
                     String description,
                     String date,
                     String diffDays) {
-
         this._id = _id;
         this.title = title;
         this.description = description;
@@ -91,6 +104,14 @@ public class DdayItem {
         this.diffDays = diffDays;
     }
 
+    public int getNotification() {
+        return notification;
+    }
+
+    public void setNotification(int notification) {
+        this.notification = notification;
+    }
+
     public boolean getIsChecked() {
         return isChecked;
     }
@@ -116,6 +137,7 @@ public class DdayItem {
                 ", description='" + description + '\'' +
                 ", date='" + date + '\'' +
                 ", diffDays='" + diffDays + '\'' +
+                ", notification=" + notification +
                 ", isChecked=" + isChecked +
                 ", isVisibleDetail=" + isVisibleDetail +
                 '}';
