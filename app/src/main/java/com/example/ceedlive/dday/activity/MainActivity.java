@@ -5,14 +5,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -32,17 +37,20 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     /*
      * 디데이 프로젝트 관련 내용은 Dday 프로젝트 README.md 에 정리
      */
 
+    private Toolbar mToolbar;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
+
     private DatabaseHelper mDatabaseHelper;
 
     private LinearLayout mLayoutNoContent;
     private ListView mListViewContent;
-    private Button mBtnCreate;
     private FloatingActionButton mFabBtn;
 
     private List<DdayItem> mDdayItemList = new ArrayList<>();
@@ -64,33 +72,7 @@ public class MainActivity extends BaseActivity {
 
         initialize();// 변수 초기화
         setEvent();// 이벤트 설정
-
-//        setSharedPreferencesData();// 데이터 세팅 (SharedPreferences 사용)
         setSQLiteData(); // (SQLite)
-
-        // 이렇게 하면 안 된다.
-//        testThread(); // 강제 예외 발생 코드, 잘못된 코드임을 알려주는 코드 블럭, 실행 시 앱이 강제종료됨
-    }
-
-    /**
-     * 다음과 같이 액티비티 메인 쓰레드에서 새로 쓰레드를 생성해서 UI 업데이트를 하면 에러 발생
-     */
-    @SuppressWarnings("unused")
-    private void testThread() {
-        // TEST 다음과 같이 액티비티 메인 쓰레드에서 새로 쓰레드를 생성해서 UI 업데이트를 하면 에러 발생
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                mBtnCreate = findViewById(R.id.btnCreate);
-                mBtnCreate.setVisibility(View.VISIBLE);
-                mBtnCreate.setText("Thread test");
-            }
-        }).start();;
     }
 
     @Override
@@ -98,26 +80,95 @@ public class MainActivity extends BaseActivity {
         mLayoutNoContent = findViewById(R.id.main_ll_no_content);
         mListViewContent = findViewById(R.id.expandableListView);
 
-        mBtnCreate = findViewById(R.id.btnCreate);
-        mFabBtn = findViewById(R.id.main_btn_fab);
+        mFabBtn = findViewById(R.id.fab);
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
     }
 
     private void setEvent() {
-        onClickButtonCreate();
         onClickFabButtonCreate();
         onClickLayoutNoContent();
     }
 
-    private void onClickButtonCreate() {
-        mBtnCreate.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moveDetailActivity(0);
-            }
-        });
-        // Annoymous class(익명 클래스)를 통한 클릭이벤트
-        // reference: https://medium.com/@henen/%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EB%B0%B0%EC%9A%B0%EB%8A%94-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-clickevent%EB%A5%BC-%EB%A7%8C%EB%93%9C%EB%8A%94-3%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95-annoymous-class-%EC%9D%B5%EB%AA%85-%ED%81%B4%EB%9E%98%EC%8A%A4-implements-1b1fbe1a74c0
+    //
+
+    /**
+     * 뒤로가기 버튼으로 내비게이션 닫기
+     * 내비게이션 드로어가 열려 있을 때 뒤로가기 버튼을 누르면 내비게이션을 닫고,
+     * 닫혀 있다면 기존 뒤로가기 버튼으로 작동한다.
+     */
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main2, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    /**
+     * Add Custom
+     */
+
+
 
     /**
      * Floating Action Button Click Event
@@ -221,14 +272,14 @@ public class MainActivity extends BaseActivity {
             mLayoutNoContent.setVisibility(View.INVISIBLE);
         }
 
-        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, MainActivity.this));
+        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, this));
     }
 
     private void setSQLiteData() {
         // TODO SQLite
         // ==================================================
 
-        mDatabaseHelper = DatabaseHelper.getInstance(MainActivity.this);
+        mDatabaseHelper = DatabaseHelper.getInstance(this);
 
         mDdayItemList.clear();
 
@@ -250,7 +301,7 @@ public class MainActivity extends BaseActivity {
             mLayoutNoContent.setVisibility(View.INVISIBLE);
         }
 
-        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, MainActivity.this));
+        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, this));
     }
 
     class SortDescending implements Comparator<DdayItem> {
@@ -305,7 +356,7 @@ public class MainActivity extends BaseActivity {
                 // FIXME TEST 토스트 띄우기
                 Toast.makeText(getApplicationContext(), ddayItem.getTitle() + " 서비스 시작", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                Intent intent = new Intent(this, NotificationService.class);
 //                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
                 intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
                 startService(intent);

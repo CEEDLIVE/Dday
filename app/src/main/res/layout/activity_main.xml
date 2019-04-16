@@ -1,117 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/constraintLayout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <FrameLayout
+    <include
+        layout="@layout/app_bar_main"
         android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/main_center_layout"
-        app:layout_constraintBottom_toTopOf="@+id/main_bottom_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
-        <ListView
-            android:id="@+id/expandableListView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
-        </ListView>
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main2_drawer" />
 
-        <LinearLayout
-            android:id="@+id/main_ll_no_content"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            >
-
-            <ImageView
-                android:id="@+id/main_iv_icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginBottom="36dp"
-                android:gravity="center"
-                app:srcCompat="@drawable/ic_baseline_calendar_today_24px"
-                android:scaleType="fitXY"/>
-
-            <TextView
-                android:id="@+id/main_tv_no_content_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:gravity="center"
-                android:text="@string/main_no_content_header"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/main_tv_no_content_header_sub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginBottom="24dp"
-                android:text="@string/main_no_content_header_sub"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <!-- Floating action button -->
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/main_btn_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="18dp"
-            android:layout_marginRight="18dp"
-            app:srcCompat="@drawable/ic_weekly_calendar"
-            app:backgroundTint="#ffffff"
-            app:elevation="6dp"
-            app:pressedTranslationZ="12dp" />
-
-    </FrameLayout>
-
-    <LinearLayout
-        android:id="@+id/main_bottom_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-
-        <Button
-            android:id="@+id/text1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#4CAF50"
-            android:gravity="center"
-            android:text="TODO 1" />
-
-        <Button
-            android:id="@+id/text2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#FF9800"
-            android:gravity="center"
-            android:text="TODO 2" />
-
-        <Button
-            android:id="@+id/btnCreate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:gravity="center"
-            android:text="기념일등록" />
-
-    </LinearLayout>
-
-</android.support.constraint.ConstraintLayout>
+</android.support.v4.widget.DrawerLayout>
