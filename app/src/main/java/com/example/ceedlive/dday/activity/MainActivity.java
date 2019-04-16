@@ -2,14 +2,12 @@ package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -57,6 +55,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private LinearLayout mLayoutNoContent;
     private ListView mListViewContent;
     private FloatingActionButton mFabBtn;
+    private FloatingActionButton mFabBtn2;
 
     private List<DdayItem> mDdayItemList;
     private String mAnniversaryInfoKey;
@@ -87,6 +86,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mListViewContent = findViewById(R.id.expandableListView);
 
         mFabBtn = findViewById(R.id.fab);
+        mFabBtn2 = findViewById(R.id.fab2);
+
+        // https://stackoverflow.com/questions/30969455/android-changing-floating-action-button-color
+        mFabBtn2.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -128,7 +131,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main2, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -340,6 +343,18 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     /**
+     * onLongClick 전부 체크 해제 시 이벤트 핸들러
+     * @param visible
+     */
+    public void handleFabVisibility(boolean visible) {
+        if (visible) {
+            mFabBtn2.setVisibility(View.VISIBLE);
+        } else {
+            mFabBtn2.setVisibility(View.GONE);
+        }
+    }
+
+    /**
      * 노티 버튼 클릭 시 이벤트 핸들러
      * @param _id
      */
@@ -390,10 +405,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public void onClickEdit(int _id) {
         try {
 //            mSharedPreferencesDataKey = uniqueKey;
-
-            // TEST
-            Log.d("Main onClickEdit" ,  "id: " + _id);
-
             if (_id > 0) {
                 moveDetailActivity(_id);
             }

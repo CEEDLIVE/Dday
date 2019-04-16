@@ -215,7 +215,7 @@ public class DetailActivity extends BaseActivity {
 
         } else {
             // create
-            ddayItem = new DdayItem(date, title, description);
+            ddayItem = new DdayItem(date, title, description, notification);
             mDatabaseHelper.addDday(ddayItem);
         }
 

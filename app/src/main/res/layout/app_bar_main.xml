@@ -22,6 +22,21 @@
 
     <include layout="@layout/content_main" />
 
+    <!--
+     The background color of this view defaults to the your theme's colorAccent. If you wish to change this at runtime then you can do so via setBackgroundTintList(ColorStateList).
+     -->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="80dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_weekly_calendar" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

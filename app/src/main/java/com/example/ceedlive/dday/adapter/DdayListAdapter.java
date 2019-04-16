@@ -170,6 +170,8 @@ public class DdayListAdapter extends BaseAdapter {
 
                     if (mChedkedItemSize < 1) {
                         Log.e("onLongClick", "전부 체크 해제됨, 삭제 버튼 사라짐");
+                        MainActivity activity = (MainActivity) context;
+                        activity.handleFabVisibility(false);
                     }
 
                     Log.e("if checkBox.isChecked()", mChedkedItemSize + "");
@@ -180,6 +182,9 @@ public class DdayListAdapter extends BaseAdapter {
                     ddayItem.setIsChecked(true);
 
                     mChedkedItemSize++;
+
+                    MainActivity activity = (MainActivity) context;
+                    activity.handleFabVisibility(true);
 
                     Log.e("else", mChedkedItemSize + "");
                 }

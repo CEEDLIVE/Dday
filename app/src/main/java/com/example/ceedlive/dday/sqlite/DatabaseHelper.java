@@ -153,7 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("TITLE", ddayItem.getTitle()); // TITLE 필드명
         values.put("DESCRIPTION", ddayItem.getDescription()); // DESCRIPTION 필드명
         values.put("DATE", ddayItem.getDate()); // DATE 필드명
-        values.put("NOTIFICATION", ddayItem.getIsChecked() ? 1 : 0); // NOTIFICATION 필드명
+        values.put("NOTIFICATION", ddayItem.getNotification()); // NOTIFICATION 필드명
 
         try {
             // 새로운 Row 추가
