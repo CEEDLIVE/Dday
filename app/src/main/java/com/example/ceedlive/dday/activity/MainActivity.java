@@ -7,19 +7,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -39,11 +37,15 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     /*
      * 디데이 프로젝트 관련 내용은 Dday 프로젝트 README.md 에 정리
      */
+
+    private Toolbar mToolbar;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
 
     private DatabaseHelper mDatabaseHelper;
 
@@ -63,100 +65,14 @@ public class MainActivity extends BaseActivity {
     private AlertDialog.Builder mAlertDialogBuilder;
     private AlertDialog mAlertDialog;
 
-    private MenuInflater mMmenuInflater;
-
-    private FrameLayout mFrameLayout;
-    private DrawerLayout mDrawerLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_outline_menu_24px);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);// 기본 타이틀 보여줄지 말지 설정
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         initialize();// 변수 초기화
-
-
         setEvent();// 이벤트 설정
-
-//        setSharedPreferencesData();// 데이터 세팅 (SharedPreferences 사용)
         setSQLiteData(); // (SQLite)
-
-        // 이렇게 하면 안 된다.
-//        testThread(); // 강제 예외 발생 코드, 잘못된 코드임을 알려주는 코드 블럭, 실행 시 앱이 강제종료됨
-    }
-
-    /**
-     * 다음과 같이 액티비티 메인 쓰레드에서 새로 쓰레드를 생성해서 UI 업데이트를 하면 에러 발생
-     */
-    @SuppressWarnings("unused")
-    private void testThread() {
-        // TEST 다음과 같이 액티비티 메인 쓰레드에서 새로 쓰레드를 생성해서 UI 업데이트를 하면 에러 발생
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();;
-    }
-
-    /**
-     *
-     * @param menu
-     * @return
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        mMmenuInflater = getMenuInflater();
-        mMmenuInflater.inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    // https://developer.android.com/guide/topics/ui/menus?hl=ko
-
-    /**
-     * 앱바(App Bar)에 표시된 액션 또는 오버플로우 메뉴가 선택되면, 액티비티의 onOptionsItemSelected() 메서드가 호출됩니다.
-     * @param item
-     * @return
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        Log.e("item.getItemId", item.getItemId() + "");
-
-        switch ( item.getItemId() ) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);   // 내비게이션 드로어 열기
-//                mDrawerLayout.setEnabled(false);
-                mFrameLayout.setEnabled(false);
-                mFrameLayout.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        return true;
-                    }
-                });
-
-                // 출처: https://liveonthekeyboard.tistory.com/entry/안드로이드-네비게이션-드로어-Navigation-drawer-사용법 [키위남]
-            case R.id.menu_search:
-//                mDrawerLayout.openDrawer(GravityCompat.START);   // 내비게이션 드로어 열기
-                Log.d("menu_search", "내비게이션 드로어 열기");
-
-//            case R.id.menu_account:
-//                if (item.isChecked()) item.setChecked(false);
-//                else item.setChecked(true);
-//                return true;
-            default:
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -164,16 +80,95 @@ public class MainActivity extends BaseActivity {
         mLayoutNoContent = findViewById(R.id.main_ll_no_content);
         mListViewContent = findViewById(R.id.expandableListView);
 
-        mFabBtn = findViewById(R.id.main_btn_fab);
+        mFabBtn = findViewById(R.id.fab);
 
-        mDrawerLayout = findViewById(R.id.main_drawer_layout);
-        mFrameLayout = findViewById(R.id.main_center_layout);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
     }
 
     private void setEvent() {
         onClickFabButtonCreate();
         onClickLayoutNoContent();
     }
+
+    //
+
+    /**
+     * 뒤로가기 버튼으로 내비게이션 닫기
+     * 내비게이션 드로어가 열려 있을 때 뒤로가기 버튼을 누르면 내비게이션을 닫고,
+     * 닫혀 있다면 기존 뒤로가기 버튼으로 작동한다.
+     */
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main2, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    /**
+     * Add Custom
+     */
+
+
 
     /**
      * Floating Action Button Click Event
@@ -277,14 +272,14 @@ public class MainActivity extends BaseActivity {
             mLayoutNoContent.setVisibility(View.INVISIBLE);
         }
 
-        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, MainActivity.this));
+        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, this));
     }
 
     private void setSQLiteData() {
         // TODO SQLite
         // ==================================================
 
-        mDatabaseHelper = DatabaseHelper.getInstance(MainActivity.this);
+        mDatabaseHelper = DatabaseHelper.getInstance(this);
 
         mDdayItemList.clear();
 
@@ -306,7 +301,7 @@ public class MainActivity extends BaseActivity {
             mLayoutNoContent.setVisibility(View.INVISIBLE);
         }
 
-        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, MainActivity.this));
+        mListViewContent.setAdapter(new DdayListAdapter(mDdayItemList, this));
     }
 
     class SortDescending implements Comparator<DdayItem> {
@@ -361,7 +356,7 @@ public class MainActivity extends BaseActivity {
                 // FIXME TEST 토스트 띄우기
                 Toast.makeText(getApplicationContext(), ddayItem.getTitle() + " 서비스 시작", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(MainActivity.this, NotificationService.class);
+                Intent intent = new Intent(this, NotificationService.class);
 //                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
                 intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
                 startService(intent);
@@ -494,21 +489,6 @@ public class MainActivity extends BaseActivity {
 
         // reference: https://mainia.tistory.com/2017
         // reference: https://m.blog.naver.com/PostView.nhn?blogId=sgepyh2916&logNo=221176134263&proxyReferer=https%3A%2F%2Fwww.google.com%2F
-    }
-
-
-    /**
-     * 뒤로가기 버튼으로 네비게이션 닫기
-     * 내비게이션 드로어가 열려 있을 때 뒤로가기 버튼을 누르면 네비게이션을 닫고,
-     * 닫혀 있다면 기존 뒤로가기 버튼으로 작동한다.
-     */
-    @Override
-    public void onBackPressed() {
-        if ( mDrawerLayout.isDrawerOpen(GravityCompat.START) ){
-            mDrawerLayout.closeDrawers();
-        } else {
-            super.onBackPressed();
-        }
     }
 
 }
