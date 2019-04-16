@@ -2,19 +2,12 @@ package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -28,7 +21,8 @@ import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.data.DdayItem;
-import com.example.ceedlive.dday.helper.DatabaseHelper;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
+import com.example.ceedlive.dday.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,6 +61,8 @@ public class DetailActivity extends BaseActivity {
     @Override
     protected void initialize() {
 
+        Log.e("DetailActivity", "initialize");
+
         mDatabaseHelper = DatabaseHelper.getInstance(DetailActivity.this);
 
         mIntent = getIntent();
@@ -95,23 +91,30 @@ public class DetailActivity extends BaseActivity {
 //            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
 
             mId = mIntent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
-            DdayItem ddayItem = mId > 0 ? mDatabaseHelper.getDday(mId) : null;
-            if (null != ddayItem) {
-                // Set Date
-                String selectedDate = ddayItem.getDate();
-                String[] arrDate = selectedDate.split("/");
-                String year = arrDate[0], month = arrDate[1], day = arrDate[2];
+        }
 
-                mTargetCalendar.set(Calendar.YEAR, Integer.parseInt(year));
-                mTargetCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
-                mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
+        DdayItem ddayItem = mId > 0 ? mDatabaseHelper.getDday(mId) : null;
+        if (null != ddayItem) {
+            // Set Date
 
-                // Set Title
-                mEtTitle.setText(ddayItem.getTitle());
+            Log.e("DetailActicity toString", ddayItem.toString());
 
-                // Set Description
-                mEtDescription.setText(ddayItem.getDescription());
-            }
+            String selectedDate = ddayItem.getDate();
+            String[] arrDate = selectedDate.split("/");
+            String year = arrDate[0], month = arrDate[1], day = arrDate[2];
+
+            mTargetCalendar.set(Calendar.YEAR, Integer.parseInt(year));
+            mTargetCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+            mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
+
+            // Set Title
+            mEtTitle.setText( ddayItem.getTitle() );
+
+            // Set Description
+            mEtDescription.setText( ddayItem.getDescription() );
+
+            boolean isChecked = ddayItem.getNotification() == 1 ? true : false;
+            mCheckBoxAddNoti.setChecked(isChecked);
         }
 
         mYear = mTargetCalendar.get(Calendar.YEAR);
@@ -164,6 +167,7 @@ public class DetailActivity extends BaseActivity {
                 final String date = mTvDate.getText().toString();
                 final String title = mEtTitle.getText().toString();
                 final String description = mEtDescription.getText().toString();
+                final int notification = mCheckBoxAddNoti.isChecked() ? 1 : 0;
 
                 // 데이터 유효성 검사
                 if ( "".equals( title.trim() ) ) {
@@ -171,7 +175,7 @@ public class DetailActivity extends BaseActivity {
                     return;
                 }
 
-                DdayItem ddayItem = doSaveSQLite(date, title, description);
+                DdayItem ddayItem = doSaveSQLite(date, title, description, notification);
 //                DdayItem ddayItem = doSaveSharedPreferencesData(date, title, description);
 
                 if ( mCheckBoxAddNoti.isChecked() ) {
@@ -180,7 +184,6 @@ public class DetailActivity extends BaseActivity {
 
                 Intent intent = new Intent();
                 setResult(Activity.RESULT_OK, intent);
-
                 finish();
             }
         });
@@ -193,7 +196,7 @@ public class DetailActivity extends BaseActivity {
      * @param description
      * @return
      */
-    private DdayItem doSaveSQLite(String date, String title, String description) {
+    private DdayItem doSaveSQLite(String date, String title, String description, int notification) {
         DdayItem ddayItem;
 
         if (mId > 0) {
@@ -202,10 +205,12 @@ public class DetailActivity extends BaseActivity {
             ddayItem.setDate(date);
             ddayItem.setTitle(title);
             ddayItem.setDescription(description);
+            ddayItem.setNotification(notification);
 
             int result = mDatabaseHelper.updateDday(ddayItem);
             if (result > 0) {
-                Log.d("doSave", result + " result update");
+                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.cancel(mId);
             }
 
         } else {
@@ -367,14 +372,13 @@ public class DetailActivity extends BaseActivity {
     }
 
     public void NotificationDday(DdayItem ddayItem) {
+        if (null != ddayItem) {
+            int createdUserId = (int) mDatabaseHelper.getLastAutoIncrementedId();
+            Intent intent = new Intent(this, NotificationService.class);
+            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, createdUserId); //전달할 값
+            startService(intent);
+        }
 
-        Resources res = getResources();
-
-        int requestCode = Integer.parseInt( ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "") );
-
-        Intent notificationIntent = new Intent(this, DetailActivity.class);
-        notificationIntent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
-        PendingIntent mPendingIntent = PendingIntent.getActivity(this, requestCode, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         // FIXME 2019-04-09 Tue
         // Task 연동을 통해서 Github 와 연동 (Jetbrains의 IDE 사용 시 적극 권장) 테스트용 주석입니다.
         // Issue 기반 Branch 생성 및 커밋 테스트용 주석입니다.
@@ -392,7 +396,6 @@ public class DetailActivity extends BaseActivity {
         // 내가 개발한 앱 안에서 A라는 액티비티에서 B라는 액티비티를 열려면 Intent intent = new Intent(A.this, B.class) 로 하여 startActivity(intent) 를 함.
         // 외부에서는 이 intent 를 포함하고 있는 PendingIntent 를 선언하여 intent 를 품게 한 뒤 사용하게 하는 것이다.
 
-        NotificationCompat.Builder notificationBuilder;
 
         // TODO Notification 개념 더 알아보기
         // 별로 중요하지 않은 알림은 소리나 진동없이 왔으면 좋겠고 중요하다고 생각하는 알림은 잠금화면에서도 알려준다면?!
@@ -404,46 +407,11 @@ public class DetailActivity extends BaseActivity {
 
         // 해당 기기의 OS 버전이 오레오 이상일때 Notification Channel 을 만들어주고 필요한 설정을 해준뒤
         // NotificationManager의 createNotificationChannel()을 호출해주면 됩니다.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel notificationChannel = new NotificationChannel(Constant.NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_DEFAULT);
-
-            // Configure the notification channel.
-            notificationChannel.setDescription("Channel description");
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.enableVibration(true);
-            notificationChannel.setVibrationPattern(new long[]{100, 200, 100, 200});
-            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
 
         // TODO 의미 다시 한번 살펴보기
         // 채널은 한번만 만들면 되기때문에 Notification이 올때마다 만들어줄 필요가 없습니다.
         // Application Class에서 만들어 줘 되고 SharedPreference를 이용해서 한번 만든적이 있다면 그다음부터는 만들지 않도록 해주어도 됩니다.
 
-        notificationBuilder = new NotificationCompat.Builder(this, Constant.NOTIFICATION_CHANNEL_ID);
-
-        notificationBuilder
-                .setContentTitle(ddayItem.getTitle())
-                .setContentText(ddayItem.getDate())
-                .setTicker(ddayItem.getTitle())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
-                .setContentIntent(mPendingIntent)
-                .setAutoCancel(false)
-                .setWhen(System.currentTimeMillis())
-                .setDefaults(Notification.DEFAULT_ALL);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            notificationBuilder
-                    .setCategory(Notification.CATEGORY_MESSAGE)
-                    .setPriority(Notification.PRIORITY_HIGH)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC);
-        }
-
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(Integer.parseInt(ddayItem.getUniqueKey().replaceAll(Constant.SHARED_PREFERENCES_KEY_PREFIX, "")), notificationBuilder.build());
     }
 
 }

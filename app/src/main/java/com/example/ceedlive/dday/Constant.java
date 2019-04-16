@@ -4,6 +4,10 @@ public class Constant {
 
     public static final int LOADING_DELAY_MILLIS = 3000;
 
+    public static final String[] LOADING_WISE_SAYING = new String[] {
+
+    };
+
     /**
      * 인텐트: 메인화면 리퀘스트 코드
      */
@@ -23,5 +27,5 @@ public class Constant {
 
     public static final String SQLITE_DB_FILE_NAME = "dday.db";
 
-    public static final int SQLITE_DB_VERSION = 1;
+    public static final int SQLITE_DB_VERSION = 2;
 }

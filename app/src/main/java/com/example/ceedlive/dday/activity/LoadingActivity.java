@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
-import com.example.ceedlive.dday.helper.DatabaseHelper;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.http.RetrofitApiService;
 import com.example.ceedlive.dday.http.RetrofitConnection;
 import com.google.gson.JsonObject;
@@ -23,7 +23,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoadingActivity extends BaseActivity {
 

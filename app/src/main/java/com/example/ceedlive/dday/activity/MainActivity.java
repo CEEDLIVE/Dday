@@ -1,10 +1,15 @@
 package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -27,7 +32,7 @@ import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.data.DdayItem;
-import com.example.ceedlive.dday.helper.DatabaseHelper;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.service.NotificationService;
 
 import java.util.ArrayList;
@@ -53,7 +58,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ListView mListViewContent;
     private FloatingActionButton mFabBtn;
 
-    private List<DdayItem> mDdayItemList = new ArrayList<>();
+    private List<DdayItem> mDdayItemList;
     private String mAnniversaryInfoKey;
     private String mAnniversaryInfoJsonString;
 
@@ -64,6 +69,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private AlertDialog.Builder mAlertDialogBuilder;
     private AlertDialog mAlertDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +99,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
+
+        mDdayItemList = new ArrayList<>();
     }
 
     private void setEvent() {
@@ -221,7 +229,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("onActivityResult", String.format("requestCode %d resultCode %d", requestCode, resultCode));
+        Log.e("onActivityResult", String.format("requestCode %d resultCode %d", requestCode, resultCode));
 
         // requestCode: 송신자 Activity 구별하기 위한 값
         // resultCode: 수신자 Activity 에서 송신자 Activity 로 어떠한 결과코드를 주었는지를 나타냄
@@ -286,7 +294,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         List<DdayItem> ddayItemList = mDatabaseHelper.getDdayList();
 
         for (DdayItem ddayItem : ddayItemList) {
-            Log.d("SQLite item.toString()", ddayItem.toString());
+            Log.e("SQLite item.toString()", ddayItem.toString());
             mDdayItemList.add(ddayItem);
         }
 
@@ -360,6 +368,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 //                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
                 intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
                 startService(intent);
+
+                ddayItem.setNotification(1);
+                mDatabaseHelper.updateDday(ddayItem);
+
+                setSQLiteData();
+
+                // intent 객체
+                // 서비스와 연결에 대한 정의
+//                mIsService = bindService(intent, mServiceConnection, Context.BIND_DEBUG_UNBIND);
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -391,11 +408,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     public void onClickDelete(final int _id) {
         try {
-//            mSharedPreferencesDataKey = uniqueKey;
-
-            // TEST
-            Log.d("Main onClickDelete" ,  "id: " + _id);
-
             if (_id > 0) {
                 // 다이얼로그
                 mAlertDialogBuilder = new AlertDialog.Builder(this);
@@ -436,6 +448,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void doDeleteItem(int _id) {
         int result = mDatabaseHelper.deleteDday(_id);
         if (result > 0) {
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.cancel(_id);
             setSQLiteData();
         }
     }
