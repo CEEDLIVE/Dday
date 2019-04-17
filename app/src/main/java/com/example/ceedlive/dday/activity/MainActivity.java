@@ -382,9 +382,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                                     for (Integer _id : mDynamicCheckedItemIdList) {
                                         doDeleteItem(_id);
                                     }
+                                    Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_delete_dday), Snackbar.LENGTH_SHORT).show();
+                                    handleFabVisibility(false);
+                                    setSQLiteData();
                                 }
-                                setSQLiteData();
-                                handleFabVisibility(false);
                             }
                         })
                 .setNegativeButton(R.string.btn_cancel,
@@ -468,6 +469,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
                     mDatabaseHelper.updateDday(ddayItem);
 
+                    // 우리는 보통 알림을 띄울때 Toast를 이용해서 많이 이용했을 겁니다.
+                    // 하지만 안드로이드 오레오부터 알림을 끄게되면 Toast가 보이지 않습니다.
+                    // 따라서 스낵바로 넘어갈 상황이 필요한것 같습니다.
                     Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_add_notification), Snackbar.LENGTH_SHORT).show();
                 }
 
@@ -517,6 +521,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                                     public void onClick(DialogInterface dialog, int id) {
                                         // 일정 삭제
                                         doDeleteItem(_id);
+                                        Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_delete_dday), Snackbar.LENGTH_SHORT).show();
                                         setSQLiteData();
                                     }
                                 })

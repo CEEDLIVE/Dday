@@ -29,6 +29,7 @@
     <string name="snackbar_msg_add_notification">상단바에 디데이를 고정합니다.</string>
     <string name="snackbar_msg_remove_notification">상단바에 고정된 디데이를 해제합니다.</string>
     <string name="snackbar_msg_add_dday">디데이가 업데이트 되었습니다.</string>
+    <string name="snackbar_msg_delete_dday">디데이가 삭제 되었습니다.</string>
 
     <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
