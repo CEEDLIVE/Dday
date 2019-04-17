@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -95,12 +96,14 @@ public class DdayListAdapter extends BaseAdapter {
             ddayViewHolder.textViewDay = (TextView) convertView.findViewById(R.id.tvDay);
             ddayViewHolder.textViewDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
 
-            ddayViewHolder.btnEdit = (Button) convertView.findViewById(R.id.listview_group_btn_edit);
-            ddayViewHolder.btnDelete = (Button) convertView.findViewById(R.id.listview_group_btn_delete);
-            ddayViewHolder.btnNoti = (Button) convertView.findViewById(R.id.listview_group_btn_noti);
+            ddayViewHolder.btnEdit = (ImageView) convertView.findViewById(R.id.listview_group_btn_edit);
+            ddayViewHolder.btnDelete = (ImageView) convertView.findViewById(R.id.listview_group_btn_delete);
+            ddayViewHolder.btnNoti = (ImageView) convertView.findViewById(R.id.listview_group_btn_noti);
 
             ddayViewHolder.generalLayout = convertView.findViewById(R.id.listview_group_general);
             ddayViewHolder.detailLayout = convertView.findViewById(R.id.listview_group_detail);
+
+            ddayViewHolder.ivStatusIcon = convertView.findViewById(R.id.iv_status_icon);
 
             convertView.setTag(ddayViewHolder);
         } else {
@@ -142,8 +145,17 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.btnDelete.setTag(ddayItem.get_id());
         ddayViewHolder.btnNoti.setTag(ddayItem.get_id());
 
-        boolean isEnabled = ddayItem.getNotification() == 1 ? false : true;
-        ddayViewHolder.btnNoti.setEnabled(isEnabled);
+        boolean isNotification = ddayItem.getNotification() == 1 ? true : false;
+//        ddayViewHolder.btnNoti.setEnabled(isEnabled);
+
+        ddayViewHolder.btnNoti.setImageResource(isNotification ?
+                R.drawable.ic_twotone_notifications_off_24px : R.drawable.ic_twotone_notifications_active_24px);
+
+        ddayViewHolder.btnEdit.setImageResource(R.drawable.ic_twotone_edit_24px);
+        ddayViewHolder.btnDelete.setImageResource(R.drawable.ic_twotone_delete_24px);
+
+        ddayViewHolder.ivStatusIcon.setImageResource(isNotification ?
+                R.drawable.ic_twotone_notifications_active_24px : R.drawable.ic_twotone_notifications_off_24px);
 
         // 롱클릭/온클릭
         // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시
@@ -166,6 +178,8 @@ public class DdayListAdapter extends BaseAdapter {
 
                     if (mChedkedItemSize > 0) {
                         mChedkedItemSize--;
+                        MainActivity activity = (MainActivity) context;
+                        activity.removeChecked(ddayItem.get_id());
                     }
 
                     if (mChedkedItemSize < 1) {
@@ -184,6 +198,7 @@ public class DdayListAdapter extends BaseAdapter {
                     mChedkedItemSize++;
 
                     MainActivity activity = (MainActivity) context;
+                    activity.addChecked(ddayItem.get_id());
                     activity.handleFabVisibility(true);
 
                     Log.e("else", mChedkedItemSize + "");
@@ -218,7 +233,7 @@ public class DdayListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) context;
-                activity.onClickNoti(ddayItem.get_id());
+                activity.onClickNoti(isNotification, ddayItem.get_id());
             }
         });
 
@@ -243,6 +258,13 @@ public class DdayListAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /**
+     *
+     * @param year
+     * @param month
+     * @param day
+     * @return
+     */
     private String getDiffDays(int year, int month, int day) {
         // Calendar 두 날짜 간 차이 구하기
         mTargetCalendar.set(Calendar.YEAR, year);

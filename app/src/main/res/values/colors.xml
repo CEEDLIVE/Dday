@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <!-- Custom color -->
     <color name="colorBrigntRed">#F14742</color>
+    <color name="colorBrigntRed2">#FDECEC</color>
     <color name="colorTransparent">#00FF0000</color>
     <color name="colorYellow1">#FFF00D</color>
     <color name="colorYellow2">#FF9900</color>

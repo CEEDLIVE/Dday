@@ -9,7 +9,8 @@
         android:id="@+id/listview_group_general"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground">
 
         <CheckBox
             android:id="@+id/lv_group_checkbox"
@@ -19,6 +20,18 @@
             android:layout_gravity="center"
             />
 
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@drawable/selected_dot" />-->
+
+        <ImageView
+            android:id="@+id/iv_status_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="18dp" />
+        
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -88,22 +101,28 @@
             android:layout_height="wrap_content"
             android:gravity="end">
 
-            <Button
+            <ImageView
                 android:id="@+id/listview_group_btn_noti"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="18dp"
                 android:text="@string/btn_noti"/>
 
-            <Button
+            <ImageView
                 android:id="@+id/listview_group_btn_edit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="18dp"
                 android:text="@string/btn_edit"/>
 
-            <Button
+            <ImageView
                 android:id="@+id/listview_group_btn_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="18dp"
                 android:text="@string/btn_delete"/>
 
         </LinearLayout>

@@ -15,7 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorYellow2"
+            android:background="@color/colorBrigntRed"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
@@ -35,7 +35,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_weekly_calendar" />
+        app:srcCompat="@drawable/ic_twotone_delete_24px" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
