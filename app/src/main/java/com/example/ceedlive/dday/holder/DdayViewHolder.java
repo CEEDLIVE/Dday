@@ -2,6 +2,7 @@ package com.example.ceedlive.dday.holder;
 
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -11,14 +12,15 @@ public class DdayViewHolder {
     public LinearLayout detailLayout;
 
     public CheckBox checkBox;
+    public ImageView ivStatusIcon;
     public TextView textViewTitle;
     public TextView textViewDate;
     public TextView textViewDay;
     public TextView textViewDescription;
 
-    public Button btnEdit;
-    public Button btnDelete;
-    public Button btnNoti;
+    public ImageView btnEdit;
+    public ImageView btnDelete;
+    public ImageView btnNoti;
 
     public int position;
 

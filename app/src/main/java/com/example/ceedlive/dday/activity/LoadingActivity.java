@@ -1,6 +1,9 @@
 package com.example.ceedlive.dday.activity;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -10,9 +13,10 @@ import android.widget.Toast;
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
-import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.http.RetrofitApiService;
 import com.example.ceedlive.dday.http.RetrofitConnection;
+import com.example.ceedlive.dday.receiver.PackageEventReceiver;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -39,10 +43,14 @@ public class LoadingActivity extends BaseActivity {
 
     private RetrofitConnection mRetrofitConnection;
 
+    private PackageEventReceiver mPackageEventReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
+
+//        registerPackageEventReceiver();
 
         createTable();
         loadWiseSaying();
@@ -51,10 +59,59 @@ public class LoadingActivity extends BaseActivity {
         mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
         mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
 
+//        mPackageEventReceiver.callback(new PackageEventReceiver.ReceiveListener() {
+//            @Override
+//            public void onReceive(String action) {
+//                Log.e(TAG, "onCreate onReceive action: " + action);
+//                try {
+//
+//
+//
+//                } catch (NullPointerException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+
 //        retrofitGet();
 //        retrofitCreate();
 //        retrofitUpdate();
 //        retrofitDelete();
+    }
+
+    private void registerPackageEventReceiver() {
+
+        Log.e(TAG, "registerPackageEventReceiver");
+
+        mPackageEventReceiver = new PackageEventReceiver();
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_INSTALL);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+
+        intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+
+        intentFilter.addDataScheme("package");
+        registerReceiver(mPackageEventReceiver, intentFilter);
+
+        // When the user uninstalls the app, at first the process is killed,
+        // then your apk file and data directory are deleted, along with the records
+        // in Package Manager that tell other apps which intent filters you've registered for.
+
+    }
+
+    /**
+     * android.app.IntentReceiverLeaked: Activity com.example.ceedlive.dday.activity.LoadingActivity has leaked IntentReceiver com.example.ceedlive.dday.receiver.PackageEventReceiver@eac196 that was originally registered here. Are you missing a call to unregisterReceiver()?
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mPackageEventReceiver != null) {
+            unregisterReceiver(mPackageEventReceiver);
+        }
     }
 
     private void createTable() {

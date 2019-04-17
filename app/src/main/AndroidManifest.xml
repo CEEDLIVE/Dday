@@ -4,6 +4,8 @@
     <!-- HTTP -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,6 +19,16 @@
             android:name=".service.NotificationService"
             android:enabled="true"
             android:exported="true" />
+
+        <receiver
+            android:name=".receiver.PackageEventReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="0">
+                <action android:name="android.intent.action.QUERY_PACKAGE_RESTART"/>
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".activity.LoadingActivity"

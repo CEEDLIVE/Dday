@@ -183,27 +183,6 @@ public class NotificationService extends Service {
         mThread = null;// 쓰레기 값을 만들어서 빠르게 회수하라고 null을 넣어줌.
     }
 
-    public void sendMessage(Intent intent) {
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        final InnerNotificationServiceHandler handler = new InnerNotificationServiceHandler();
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID) ) {
-                    int mId = intent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
-                    if (mId > 0) {
-                        mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
-                        DdayItem ddayItem = mDatabaseHelper.getDday(mId);
-                        Message message = handler.obtainMessage();
-                        message.obj = ddayItem;
-                        handler.sendMessage(message);
-                    }
-                }
-            }
-        });
-        mThread.start();
-    }
-
     /**
      * 두 날짜 간 차이 구하기
      * @param year
