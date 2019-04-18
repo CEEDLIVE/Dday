@@ -1,7 +1,6 @@
 package com.example.ceedlive.dday.activity;
 
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -44,6 +43,8 @@ public class LoadingActivity extends BaseActivity {
     private RetrofitConnection mRetrofitConnection;
 
     private PackageEventReceiver mPackageEventReceiver;
+
+    private NotificationManager mNotificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

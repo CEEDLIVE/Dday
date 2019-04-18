@@ -28,5 +28,14 @@ public class Constant {
     public static class NOTIFICATION {
         public static final int UNREGISTERED = 0;
         public static final int REGISTERED = 1;
+
+        public static final boolean TO_BE_NOTIFIED = true;
+        public static final boolean TO_BE_CANCELLED = false;
     }
+
+    public static class FLOATING_ACTION_BUTTON {
+        public static final boolean VISIBLE = true;
+        public static final boolean INVISIBLE = false;
+    }
+
 }

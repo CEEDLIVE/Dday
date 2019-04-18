@@ -6,6 +6,8 @@
     <string name="btn_edit">수정</string>
     <string name="btn_delete">삭제</string>
     <string name="btn_cancel">취소</string>
+    <string name="btn_deactivate">해제</string>
+    <string name="btn_activate">고정</string>
 
     <string name="main_no_content_header">처음으로 디데이를 입력해주세요.</string>
     <!--<string name="main_no_content_header_sub">훗날 기억을 되새겨 봄으로써 순간이나마\n그 시절의 감상을 느낄 수 있는 추억은,\n그 자체로 축복이다.</string>-->
@@ -20,6 +22,12 @@
     <string name="alert_title_delete_dday_checked">선택 일정 삭제</string>
     <string name="alert_message_delete_dday_checked">선택한 일정을 삭제하시겠습니까?</string>
 
+    <string name="alert_title_deactivate_dday_checked">선택 일정 해제</string>
+    <string name="alert_message_deactivate_dday_checked">선택한 일정이 상단바에 고정되어 있으면 해제합니다.</string>
+
+    <string name="alert_title_activate_dday_checked">선택 일정 고정</string>
+    <string name="alert_message_activate_dday_checked">선택한 일정이 상단바에 없으면 고정합니다.</string>
+
     <string name="dday_valid_prefix">D-</string>
     <string name="dday_invalid_prefix">D+</string>
     <string name="dday_today">D-DAY</string>
@@ -30,6 +38,12 @@
     <string name="snackbar_msg_remove_notification">상단바에 고정된 디데이를 해제합니다.</string>
     <string name="snackbar_msg_add_dday">디데이가 업데이트 되었습니다.</string>
     <string name="snackbar_msg_delete_dday">디데이가 삭제 되었습니다.</string>
+
+    <string name="snackbar_msg_deactivate_dday">상단바에 고정된 디데이가 해제 되었습니다.</string>
+    <string name="snackbar_msg_no_deactivate_dday">고정 해제할 디데이가 없습니다.\n먼저 일정을 등록해보세요.</string>
+
+    <string name="snackbar_msg_activate_dday">상단바에 디데이가 고정 되었습니다.</string>
+    <string name="snackbar_msg_no_activate_dday">고정할 디데이가 없습니다.</string>
 
     <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

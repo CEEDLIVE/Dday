@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ceedlive.dday.BaseActivity;
@@ -38,7 +39,7 @@ public class DetailActivity extends BaseActivity {
 
     private TextView mTvToday, mTvDate;
     private int mYear, mMonth, mDay;
-    private Button mBtnSave;
+    private ImageView mBtnSave;
     private EditText mEtTitle, mEtDescription;
     private CheckBox mCheckBoxAddNoti;
 

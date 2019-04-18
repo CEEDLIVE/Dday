@@ -149,13 +149,13 @@ public class DdayListAdapter extends BaseAdapter {
 //        ddayViewHolder.btnNoti.setEnabled(isEnabled);
 
         ddayViewHolder.btnNoti.setImageResource(isNotification ?
-                R.drawable.ic_twotone_notifications_off_24px : R.drawable.ic_twotone_notifications_active_24px);
+                R.drawable.ic_calendar_noti_deactivate : R.drawable.ic_calendar_noti_activate);
 
-        ddayViewHolder.btnEdit.setImageResource(R.drawable.ic_twotone_edit_24px);
-        ddayViewHolder.btnDelete.setImageResource(R.drawable.ic_twotone_delete_24px);
+        ddayViewHolder.btnEdit.setImageResource(R.drawable.ic_calendar_edit);
+        ddayViewHolder.btnDelete.setImageResource(R.drawable.ic_calendar_minus);
 
         ddayViewHolder.ivStatusIcon.setImageResource(isNotification ?
-                R.drawable.ic_twotone_notifications_active_24px : R.drawable.ic_twotone_notifications_off_24px);
+                R.drawable.ic_calendar_noti_activate : R.drawable.ic_calendar_noti_deactivate);
 
         // 롱클릭/온클릭
         // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시

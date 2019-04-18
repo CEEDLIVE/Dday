@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.example.ceedlive.dday.Constant;
@@ -267,18 +268,29 @@ public class NotificationService extends Service {
 
             mNotificationBuilder = new NotificationCompat.Builder(getApplicationContext(), Constant.NOTIFICATION_CHANNEL_ID);
 
+            // Notification 객체는 다음을 반드시 포함해야 합니다.
+
+            // setSmallIcon()이 설정한 작은 아이콘
+            // setContentTitle()이 설정한 제목
+            // setContentText()이 설정한 세부 텍스트
+
+            // reference: https://developer.android.com/guide/topics/ui/notifiers/notifications?hl=ko
+
             mNotificationBuilder
                     .setContentTitle(ddayItem.getTitle())
                     .setContentText(ddayItem.getDescription())
                     .setTicker(ddayItem.getTitle())
-                    .setSmallIcon(R.drawable.ic_weekly_calendar)
-                    .setLargeIcon(BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher))
-                    .setBadgeIconType(R.drawable.ic_weekly_calendar)
+                    .setLargeIcon(BitmapFactory.decodeResource(mResources, R.drawable.ic_notification_calendar))
+                    .setSmallIcon(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ?
+                            R.drawable.ic_notification_plus1d : R.mipmap.ic_launcher)
+                    .setBadgeIconType(R.drawable.ic_calendar_noti_activate)
+//                    .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent))
                     .setOngoing(true)
                     .setShowWhen(true)
                     .setAutoCancel(false)
                     .setContentIntent(pendingIntent)
                     .setWhen(System.currentTimeMillis())
+                    .setPriority(Notification.PRIORITY_HIGH)
                     .setDefaults(Notification.DEFAULT_ALL);
 
             // FIXME 알림 메시지 수량이 늘어나 그룹으로 묶이는 경우 그룹을 스와이프 하면 노티 삭제됨

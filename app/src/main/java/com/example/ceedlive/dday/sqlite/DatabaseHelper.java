@@ -324,19 +324,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.e("DbHelper updateDday", ddayItem.toString());
 
         SQLiteDatabase db = this.getWritableDatabase();
+        int result = 0;
 
-        // SQLite in Android How to update a specific row
-        // This is the cleanes solution to update a specific row.
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("DATE", ddayItem.getDate());
-        contentValues.put("TITLE", ddayItem.getTitle());
-        contentValues.put("DESCRIPTION", ddayItem.getDescription());
-        contentValues.put("NOTIFICATION", ddayItem.getNotification());
+        try {
+            // SQLite in Android How to update a specific row
+            // This is the cleanes solution to update a specific row.
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("DATE", ddayItem.getDate());
+            contentValues.put("TITLE", ddayItem.getTitle());
+            contentValues.put("DESCRIPTION", ddayItem.getDescription());
+            contentValues.put("NOTIFICATION", ddayItem.getNotification());
 
-        int result = db.update("CLT_DDAY",
-                contentValues,
-                "_ID = ?",
-                new String[] { String.valueOf(ddayItem.get_id()) });
+            result = db.update("CLT_DDAY",
+                    contentValues,
+                    "_ID = ?",
+                    new String[] { String.valueOf(ddayItem.get_id()) });
 
 //        StringBuffer sb = new StringBuffer();
 //        sb.append(" UPDATE CLT_DDAY ");
@@ -355,6 +357,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //                });
 
 //        db.execSQL("update mytable set name='Park' where id=5;");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
 
         // updating row
         return result;

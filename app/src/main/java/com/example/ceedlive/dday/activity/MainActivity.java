@@ -56,8 +56,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private LinearLayout mLayoutNoContent;
     private ListView mListViewContent;
-    private FloatingActionButton mFabBtn;
-    private FloatingActionButton mFabBtn2;
+    private FloatingActionButton mFabToBeCreated;
+    private FloatingActionButton mFabToBeDeleted;
+    private FloatingActionButton mFabToBeCancelled;
+    private FloatingActionButton mFabToBeNotified;
 
     private List<DdayItem> mDdayItemList;
     private String mAnniversaryInfoKey;
@@ -91,23 +93,27 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mLayoutNoContent = findViewById(R.id.main_ll_no_content);
         mListViewContent = findViewById(R.id.expandableListView);
 
-        mFabBtn = findViewById(R.id.fab);
-        mFabBtn2 = findViewById(R.id.fab2);
+        mFabToBeCreated = findViewById(R.id.fabToBeCreated);
+        mFabToBeDeleted = findViewById(R.id.fabToBeDeleted);
+        mFabToBeCancelled = findViewById(R.id.fabToBeCancelled);
+        mFabToBeNotified = findViewById(R.id.fabToBeNotified);
 
         // https://stackoverflow.com/questions/30969455/android-changing-floating-action-button-color
-        mFabBtn.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
-        mFabBtn2.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+//        mFabBtn.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+        mFabToBeDeleted.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+        mFabToBeCancelled.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+        mFabToBeNotified.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
         mDdayItemList = new ArrayList<>();
@@ -118,13 +124,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         onClickFabButtonCreate();
         onClickLayoutNoContent();
 
-
-        mFabBtn2.setOnClickListener(new OnClickListener() {
+        mFabToBeDeleted.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
-                Log.e("삭제 FAB 클릭", "삭제삭제");
                 onClickFabDelete();
+            }
+        });
+
+        mFabToBeCancelled.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickFabNotification(Constant.NOTIFICATION.TO_BE_CANCELLED);
+            }
+        });
+
+        mFabToBeNotified.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickFabNotification(Constant.NOTIFICATION.TO_BE_NOTIFIED);
             }
         });
     }
@@ -138,7 +155,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -203,7 +220,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      * Floating Action Button Click Event
      */
     private void onClickFabButtonCreate() {
-        mFabBtn.setOnClickListener(new OnClickListener() {
+        mFabToBeCreated.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 moveDetailActivity(0);
@@ -307,27 +324,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void setSQLiteData() {
-        // TODO SQLite
-        // ==================================================
-
         mDatabaseHelper = DatabaseHelper.getInstance(this);
-
         mDdayItemList.clear();
 
         List<DdayItem> ddayItemList = mDatabaseHelper.getDdayList();
-
         for (DdayItem ddayItem : ddayItemList) {
-            Log.e("SQLite item.toString()", ddayItem.toString());
             mDdayItemList.add(ddayItem);
         }
 
         SortDescending sortDescending = new SortDescending();
         Collections.sort(mDdayItemList, sortDescending);
 
-        if (mDdayItemList.isEmpty()) {
+        if ( mDdayItemList.isEmpty() ) {
             mLayoutNoContent.setVisibility(View.VISIBLE);
             mListViewContent.setVisibility(View.INVISIBLE);
-            mFabBtn2.setVisibility(View.GONE);
+            mFabToBeDeleted.setVisibility(View.GONE);
+            mFabToBeCancelled.setVisibility(View.GONE);
+            mFabToBeNotified.setVisibility(View.GONE);
         } else {
             mListViewContent.setVisibility(View.VISIBLE);
             mLayoutNoContent.setVisibility(View.INVISIBLE);
@@ -347,20 +360,145 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             int first = ddayItem1.get_id();
             int second = ddayItem2.get_id();
 
-            int compareValue = 0;
+//            int compareValue = 0;
+//            compareValue = second > first ? 1 : second == first ? 0 : -1;
+//            if (second > first) {
+//                compareValue = 1;
+//            }
+//            if (second == first) {
+//                compareValue = 0;
+//            }
+//            if (second < first) {
+//                compareValue = -1;
+//            }
 
-            if (second > first) {
-                compareValue = 1;
-            }
-            if (second == first) {
-                compareValue = 0;
-            }
-            if (second < first) {
-                compareValue = -1;
-            }
-
-            return compareValue;
+            return Integer.compare(second, first);
         }
+    }
+
+    public void onClickFabNotification(boolean isToBeNotified) {
+        Log.e("MainActivity", "onClickFabNotification");
+
+        // 다이얼로그
+        mAlertDialogBuilder = new AlertDialog.Builder(this);
+
+        // 다이얼로그 값/옵션 세팅
+        mAlertDialogBuilder
+                .setTitle(isToBeNotified ?
+                        R.string.alert_title_activate_dday_checked :
+                        R.string.alert_title_deactivate_dday_checked)
+                .setMessage(isToBeNotified ?
+                        R.string.alert_message_activate_dday_checked :
+                        R.string.alert_message_deactivate_dday_checked)
+                .setCancelable(false)
+                .setPositiveButton(isToBeNotified ? R.string.btn_activate : R.string.btn_deactivate,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (isToBeNotified) {
+                                    handleClickCheckedItemNotify();
+                                } else {
+                                    handleClickCheckedItemCancel();
+                                }
+                            }
+                        })
+                .setNegativeButton(R.string.btn_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // 다이얼로그를 취소한다.
+                                dialog.cancel();
+                            }
+                        });
+
+        mAlertDialog = mAlertDialogBuilder.create();
+        mAlertDialog.show();
+    }
+
+    private void handleClickCheckedItemNotify() {
+        // 일정 수정
+        if ( !mDynamicCheckedItemIdList.isEmpty() ) {
+            int count = 0;
+            int updated = 0;
+            int total = mDynamicCheckedItemIdList.size();
+
+            for (Integer rowId : mDynamicCheckedItemIdList) {
+                count++;
+
+                DdayItem ddayItem = mDatabaseHelper.getDday(rowId);
+
+                if ( Constant.NOTIFICATION.REGISTERED == ddayItem.getNotification() ) {
+                    continue;
+                }
+
+                ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
+
+                if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                    Intent intent = new Intent(this, NotificationService.class);
+                    intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, rowId); //전달할 값
+                    startService(intent);
+
+                    updated++;
+                }
+
+                if (count == total) { // last item
+                    Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_activate_dday), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            if (updated == 0) {
+                Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_activate_dday), Snackbar.LENGTH_SHORT).show();
+            }
+
+        } else {
+            Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_activate_dday), Snackbar.LENGTH_SHORT).show();
+        }
+
+        handleFabVisibility(false);
+        setSQLiteData();
+    }
+
+    private void handleClickCheckedItemCancel() {
+        // 일정 수정
+        if ( !mDynamicCheckedItemIdList.isEmpty() ) {
+            int count = 0;
+            int updated = 0;
+            int total = mDynamicCheckedItemIdList.size();
+
+            for (Integer rowId : mDynamicCheckedItemIdList) {
+                count++;
+
+                DdayItem ddayItem = mDatabaseHelper.getDday(rowId);
+
+                if ( Constant.NOTIFICATION.UNREGISTERED == ddayItem.getNotification() ) {
+                    continue;
+                }
+
+                ddayItem.setNotification(Constant.NOTIFICATION.UNREGISTERED);
+
+                if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                    try {
+                        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                        mNotificationManager.cancel(rowId);
+                        updated++;
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (count == total) { // last item
+                    Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_deactivate_dday), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            if (updated == 0) {
+                Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_deactivate_dday), Snackbar.LENGTH_SHORT).show();
+            }
+
+        } else {
+            Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_deactivate_dday), Snackbar.LENGTH_SHORT).show();
+        }
+
+        handleFabVisibility(false);
+        setSQLiteData();
     }
 
     public void onClickFabDelete() {
@@ -379,8 +517,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             public void onClick(DialogInterface dialog, int id) {
                                 // 일정 삭제
                                 if ( !mDynamicCheckedItemIdList.isEmpty() ) {
-                                    for (Integer _id : mDynamicCheckedItemIdList) {
-                                        doDeleteItem(_id);
+                                    for (Integer rowId : mDynamicCheckedItemIdList) {
+                                        doDeleteItem(rowId);
                                     }
                                     Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_delete_dday), Snackbar.LENGTH_SHORT).show();
                                     handleFabVisibility(false);
@@ -425,9 +563,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     public void handleFabVisibility(boolean visible) {
         if (visible) {
-            mFabBtn2.setVisibility(View.VISIBLE);
+            mFabToBeDeleted.setVisibility(View.VISIBLE);
+            mFabToBeCancelled.setVisibility(View.VISIBLE);
+            mFabToBeNotified.setVisibility(View.VISIBLE);
+
+            mFabToBeCreated.setEnabled(false);
+            mFabToBeCreated.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
         } else {
-            mFabBtn2.setVisibility(View.GONE);
+            mFabToBeDeleted.setVisibility(View.GONE);
+            mFabToBeCancelled.setVisibility(View.GONE);
+            mFabToBeNotified.setVisibility(View.GONE);
+
+            mFabToBeCreated.setEnabled(true);
+            mFabToBeCreated.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorBrigntRed) ));
+
+            mDynamicCheckedItemIdList.clear();
+
+            Log.e("handleFabVisibility", "clear");
         }
     }
 
