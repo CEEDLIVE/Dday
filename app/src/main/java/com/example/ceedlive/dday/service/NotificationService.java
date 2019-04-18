@@ -280,7 +280,7 @@ public class NotificationService extends Service {
                     .setContentTitle(ddayItem.getTitle())
                     .setContentText(ddayItem.getDescription())
                     .setTicker(ddayItem.getTitle())
-                    .setLargeIcon(BitmapFactory.decodeResource(mResources, R.drawable.ic_notification_calendar))
+                    .setLargeIcon(BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher_round))
                     .setSmallIcon(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ?
                             R.drawable.ic_notification_plus1d : R.mipmap.ic_launcher)
                     .setBadgeIconType(R.drawable.ic_calendar_noti_activate)

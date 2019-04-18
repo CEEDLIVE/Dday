@@ -8,9 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -24,6 +28,7 @@ import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.service.NotificationService;
+import com.example.ceedlive.dday.validation.ValidationHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,6 +55,12 @@ public class DetailActivity extends BaseActivity {
     private Intent mIntent;
     private String mDiffDays;
 
+    private ValidationHelper mValidationHelper;
+    private TextInputLayout mTextInputLayoutTitle;
+
+    private TextWatcher mTextWatcher;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +86,7 @@ public class DetailActivity extends BaseActivity {
         mTvToday = findViewById(R.id.detail_tv_today);
         mTvDate = findViewById(R.id.detail_tv_date);
         mEtTitle = findViewById(R.id.detail_et_title);
+
         mEtDescription = findViewById(R.id.detail_et_description);
 
         mCheckBoxAddNoti = findViewById(R.id.detail_checkbox_add_noti);
@@ -126,6 +138,12 @@ public class DetailActivity extends BaseActivity {
 
         // 텍스트뷰의 값을 업데이트함
         doUpdateText(mYear, mMonth, mDay);
+
+        mValidationHelper = new ValidationHelper(this);
+        mTextInputLayoutTitle = findViewById(R.id.detail_til_title);
+
+        mTextWatcher = new MyTextWatcher(mEtTitle);
+        mEtTitle.addTextChangedListener(mTextWatcher);
     }
 
     private void setEvent() {
@@ -171,8 +189,12 @@ public class DetailActivity extends BaseActivity {
                 final int notification = mCheckBoxAddNoti.isChecked() ? 1 : 0;
 
                 // 데이터 유효성 검사
-                if ( "".equals( title.trim() ) ) {
-                    showDialog("경고", "디데이 제목을 입력하세요.");
+//                if ( "".equals( title.trim() ) ) {
+//                    showDialog("경고", "디데이 제목을 입력하세요.");
+//                    return;
+//                }
+
+                if ( !checkValidation() ) {
                     return;
                 }
 
@@ -188,6 +210,33 @@ public class DetailActivity extends BaseActivity {
                 finish();
             }
         });
+    }
+
+    private boolean checkValidation() {
+        if ( !validateTitle() ) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateTitle() {
+        Log.e("validateTitle", "validateTitle");
+
+        if ( mEtTitle.getText().toString().trim().isEmpty() ) {
+            mTextInputLayoutTitle.setError("디데이 제목은 꼭 입력하셔야 합니다.");
+            requestFocus(mEtTitle);
+            return false;
+        } else {
+            mTextInputLayoutTitle.setErrorEnabled(false);
+        }
+
+        return true;
+    }
+
+    private void requestFocus(View view) {
+        if ( view.requestFocus() ) {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
     }
 
     /**
@@ -413,6 +462,30 @@ public class DetailActivity extends BaseActivity {
         // 채널은 한번만 만들면 되기때문에 Notification이 올때마다 만들어줄 필요가 없습니다.
         // Application Class에서 만들어 줘 되고 SharedPreference를 이용해서 한번 만든적이 있다면 그다음부터는 만들지 않도록 해주어도 됩니다.
 
+    }
+
+
+    private class MyTextWatcher implements TextWatcher {
+
+        private View view;
+
+        private MyTextWatcher(View view) {
+            this.view = view;
+        }
+
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.detail_et_title:
+                    validateTitle();
+                    break;
+            }
+        }
     }
 
 }
