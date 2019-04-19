@@ -16,15 +16,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.DetailActivity;
 import com.example.ceedlive.dday.data.DdayItem;
-import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.receiver.NotificationReceiver;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -42,10 +42,9 @@ public class NotificationService extends Service {
 
     NotificationManager mNotificationManager;
     NotificationChannel mNotificationChannel;
-    Thread mThread;
     NotificationCompat.Builder mNotificationBuilder;
 
-    NotificationReceiver mNotificationReceiver;
+//    NotificationReceiver mNotificationReceiver;
 
     Calendar mTargetCalendar = new GregorianCalendar();
     Calendar mBaseCalendar = new GregorianCalendar();
@@ -109,6 +108,8 @@ public class NotificationService extends Service {
         mResources = getResources();
     }
 
+
+
     // Service와 Thread가 사용될 시점을 생각해 보자.
     // Thread는 앱이 사용자와 상호작용하는 과정에서 UI Thread가 Block 되지 않기 위한 작업등을 처리하기 위한 Foreground 작업에 적합하고
     // Service는 앱이 사용자와 상호작용하지 않아도 계속 수행되어야 하는 Background 작업에 적합하다고 볼 수 있다.
@@ -118,6 +119,10 @@ public class NotificationService extends Service {
      * 시작 서비스를 구현하고 비동기 태스크 실행을 초기화하기 위한 중요한 메서드
      * 백그라운드에서 실행되는 동작들이 들어가는 곳
      * 서비스가 호출될 때마다 실행
+     *
+     * onStartCommand() is always called on the main application thread in any service.
+     * You cannot be called with onStartCommand() in two threads simultaneously.
+     *
      * @param intent 인텐트 : 비동기 실행을 위해 사용되는 데이터, 예를 들면 네트워크 자원의 URL
      * @param flags 전달 메서드 : 시작 요청의 기록을 반영하는 플래그, 0, START_FLAG_REDELIVERY (1), START_FLAG_RETRY(2)
      * @param startId 시작 ID : 런타임에서 제공하는 고유 식별자
@@ -135,17 +140,27 @@ public class NotificationService extends Service {
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final InnerNotificationServiceHandler handler = new InnerNotificationServiceHandler();
-        mThread = new Thread(new Runnable() {
+
+        Thread mThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID) ) {
-                    int mId = intent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
-                    if (mId > 0) {
-                        mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
-                        DdayItem ddayItem = mDatabaseHelper.getDday(mId);
-                        Message message = handler.obtainMessage();
-                        message.obj = ddayItem;
-                        handler.sendMessage(message);
+                synchronized (this) {
+                    try {
+                        if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID) ) {
+                            int mId = intent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
+                            if (mId > 0) {
+//                                mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
+//                                DdayItem ddayItem = mDatabaseHelper.getDday(mId);
+
+                                DdayItem ddayItem = intent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
+
+                                Message message = handler.obtainMessage();
+                                message.obj = ddayItem;
+                                handler.sendMessage(message);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -177,11 +192,10 @@ public class NotificationService extends Service {
     public void onDestroy() {
         // 서비스가 종료될 때 실행되는 함수가 들어갑니다.
         Log.e(TAG,"onDestroy()");
-
 //        synchronized (mThread) {
 //            mIsRun = false;
 //        }
-        mThread = null;// 쓰레기 값을 만들어서 빠르게 회수하라고 null을 넣어줌.
+//        mThread = null;// 쓰레기 값을 만들어서 빠르게 회수하라고 null을 넣어줌.
     }
 
     /**
@@ -230,7 +244,7 @@ public class NotificationService extends Service {
         @Override
         public void handleMessage(android.os.Message msg) {
 
-            Log.d(TAG, "InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)");
+            Log.e(TAG, "InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)");
 
             final DdayItem ddayItem = (DdayItem) msg.obj;
             final int requestCode = ddayItem.get_id();
@@ -238,7 +252,8 @@ public class NotificationService extends Service {
 
             // 알림 클릭시 DetailActivity 화면에 띄운다.
             Intent intent = new Intent(NotificationService.this, DetailActivity.class);
-            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
             PendingIntent pendingIntent = PendingIntent.getActivity(NotificationService.this, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             // TODO Notification 개념 더 알아보기
@@ -337,7 +352,7 @@ public class NotificationService extends Service {
             intentFilter.addAction(Intent.ACTION_DATE_CHANGED);
 
             // 동적리시버 생성
-            mNotificationReceiver = new NotificationReceiver();
+            NotificationReceiver mNotificationReceiver = new NotificationReceiver();
 
             // 위에서 설정한 인텐트필터+리시버정보로 리시버 등록
             registerReceiver(mNotificationReceiver, intentFilter);
@@ -360,8 +375,31 @@ public class NotificationService extends Service {
                 }
             });
 
-            // TODO https://academy.realm.io/kr/posts/android-thread-looper-handler/ 살펴보기
+            // 2019-04-19 금요일 발견한 버그 해결 내용 정리
 
+            // 버그 발생 시나리오
+            // MainActivity -> DetailActivity
+            // 신규로 디데이 일정 등록, 이때 상단바 디데이 고정 선택
+            // 저장
+            // 알림 메시지 내려옴
+            // 해당 알림 메시지 터치 == 노티피케이션에 등록된 알림 터치
+            // DetailActivity 로 이동
+            // 날짜 변경
+            // 저장
+            // MainActivity에 반영 안 됨
+            // 로그캣을 보면
+            // MainActivity onCreate 메소드 호출 안됨
+            // NotificationService 클래스의 onStartCommand 호출
+            // InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)
+
+            // 그래서
+            // 서비스 내 해당 코드 말미에 브로드캐스트 리시버 추가, onReceive 메소드 안에 setSQLiteData 함수 추가
+            // 버그 해결
+
+            Intent fromNotificationToDetailActivityIntent = new Intent(Constant.ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(fromNotificationToDetailActivityIntent);
+
+            // TODO https://academy.realm.io/kr/posts/android-thread-looper-handler/ 살펴보기
 
 //            Intent broadcastIntent = new Intent(Intent.ACTION_TIME_TICK);
 
@@ -415,7 +453,7 @@ public class NotificationService extends Service {
             // cancel(int id): 주어지는 id에 해당하는 알림을 취소한다.
             // cancelAll(): 현재 발생된 모든 알림을 취소한다.
 
-            Log.d(TAG, "서비스 호출");
+            Log.e(TAG, "서비스 호출");
             // FIXME TEST 토스트 띄우기
 //            Toast.makeText(NotificationService.this, "뜸?", Toast.LENGTH_LONG).show();
         }

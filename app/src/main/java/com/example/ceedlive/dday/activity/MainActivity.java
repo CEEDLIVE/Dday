@@ -2,9 +2,11 @@ package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -77,15 +80,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private NotificationManager mNotificationManager;
 
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.e("onCreate", "onCreate");
+
         initialize();// 변수 초기화
         setEvent();// 이벤트 설정
         setSQLiteData(); // (SQLite)
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -118,6 +130,39 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         mDdayItemList = new ArrayList<>();
         mDynamicCheckedItemIdList = new CopyOnWriteArrayList<>();
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // intent ..
+
+                // 2019-04-19 금요일 발견한 버그 해결 내용 정리
+
+                // 버그 발생 시나리오
+                // MainActivity -> DetailActivity
+                // 신규로 디데이 일정 등록, 이때 상단바 디데이 고정 선택
+                // 저장
+                // 알림 메시지 내려옴
+                // 해당 알림 메시지 터치 == 노티피케이션에 등록된 알림 터치
+                // DetailActivity 로 이동
+                // 날짜 변경
+                // 저장
+                // MainActivity에 반영 안 됨
+                // 로그캣을 보면
+                // MainActivity onCreate 메소드 호출 안됨
+                // NotificationService 클래스의 onStartCommand 호출
+                // InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)
+
+                // 그래서
+                // 서비스 내 해당 코드 말미에 브로드캐스트 리시버 추가, onReceive 메소드 안에 다음 코드 추가
+                // 버그 해결
+
+                setSQLiteData();
+            }
+        };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver( mBroadcastReceiver,
+                new IntentFilter(Constant.ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND) );
     }
 
     private void setEvent() {
@@ -156,7 +201,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if ( drawer.isDrawerOpen(GravityCompat.START) ) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -205,7 +250,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -223,7 +268,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mFabToBeCreated.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                moveDetailActivity(0);
+                moveDetailActivity(Constant.DDAY.NEW);
             }
         });
     }
@@ -233,7 +278,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mLayoutNoContent.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                moveDetailActivity(0);
+                moveDetailActivity(Constant.DDAY.NEW);
             }
         });
     }
@@ -250,7 +295,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         // 수정/삭제
         if (_id > 0) {
 //            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, _id);
-            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, _id);
+            DdayItem ddayItem = mDatabaseHelper.getDday(_id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, _id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
         }
 
         // 인텐트 실행
@@ -425,18 +472,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
                 DdayItem ddayItem = mDatabaseHelper.getDday(rowId);
 
-                if ( Constant.NOTIFICATION.REGISTERED == ddayItem.getNotification() ) {
-                    continue;
-                }
+                if (ddayItem != null) {
+                    if ( Constant.NOTIFICATION.REGISTERED == ddayItem.getNotification() ) {
+                        continue;
+                    }
 
-                ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
+                    ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
 
-                if (mDatabaseHelper.updateDday(ddayItem) > 0) {
-                    Intent intent = new Intent(this, NotificationService.class);
-                    intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, rowId); //전달할 값
-                    startService(intent);
+                    if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                        Intent intent = new Intent(this, NotificationService.class);
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, rowId); //전달할 값
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+                        startService(intent);
+                        // 간혹 앱이 죽는 현상 발생, NullPointerException
 
-                    updated++;
+                        updated++;
+                    }
                 }
 
                 if (count == total) { // last item
@@ -616,10 +667,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 } else {
                     Intent intent = new Intent(this, NotificationService.class);
 //                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
-                    intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
-                    startService(intent);
                     ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
-                    mDatabaseHelper.updateDday(ddayItem);
+                    if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+                        startService(intent);
+                    }
 
                     // 우리는 보통 알림을 띄울때 Toast를 이용해서 많이 이용했을 겁니다.
                     // 하지만 안드로이드 오레오부터 알림을 끄게되면 Toast가 보이지 않습니다.

@@ -53,12 +53,13 @@ public class LoadingActivity extends BaseActivity {
 
 //        registerPackageEventReceiver();
 
+        initialize();
+
         createTable();
         loadWiseSaying();
         startLoading();
 
-        mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
-        mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
+
 
 //        mPackageEventReceiver.callback(new PackageEventReceiver.ReceiveListener() {
 //            @Override
@@ -78,6 +79,12 @@ public class LoadingActivity extends BaseActivity {
 //        retrofitCreate();
 //        retrofitUpdate();
 //        retrofitDelete();
+    }
+
+    @Override
+    protected void initialize() {
+        mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
+        mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
     }
 
     private void registerPackageEventReceiver() {

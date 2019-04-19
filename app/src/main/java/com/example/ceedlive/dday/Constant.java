@@ -15,7 +15,11 @@ public class Constant {
 
     public static final String INTENT_DATA_NAME_SHARED_PREFERENCES = "sharedPreferencesDataKey";
 
-    public static final String INTENT_DATA_SQLITE_TABLE_DDAY_ID = "dday_id";
+    public static final String KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID = "dday_id";
+
+    public static final String KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM = "ddayitem";
+
+    public static final String ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND = "ddayitem";
 
     public static final String CALENDAR_STRING_FORMAT_SLASH = "%d/%d/%d";
 
@@ -26,6 +30,7 @@ public class Constant {
     public static final int SQLITE_DB_VERSION = 2;
 
     public static class NOTIFICATION {
+
         public static final int UNREGISTERED = 0;
         public static final int REGISTERED = 1;
 
@@ -36,6 +41,10 @@ public class Constant {
     public static class FLOATING_ACTION_BUTTON {
         public static final boolean VISIBLE = true;
         public static final boolean INVISIBLE = false;
+    }
+
+    public static class DDAY {
+        public static final int NEW = 0;
     }
 
 }

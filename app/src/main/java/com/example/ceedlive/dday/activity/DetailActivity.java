@@ -15,7 +15,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -26,8 +25,8 @@ import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.data.DdayItem;
-import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.service.NotificationService;
+import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.validation.ValidationHelper;
 
 import java.util.ArrayList;
@@ -39,6 +38,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
+
+    private Context mContext;
 
     private DatabaseHelper mDatabaseHelper;
 
@@ -91,8 +92,13 @@ public class DetailActivity extends BaseActivity {
 
         mCheckBoxAddNoti = findViewById(R.id.detail_checkbox_add_noti);
 
+        DdayItem ddayItem = null;
+        mId = mIntent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
+
 //        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES)) {
-        if ( mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID)) {
+        if ( mIntent.getExtras() != null
+                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID)
+                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM) ) {
 //            mSharedPreferencesDataKey = mIntent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
 
 //            SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
@@ -103,10 +109,9 @@ public class DetailActivity extends BaseActivity {
 //            String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
 //            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
 
-            mId = mIntent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
+            ddayItem = mIntent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
         }
 
-        DdayItem ddayItem = mId > 0 ? mDatabaseHelper.getDday(mId) : null;
         if (null != ddayItem) {
             // Set Date
 
@@ -198,6 +203,11 @@ public class DetailActivity extends BaseActivity {
                     return;
                 }
 
+                Log.e("onClickSave", "date: " + date);
+                Log.e("onClickSave", "title: " + title);
+                Log.e("onClickSave", "description: " + description);
+                Log.e("onClickSave", "notification: " + notification);
+
                 DdayItem ddayItem = doSaveSQLite(date, title, description, notification);
 //                DdayItem ddayItem = doSaveSharedPreferencesData(date, title, description);
 
@@ -266,7 +276,11 @@ public class DetailActivity extends BaseActivity {
         } else {
             // create
             ddayItem = new DdayItem(date, title, description, notification);
-            mDatabaseHelper.addDday(ddayItem);
+            int createdRowId = (int) mDatabaseHelper.addDday(ddayItem);
+            ddayItem.set_id(createdRowId);
+
+            Log.e("createdRowId: ", createdRowId + "");
+//            ddayItem = mDatabaseHelper.getDday( (int) mDatabaseHelper.getLastAutoIncrementedId() );
         }
 
         return ddayItem;
@@ -414,6 +428,9 @@ public class DetailActivity extends BaseActivity {
      *
      */
     private void doUpdateText(int year, int month, int day) {
+
+        Log.e("doUpdateText", String.format("%d %d %d", year, month, day));
+
         mTvDate.setText(String.format(Locale.getDefault(),
                 Constant.CALENDAR_STRING_FORMAT_SLASH, mYear, mMonth + 1, mDay));
 
@@ -423,9 +440,10 @@ public class DetailActivity extends BaseActivity {
 
     public void NotificationDday(DdayItem ddayItem) {
         if (null != ddayItem) {
-            int createdUserId = (int) mDatabaseHelper.getLastAutoIncrementedId();
+//            int createdUserId = (int) mDatabaseHelper.getLastAutoIncrementedId();
             Intent intent = new Intent(this, NotificationService.class);
-            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, createdUserId); //전달할 값
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
             startService(intent);
         }
 

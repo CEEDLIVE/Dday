@@ -8,11 +8,10 @@ import com.example.ceedlive.dday.http.OkHttpConnection;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
     protected final Gson gson = new GsonBuilder().create();
 
     protected OkHttpConnection httpConnection;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -22,7 +21,5 @@ public class BaseActivity extends AppCompatActivity {
     /**
      *
      */
-    protected void initialize() {
-
-    }
+    protected abstract void initialize();
 }

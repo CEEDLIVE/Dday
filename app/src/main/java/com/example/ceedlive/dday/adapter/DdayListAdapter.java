@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -88,22 +87,23 @@ public class DdayListAdapter extends BaseAdapter {
             // 실제 객체는 이곳에 있다.
             convertView = inflater.inflate(R.layout.listview_group, parent, false);
             ddayViewHolder = new DdayViewHolder();
+            {
+                // 화면에 표시될 view로부터 위젯에 대한 데이터 획득
+                ddayViewHolder.checkBox = convertView.findViewById(R.id.lv_group_checkbox);
+                ddayViewHolder.textViewTitle = (TextView) convertView.findViewById(R.id.tvTitle);
+                ddayViewHolder.textViewDate = (TextView) convertView.findViewById(R.id.tvDate);
+                ddayViewHolder.textViewDay = (TextView) convertView.findViewById(R.id.tvDay);
+                ddayViewHolder.textViewDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
 
-            // 화면에 표시될 view로부터 위젯에 대한 데이터 획득
-            ddayViewHolder.checkBox = convertView.findViewById(R.id.lv_group_checkbox);
-            ddayViewHolder.textViewTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-            ddayViewHolder.textViewDate = (TextView) convertView.findViewById(R.id.tvDate);
-            ddayViewHolder.textViewDay = (TextView) convertView.findViewById(R.id.tvDay);
-            ddayViewHolder.textViewDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
+                ddayViewHolder.btnEdit = (ImageView) convertView.findViewById(R.id.listview_group_btn_edit);
+                ddayViewHolder.btnDelete = (ImageView) convertView.findViewById(R.id.listview_group_btn_delete);
+                ddayViewHolder.btnNoti = (ImageView) convertView.findViewById(R.id.listview_group_btn_noti);
 
-            ddayViewHolder.btnEdit = (ImageView) convertView.findViewById(R.id.listview_group_btn_edit);
-            ddayViewHolder.btnDelete = (ImageView) convertView.findViewById(R.id.listview_group_btn_delete);
-            ddayViewHolder.btnNoti = (ImageView) convertView.findViewById(R.id.listview_group_btn_noti);
+                ddayViewHolder.generalLayout = convertView.findViewById(R.id.listview_group_general);
+                ddayViewHolder.detailLayout = convertView.findViewById(R.id.listview_group_detail);
 
-            ddayViewHolder.generalLayout = convertView.findViewById(R.id.listview_group_general);
-            ddayViewHolder.detailLayout = convertView.findViewById(R.id.listview_group_detail);
-
-            ddayViewHolder.ivStatusIcon = convertView.findViewById(R.id.iv_status_icon);
+                ddayViewHolder.ivStatusIcon = convertView.findViewById(R.id.iv_status_icon);
+            }
 
             convertView.setTag(ddayViewHolder);
         } else {
@@ -145,7 +145,7 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.btnDelete.setTag(ddayItem.get_id());
         ddayViewHolder.btnNoti.setTag(ddayItem.get_id());
 
-        boolean isNotification = ddayItem.getNotification() == 1 ? true : false;
+        boolean isNotification = ddayItem.getNotification() == 1;
 //        ddayViewHolder.btnNoti.setEnabled(isEnabled);
 
         ddayViewHolder.btnNoti.setImageResource(isNotification ?
