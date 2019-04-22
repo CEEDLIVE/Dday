@@ -21,7 +21,7 @@ import android.util.Log;
 
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
-import com.example.ceedlive.dday.activity.DetailActivity;
+import com.example.ceedlive.dday.activity.MergeActivity;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.receiver.NotificationReceiver;
 import com.example.ceedlive.dday.sqlite.DatabaseHelper;
@@ -250,8 +250,8 @@ public class NotificationService extends Service {
             final int requestCode = ddayItem.get_id();
             final int notificationId = requestCode;
 
-            // 알림 클릭시 DetailActivity 화면에 띄운다.
-            Intent intent = new Intent(NotificationService.this, DetailActivity.class);
+            // 알림 클릭시 MergeActivity 화면에 띄운다.
+            Intent intent = new Intent(NotificationService.this, MergeActivity.class);
             intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
             intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
             PendingIntent pendingIntent = PendingIntent.getActivity(NotificationService.this, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -378,12 +378,12 @@ public class NotificationService extends Service {
             // 2019-04-19 금요일 발견한 버그 해결 내용 정리
 
             // 버그 발생 시나리오
-            // MainActivity -> DetailActivity
+            // MainActivity -> MergeActivity
             // 신규로 디데이 일정 등록, 이때 상단바 디데이 고정 선택
             // 저장
             // 알림 메시지 내려옴
             // 해당 알림 메시지 터치 == 노티피케이션에 등록된 알림 터치
-            // DetailActivity 로 이동
+            // MergeActivity 로 이동
             // 날짜 변경
             // 저장
             // MainActivity에 반영 안 됨

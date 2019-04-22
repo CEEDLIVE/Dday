@@ -18,6 +18,7 @@ public class DdayViewHolder {
     public TextView textViewDay;
     public TextView textViewDescription;
 
+    public ImageView btnDetail;
     public ImageView btnEdit;
     public ImageView btnDelete;
     public ImageView btnNoti;

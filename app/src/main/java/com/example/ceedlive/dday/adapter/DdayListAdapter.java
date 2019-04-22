@@ -10,11 +10,14 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.MainActivity;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.holder.DdayViewHolder;
+import com.example.ceedlive.dday.util.CalendarUtil;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -31,7 +34,7 @@ public class DdayListAdapter extends BaseAdapter {
     /**
      * ListView에 Item을 세팅할 요청자의 정보가 들어감
      */
-    private Context context;
+    private Context mContext;
 
     private Calendar mTargetCalendar, mBaseCalendar;
 
@@ -46,7 +49,7 @@ public class DdayListAdapter extends BaseAdapter {
      */
     public DdayListAdapter(List<DdayItem> arrayGroup, Context context) {
         this.mArrayGroup = arrayGroup;
-        this.context = context;
+        this.mContext = context;
 
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
         this.mTargetCalendar = new GregorianCalendar();
@@ -81,7 +84,7 @@ public class DdayListAdapter extends BaseAdapter {
         // 뷰홀더 패턴 적용
         if (convertView == null) {
             // Item Cell에 Layout을 적용시킬 Inflator 객체를 생성한다.
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
 
             // Item Cell에 Layout을 적용시킨다.
             // 실제 객체는 이곳에 있다.
@@ -95,6 +98,7 @@ public class DdayListAdapter extends BaseAdapter {
                 ddayViewHolder.textViewDay = (TextView) convertView.findViewById(R.id.tvDay);
                 ddayViewHolder.textViewDescription = (TextView) convertView.findViewById(R.id.listview_group_tv_description);
 
+                ddayViewHolder.btnDetail = (ImageView) convertView.findViewById(R.id.listview_group_btn_detail);
                 ddayViewHolder.btnEdit = (ImageView) convertView.findViewById(R.id.listview_group_btn_edit);
                 ddayViewHolder.btnDelete = (ImageView) convertView.findViewById(R.id.listview_group_btn_delete);
                 ddayViewHolder.btnNoti = (ImageView) convertView.findViewById(R.id.listview_group_btn_noti);
@@ -131,7 +135,16 @@ public class DdayListAdapter extends BaseAdapter {
         int month = Integer.parseInt(strMonth);
         int day = Integer.parseInt(strDay);
 
-        ddayViewHolder.textViewDay.setText(getDiffDays(year, month - 1, day));
+        String diffDays = CalendarUtil.getDiffDays(mContext,
+                mTargetCalendar,
+                mBaseCalendar,
+                year,
+                month,
+                day,
+                Constant.DIRECTION.FORWARD);
+
+//        ddayViewHolder.textViewDay.setText(getDiffDays(year, month - 1, day));
+        ddayViewHolder.textViewDay.setText(diffDays);
 
         mTargetCalendar.set(Calendar.YEAR, year);
         mTargetCalendar.set(Calendar.MONTH, month - 1);
@@ -141,6 +154,7 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.detailLayout.setTag("detailLayout" + position);
         ddayViewHolder.checkBox.setTag("checkBox" + position);
 
+        ddayViewHolder.btnDetail.setTag(ddayItem.get_id());
         ddayViewHolder.btnEdit.setTag(ddayItem.get_id());
         ddayViewHolder.btnDelete.setTag(ddayItem.get_id());
         ddayViewHolder.btnNoti.setTag(ddayItem.get_id());
@@ -148,10 +162,13 @@ public class DdayListAdapter extends BaseAdapter {
         boolean isNotification = ddayItem.getNotification() == 1;
 //        ddayViewHolder.btnNoti.setEnabled(isEnabled);
 
+        ddayViewHolder.btnDetail.setImageResource(R.drawable.ic_calendar_minus);
+
         ddayViewHolder.btnNoti.setImageResource(isNotification ?
                 R.drawable.ic_calendar_noti_deactivate : R.drawable.ic_calendar_noti_activate);
 
         ddayViewHolder.btnEdit.setImageResource(R.drawable.ic_calendar_edit);
+
         ddayViewHolder.btnDelete.setImageResource(R.drawable.ic_calendar_minus);
 
         ddayViewHolder.ivStatusIcon.setImageResource(isNotification ?
@@ -178,13 +195,13 @@ public class DdayListAdapter extends BaseAdapter {
 
                     if (mChedkedItemSize > 0) {
                         mChedkedItemSize--;
-                        MainActivity activity = (MainActivity) context;
+                        MainActivity activity = (MainActivity) mContext;
                         activity.removeChecked(ddayItem.get_id());
                     }
 
                     if (mChedkedItemSize < 1) {
                         Log.e("onLongClick", "전부 체크 해제됨, 삭제 버튼 사라짐");
-                        MainActivity activity = (MainActivity) context;
+                        MainActivity activity = (MainActivity) mContext;
                         activity.handleFabVisibility(false);
                     }
 
@@ -197,7 +214,7 @@ public class DdayListAdapter extends BaseAdapter {
 
                     mChedkedItemSize++;
 
-                    MainActivity activity = (MainActivity) context;
+                    MainActivity activity = (MainActivity) mContext;
                     activity.addChecked(ddayItem.get_id());
                     activity.handleFabVisibility(true);
 
@@ -228,11 +245,22 @@ public class DdayListAdapter extends BaseAdapter {
             }
         });
 
+        // 상세
+        ddayViewHolder.btnDetail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) mContext;
+                activity.onClickDetail(ddayItem.get_id());
+
+                Toast.makeText(mContext, "상세상세", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // 노티
         ddayViewHolder.btnNoti.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
+                MainActivity activity = (MainActivity) mContext;
                 activity.onClickNoti(isNotification, ddayItem.get_id());
             }
         });
@@ -241,7 +269,7 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
+                MainActivity activity = (MainActivity) mContext;
                 activity.onClickEdit(ddayItem.get_id());
             }
         });
@@ -250,51 +278,12 @@ public class DdayListAdapter extends BaseAdapter {
         ddayViewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity activity = (MainActivity) context;
+                MainActivity activity = (MainActivity) mContext;
                 activity.onClickDelete(ddayItem.get_id());
             }
         });
 
         return convertView;
-    }
-
-    /**
-     *
-     * @param year
-     * @param month
-     * @param day
-     * @return
-     */
-    private String getDiffDays(int year, int month, int day) {
-        // Calendar 두 날짜 간 차이 구하기
-        mTargetCalendar.set(Calendar.YEAR, year);
-        mTargetCalendar.set(Calendar.MONTH, month);
-        mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
-
-        // 밀리초(1000분의 1초) 단위로 두 날짜 간 차이를 변환 후 초 단위로 다시 변환
-        long diffSec = (mTargetCalendar.getTimeInMillis() - mBaseCalendar.getTimeInMillis()) / 1000;
-        // 1분(60초), 1시간(60분), 1일(24시간) 이므로 다음과 같이 나누어 1일 단위로 다시 변환
-        long diffDays = diffSec / (60 * 60 * 24);
-
-        int flag = diffDays > 0 ? 1 : diffDays < 0 ? -1 : 0;
-
-        String msg = "";
-
-        switch (flag) {
-            case 1:
-                msg = context.getString(R.string.dday_valid_prefix) + Math.abs(diffDays);
-                break;
-            case 0:
-                msg = context.getString(R.string.dday_today);
-                break;
-            case -1:
-                msg = context.getString(R.string.dday_invalid_prefix) + Math.abs(diffDays);
-                break;
-            default:
-                msg = "";
-        }
-
-        return msg;
     }
 
 }

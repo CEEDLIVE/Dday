@@ -59,6 +59,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private LinearLayout mLayoutNoContent;
     private ListView mListViewContent;
+
     private FloatingActionButton mFabToBeCreated;
     private FloatingActionButton mFabToBeDeleted;
     private FloatingActionButton mFabToBeCancelled;
@@ -139,12 +140,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 // 2019-04-19 금요일 발견한 버그 해결 내용 정리
 
                 // 버그 발생 시나리오
-                // MainActivity -> DetailActivity
+                // MainActivity -> MergeActivity
                 // 신규로 디데이 일정 등록, 이때 상단바 디데이 고정 선택
                 // 저장
                 // 알림 메시지 내려옴
                 // 해당 알림 메시지 터치 == 노티피케이션에 등록된 알림 터치
-                // DetailActivity 로 이동
+                // MergeActivity 로 이동
                 // 날짜 변경
                 // 저장
                 // MainActivity에 반영 안 됨
@@ -268,7 +269,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mFabToBeCreated.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                moveDetailActivity(Constant.DDAY.NEW);
+                goMergeActivity(Constant.DDAY.NEW);
             }
         });
     }
@@ -278,7 +279,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mLayoutNoContent.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                moveDetailActivity(Constant.DDAY.NEW);
+                goMergeActivity(Constant.DDAY.NEW);
             }
         });
     }
@@ -287,10 +288,31 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      * 상세화면 액티비티로 이동
      * @param _id
      */
-    private void moveDetailActivity(int _id) {
+    private void goDetailActivity(int _id) {
         // 액티비티 전환 코드
         // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+
+        // 수정/삭제
+        if (_id > 0) {
+//            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, _id);
+            DdayItem ddayItem = mDatabaseHelper.getDday(_id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, _id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
+        }
+
+        // 인텐트 실행
+        startActivityForResult(intent, Constant.REQUEST_CODE_MAIN_ACTIVITY);
+    }
+
+    /**
+     * 상세화면 액티비티로 이동
+     * @param _id
+     */
+    private void goMergeActivity(int _id) {
+        // 액티비티 전환 코드
+        // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
+        Intent intent = new Intent(MainActivity.this, MergeActivity.class);
 
         // 수정/삭제
         if (_id > 0) {
@@ -635,6 +657,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     /**
+     * 수정 버튼 클릭 시 이벤트 핸들러
+     * @param _id
+     */
+    public void onClickDetail(int _id) {
+        try {
+            if (_id > 0) {
+                goDetailActivity(_id);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 노티 버튼 클릭 시 이벤트 핸들러
      * @param isNotification
      * @param _id
@@ -699,7 +735,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         try {
 //            mSharedPreferencesDataKey = uniqueKey;
             if (_id > 0) {
-                moveDetailActivity(_id);
+                goMergeActivity(_id);
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
