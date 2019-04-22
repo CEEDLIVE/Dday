@@ -22,6 +22,20 @@
             android:exported="true" />
 
         <receiver
+            android:name=".receiver.NotificationReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="0">
+                <action android:name="android.intent.action.TIME_TICK"/>
+                <data android:scheme="package" />
+            </intent-filter>
+            <intent-filter android:priority="0">
+                <action android:name="android.intent.action.DATE_CHANGED"/>
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".receiver.PackageEventReceiver"
             android:enabled="true"
             android:exported="true">

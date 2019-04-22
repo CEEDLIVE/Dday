@@ -29,16 +29,16 @@ public class NotificationReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving
 
-//        if ( Intent.ACTION_TIME_TICK.equals( intent.getAction() ) ) {
-//            // 시간이 변경된 경우 해야 할 작업
-//            Log.d("NotificationReceiver", "ACTION_TIME_TICK: 시간이 변경된 경우 해야 할 작업");
-//            listener.onReceive(Intent.ACTION_TIME_TICK);
-//        }
+        if ( Intent.ACTION_TIME_TICK.equals( intent.getAction() ) ) {
+            // 시간이 변경된 경우 해야 할 작업
+            Log.e("NotificationReceiver", "ACTION_TIME_TICK: 시간이 변경된 경우 해야 할 작업");
+            listener.onReceive(Intent.ACTION_TIME_TICK);
+        }
 
         // ACTION_DATE_CHANGED: 날짜가 변경된 경우 해야 할 작업
         if ( Intent.ACTION_DATE_CHANGED.equals( intent.getAction() ) ) {
             // 날짜가 변경된 경우 해야 할 작업
-            Log.d("NotificationReceiver", "ACTION_DATE_CHANGED: 날짜가 변경된 경우 해야 할 작업");
+            Log.e("NotificationReceiver", "ACTION_DATE_CHANGED: 날짜가 변경된 경우 해야 할 작업");
             listener.onReceive(Intent.ACTION_DATE_CHANGED);
         }
 

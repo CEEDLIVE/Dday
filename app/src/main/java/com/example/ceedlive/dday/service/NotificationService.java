@@ -293,7 +293,7 @@ public class NotificationService extends Service {
 
             mNotificationBuilder
                     .setContentTitle(ddayItem.getTitle())
-                    .setContentText(ddayItem.getDescription())
+                    .setContentText(ddayItem.getDate())
                     .setTicker(ddayItem.getTitle())
                     .setLargeIcon(BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher_round))
                     .setSmallIcon(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ?
@@ -345,7 +345,7 @@ public class NotificationService extends Service {
             // 매 분마다 이벤트가 발생한다.
             // 이 이벤트는 AndroidManifest에 Intent filter를 적용하는 것으로 캐치할 수 없고 코드내에서 동적으로 등록을 해야 한다.
             // 아마도 실수로 이 이벤트에 대한 로직을 추가하여 디바이스 배터리 광탈을 막기위한 목적이 아닌가 한다.
-//            intentFilter.addAction(Intent.ACTION_TIME_TICK);
+            intentFilter.addAction(Intent.ACTION_TIME_TICK);
 
             // 날짜가 변경 될 때 발생한다.
             // 다시 설명하면 어느 날의 11:59  PM에서 자정으로 넘어가 날짜가 변경되는 경우 브로드캐스트 되는 인텐트
