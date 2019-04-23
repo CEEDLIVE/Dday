@@ -3,6 +3,7 @@ package com.example.ceedlive.dday.activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -29,7 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
-
+    private Toolbar mToolbar;
     private ListView mListView;
 
     private int mId;
@@ -61,6 +62,10 @@ public class DetailActivity extends BaseActivity {
 
     @Override
     protected void initialize() {
+        mToolbar = findViewById(R.id.detail_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle(R.string.toolbar_title_detail); // it works.
+
         mList = new ArrayList();
         mListView = findViewById(R.id.detail_lv_detail);
         mTvDiffDays = findViewById(R.id.detail_tv_diff_days);

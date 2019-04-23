@@ -10,9 +10,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -20,6 +23,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
@@ -39,14 +43,13 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MergeActivity extends BaseActivity {
-
+    private Toolbar mToolbar;
     private Context mContext;
 
     private DatabaseHelper mDatabaseHelper;
 
     private TextView mTvToday, mTvDate;
     private int mYear, mMonth, mDay;
-    private ImageView mBtnSave;
     private EditText mEtTitle, mEtDescription;
     private CheckBox mCheckBoxAddNoti;
 
@@ -74,8 +77,10 @@ public class MergeActivity extends BaseActivity {
 
     @Override
     protected void initialize() {
+        mContext = getApplicationContext();
 
-        Log.e("MergeActivity", "initialize");
+        mToolbar = findViewById(R.id.merge_toolbar);
+        setSupportActionBar(mToolbar);
 
         mDatabaseHelper = DatabaseHelper.getInstance(MergeActivity.this);
 
@@ -132,15 +137,17 @@ public class MergeActivity extends BaseActivity {
             // Set Description
             mEtDescription.setText( ddayItem.getDescription() );
 
-            boolean isChecked = ddayItem.getNotification() == 1 ? true : false;
+            boolean isChecked = ddayItem.getNotification() == 1;
             mCheckBoxAddNoti.setChecked(isChecked);
+
+            getSupportActionBar().setTitle(R.string.toolbar_title_merge_update);
+        } else {
+            getSupportActionBar().setTitle(R.string.toolbar_title_merge_create);
         }
 
         mYear = mTargetCalendar.get(Calendar.YEAR);
         mMonth = mTargetCalendar.get(Calendar.MONTH);
         mDay = mTargetCalendar.get(Calendar.DAY_OF_MONTH);
-
-        mBtnSave = findViewById(R.id.detail_btn_save);
 
         // 텍스트뷰의 값을 업데이트함
         doUpdateText(mYear, mMonth, mDay);
@@ -154,7 +161,6 @@ public class MergeActivity extends BaseActivity {
 
     private void setEvent() {
         onClickDate();
-        onClickSave();
     }
 
     private void onClickDate() {
@@ -184,43 +190,40 @@ public class MergeActivity extends BaseActivity {
      * 저장 버튼 클릭 시 이벤트
      */
     private void onClickSave() {
-        mBtnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        // 사용자가 입력한 저장할 데이터
+        final String date = mTvDate.getText().toString();
+        final String title = mEtTitle.getText().toString();
+        final String description = mEtDescription.getText().toString();
+        final int notification = mCheckBoxAddNoti.isChecked() ? 1 : 0;
 
-                // 사용자가 입력한 저장할 데이터
-                final String date = mTvDate.getText().toString();
-                final String title = mEtTitle.getText().toString();
-                final String description = mEtDescription.getText().toString();
-                final int notification = mCheckBoxAddNoti.isChecked() ? 1 : 0;
+        // 데이터 유효성 검사
+        if ( !checkValidation() ) {
+            return;
+        }
 
-                // 데이터 유효성 검사
-//                if ( "".equals( title.trim() ) ) {
-//                    showDialog("경고", "디데이 제목을 입력하세요.");
-//                    return;
-//                }
+        String diffDays = CalendarUtil.getDiffDays(mContext,
+                mTargetCalendar,
+                mBaseCalendar,
+                mYear,
+                mMonth + 1,
+                mDay,
+                Constant.DIRECTION.FORWARD);
 
-                if ( !checkValidation() ) {
-                    return;
-                }
+        Log.e("onClickSave", "date: " + date);
+        Log.e("onClickSave", "title: " + title);
+        Log.e("onClickSave", "description: " + description);
+        Log.e("onClickSave", "notification: " + notification);
 
-                Log.e("onClickSave", "date: " + date);
-                Log.e("onClickSave", "title: " + title);
-                Log.e("onClickSave", "description: " + description);
-                Log.e("onClickSave", "notification: " + notification);
-
-                DdayItem ddayItem = doSaveSQLite(date, title, description, notification);
+        DdayItem ddayItem = doSaveSQLite(date, title, description, diffDays, notification);
 //                DdayItem ddayItem = doSaveSharedPreferencesData(date, title, description);
 
-                if ( mCheckBoxAddNoti.isChecked() ) {
-                    NotificationDday(ddayItem);
-                }
+        if ( mCheckBoxAddNoti.isChecked() ) {
+            NotificationDday(ddayItem);
+        }
 
-                Intent intent = new Intent();
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
+        Intent intent = new Intent();
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 
     private boolean checkValidation() {
@@ -257,7 +260,7 @@ public class MergeActivity extends BaseActivity {
      * @param description
      * @return
      */
-    private DdayItem doSaveSQLite(String date, String title, String description, int notification) {
+    private DdayItem doSaveSQLite(String date, String title, String description, String diffDays, int notification) {
         DdayItem ddayItem;
 
         if (mId > 0) {
@@ -267,6 +270,7 @@ public class MergeActivity extends BaseActivity {
             ddayItem.setTitle(title);
             ddayItem.setDescription(description);
             ddayItem.setNotification(notification);
+            ddayItem.setDiffDays(diffDays);
 
             int result = mDatabaseHelper.updateDday(ddayItem);
             if (result > 0) {
@@ -276,7 +280,11 @@ public class MergeActivity extends BaseActivity {
 
         } else {
             // create
-            ddayItem = new DdayItem(date, title, description, notification);
+            ddayItem = new DdayItem.Builder(date, title, description)
+                    .diffDays(diffDays)
+                    .notification(notification)
+                    .build();
+
             int createdRowId = (int) mDatabaseHelper.addDday(ddayItem);
             ddayItem.set_id(createdRowId);
 
@@ -335,12 +343,10 @@ public class MergeActivity extends BaseActivity {
 
         final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
 
-        DdayItem ddayItem = new DdayItem();
-        ddayItem.setDate(date);
-        ddayItem.setTitle(title);
-        ddayItem.setDescription(description);
-        ddayItem.setUniqueKey(uniqueKey);
-        ddayItem.setDiffDays(mDiffDays);
+        DdayItem ddayItem = new DdayItem.Builder(date, title, description)
+                .uniqueKey(uniqueKey)
+                .diffDays(mDiffDays)
+                .build();
 
         // JSON 으로 변환
         final String jsonStringAnniversaryInfo = gson.toJson(ddayItem, DdayItem.class);
@@ -452,21 +458,38 @@ public class MergeActivity extends BaseActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu_main; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.merge, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_merge:
+                // User chose the "Settings" item, show the app settings UI...
+                onClickSave();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
 
     private class CustomTextWatcher implements TextWatcher {
-
         private View view;
-
         private CustomTextWatcher(View view) {
             this.view = view;
         }
-
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         }
-
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         }
-
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
                 case R.id.detail_et_title:

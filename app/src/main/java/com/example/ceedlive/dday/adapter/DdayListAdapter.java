@@ -10,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
@@ -125,7 +124,7 @@ public class DdayListAdapter extends BaseAdapter {
 
         // Set Date
         String selectedDate = ddayItem.getDate();
-        String[] arrDate = selectedDate.split("/");
+        String[] arrDate = selectedDate.split(Constant.REGEX.SLASH);
 
         String strYear = arrDate[0];
         String strMonth = arrDate[1];
@@ -162,17 +161,17 @@ public class DdayListAdapter extends BaseAdapter {
         boolean isNotification = ddayItem.getNotification() == 1;
 //        ddayViewHolder.btnNoti.setEnabled(isEnabled);
 
-        ddayViewHolder.btnDetail.setImageResource(R.drawable.ic_calendar_minus);
+        ddayViewHolder.btnDetail.setImageResource(R.drawable.ic_dday_search);
 
         ddayViewHolder.btnNoti.setImageResource(isNotification ?
-                R.drawable.ic_calendar_noti_deactivate : R.drawable.ic_calendar_noti_activate);
+                R.drawable.ic_noti_star_unchecked : R.drawable.ic_noti_star_checked);
 
-        ddayViewHolder.btnEdit.setImageResource(R.drawable.ic_calendar_edit);
+        ddayViewHolder.btnEdit.setImageResource(R.drawable.ic_dday_edit);
 
-        ddayViewHolder.btnDelete.setImageResource(R.drawable.ic_calendar_minus);
+        ddayViewHolder.btnDelete.setImageResource(R.drawable.ic_dday_trash_can);
 
         ddayViewHolder.ivStatusIcon.setImageResource(isNotification ?
-                R.drawable.ic_calendar_noti_activate : R.drawable.ic_calendar_noti_deactivate);
+                R.drawable.ic_noti_star_checked : R.drawable.ic_noti_star_unchecked);
 
         // 롱클릭/온클릭
         // 로우별 isChecked, isVisibleDetail 값에 따른 체크상태를 표시
@@ -251,8 +250,6 @@ public class DdayListAdapter extends BaseAdapter {
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) mContext;
                 activity.onClickDetail(ddayItem.get_id());
-
-                Toast.makeText(mContext, "상세상세", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -24,7 +23,6 @@ import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.activity.MergeActivity;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.receiver.NotificationReceiver;
-import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -38,34 +36,18 @@ public class NotificationService extends Service {
     // onCreate() -> onStart() -> onDestory()
     // 메인스레드에서 관리하기 때문에 UI가 종료되어도 살아서 서비스를 계속한다.
 
-    DatabaseHelper mDatabaseHelper;
-
     NotificationManager mNotificationManager;
     NotificationChannel mNotificationChannel;
     NotificationCompat.Builder mNotificationBuilder;
 
-//    NotificationReceiver mNotificationReceiver;
-
     Calendar mTargetCalendar = new GregorianCalendar();
     Calendar mBaseCalendar = new GregorianCalendar();
-
-    IBinder mIBinder = new NotificationBinder();
 
     Resources mResources;
 
     private static final String TAG = "NotificationService";
 
-    boolean mIsRun = true;
-
-    final String RECEIVER_ACTION_NAME = "NotificationReceiver";
-
     public NotificationService() {
-    }
-
-    public class NotificationBinder extends Binder {
-        public NotificationService getService() {
-            return NotificationService.this;
-        }
     }
 
     /**
@@ -108,8 +90,6 @@ public class NotificationService extends Service {
         mResources = getResources();
     }
 
-
-
     // Service와 Thread가 사용될 시점을 생각해 보자.
     // Thread는 앱이 사용자와 상호작용하는 과정에서 UI Thread가 Block 되지 않기 위한 작업등을 처리하기 위한 Foreground 작업에 적합하고
     // Service는 앱이 사용자와 상호작용하지 않아도 계속 수행되어야 하는 Background 작업에 적합하다고 볼 수 있다.
@@ -136,8 +116,6 @@ public class NotificationService extends Service {
         // 다른 컴포넌트가 startService()를 호출해서 서비스가 시작되면 이 메소드가 호출됩니다.
         // 만약 연결된 타입의 서비스를 구현한다면 이 메소드는 재정의 할 필요가 없습니다.
 
-        Log.e(TAG,"onStartCommand()");
-
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final InnerNotificationServiceHandler handler = new InnerNotificationServiceHandler();
 
@@ -149,11 +127,7 @@ public class NotificationService extends Service {
                         if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID) ) {
                             int mId = intent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
                             if (mId > 0) {
-//                                mDatabaseHelper = DatabaseHelper.getInstance(NotificationService.this);
-//                                DdayItem ddayItem = mDatabaseHelper.getDday(mId);
-
                                 DdayItem ddayItem = intent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
-
                                 Message message = handler.obtainMessage();
                                 message.obj = ddayItem;
                                 handler.sendMessage(message);
@@ -293,11 +267,11 @@ public class NotificationService extends Service {
 
             mNotificationBuilder
                     .setContentTitle(ddayItem.getTitle())
-                    .setContentText(ddayItem.getDate())
+                    .setContentText(ddayItem.getDiffDays())
                     .setTicker(ddayItem.getTitle())
                     .setLargeIcon(BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher_round))
                     .setSmallIcon(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ?
-                            R.drawable.ic_notification_plus1d : R.mipmap.ic_launcher)
+                            R.drawable.ic_notification_star_white : R.mipmap.ic_launcher)
                     .setBadgeIconType(R.drawable.ic_calendar_noti_activate)
 //                    .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent))
                     .setOngoing(true)
@@ -345,10 +319,12 @@ public class NotificationService extends Service {
             // 매 분마다 이벤트가 발생한다.
             // 이 이벤트는 AndroidManifest에 Intent filter를 적용하는 것으로 캐치할 수 없고 코드내에서 동적으로 등록을 해야 한다.
             // 아마도 실수로 이 이벤트에 대한 로직을 추가하여 디바이스 배터리 광탈을 막기위한 목적이 아닌가 한다.
-            intentFilter.addAction(Intent.ACTION_TIME_TICK);
+//            intentFilter.addAction(Intent.ACTION_TIME_TICK);
 
             // 날짜가 변경 될 때 발생한다.
             // 다시 설명하면 어느 날의 11:59  PM에서 자정으로 넘어가 날짜가 변경되는 경우 브로드캐스트 되는 인텐트
+
+            // FIXME it doesn't work.
             intentFilter.addAction(Intent.ACTION_DATE_CHANGED);
 
             // 동적리시버 생성

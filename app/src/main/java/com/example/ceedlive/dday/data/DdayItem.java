@@ -26,50 +26,66 @@ public class DdayItem implements Parcelable {
 
     // TODO 생성자 빌더 패턴 알아보기
 
-    public DdayItem() {
+    public static class Builder {
+        private String uniqueKey;
+        private int _id;
 
+        private String title;
+        private String description;
+        private String date;
+
+        private String diffDays;
+        private int notification;
+
+        private boolean isChecked;
+        private boolean isVisibleDetail;
+
+        public Builder(String date, String title, String description) {
+            this.date = date;
+            this.title = title;
+            this.description = description;
+        }
+
+        public Builder uniqueKey(String uniqueKey) {
+            this.uniqueKey = uniqueKey;
+            return this;
+        }
+        public Builder rowId(int _id) {
+            this._id = _id;
+            return this;
+        }
+        public Builder diffDays(String diffDays) {
+            this.diffDays = diffDays;
+            return this;
+        }
+        public Builder notification(int notification) {
+            this.notification = notification;
+            return this;
+        }
+        public Builder isChecked(boolean isChecked) {
+            this.isChecked = isChecked;
+            return this;
+        }
+        public Builder isVisibleDetail(boolean isVisibleDetail) {
+            this.isVisibleDetail = isVisibleDetail;
+            return this;
+        }
+
+        public DdayItem build() {
+            return new DdayItem(this);
+        }
     }
 
-    public DdayItem(String date,
-                    String title,
-                    String description) {
-        this.date = date;
-        this.title = title;
-        this.description = description;
-    }
-
-    public DdayItem(String date,
-                    String title,
-                    String description,
-                    int notification) {
-        this.date = date;
-        this.title = title;
-        this.description = description;
-        this.notification = notification;
-    }
-
-    public DdayItem(int _id,
-                    String date,
-                    String title,
-                    String description,
-                    int notification) {
-        this._id = _id;
-        this.date = date;
-        this.title = title;
-        this.description = description;
-        this.notification = notification;
-    }
-
-    public DdayItem(int _id,
-                    String title,
-                    String description,
-                    String date,
-                    String diffDays) {
-        this._id = _id;
-        this.title = title;
-        this.description = description;
-        this.date = date;
-        this.diffDays = diffDays;
+    public DdayItem(Builder builder) {
+        this.uniqueKey = builder.uniqueKey;
+        this._id = builder._id;
+        this.title = builder.title;
+        this.description = builder.description;
+        this.date = builder.date;
+        this.diffDays = builder.diffDays;
+        this.notification = builder.notification;
+        this.isChecked = builder.isChecked;
+        this.isVisibleDetail = builder.isVisibleDetail;
     }
 
     protected DdayItem(Parcel in) {

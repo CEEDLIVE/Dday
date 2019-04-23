@@ -14,14 +14,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
         <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/detail_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorBrigntRed"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
+            app:popupTheme="@style/AppTheme.PopupOverlay" >
+        </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
@@ -29,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/colorBrigntRed2"
+        android:background="@color/colorWhiteSmoke"
         app:layout_constraintBottom_toTopOf="@id/detail_lv_detail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,6 +40,7 @@
             android:layout_height="wrap_content"
             android:textSize="36sp"
             android:textStyle="bold"
+            android:textColor="@color/colorBrigntRed"
             android:layout_gravity="center"
             android:layout_marginTop="50dp"
             android:layout_marginLeft="50dp"

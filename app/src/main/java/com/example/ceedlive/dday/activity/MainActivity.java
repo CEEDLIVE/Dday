@@ -20,6 +20,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
@@ -54,6 +56,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private TextView mTvNavBody;
 
     private DatabaseHelper mDatabaseHelper;
 
@@ -87,8 +90,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Log.e("onCreate", "onCreate");
 
         initialize();// 변수 초기화
         setEvent();// 이벤트 설정
@@ -125,6 +126,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+        mTvNavBody = findViewById(R.id.nav_body_text);
+        mTvNavBody.setMovementMethod(new ScrollingMovementMethod());
 
         mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
@@ -211,8 +215,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        // Inflate the menu_main; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -302,7 +306,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         // 인텐트 실행
-        startActivityForResult(intent, Constant.REQUEST_CODE_MAIN_ACTIVITY);
+        startActivityForResult(intent, Constant.INTENT.REQUEST_CODE.MAIN_ACTIVITY);
     }
 
     /**
@@ -323,7 +327,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         // 인텐트 실행
-        startActivityForResult(intent, Constant.REQUEST_CODE_MAIN_ACTIVITY);
+        startActivityForResult(intent, Constant.INTENT.REQUEST_CODE.MAIN_ACTIVITY);
     }
 
     /**
@@ -627,7 +631,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 mDynamicCheckedItemIdList.remove(index);
             }
         }
-        Log.e("MainActivity", "removeChecked: " + mDynamicCheckedItemIdList.toString());
     }
 
     /**
@@ -651,8 +654,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             mFabToBeCreated.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorBrigntRed) ));
 
             mDynamicCheckedItemIdList.clear();
-
-            Log.e("handleFabVisibility", "clear");
         }
     }
 

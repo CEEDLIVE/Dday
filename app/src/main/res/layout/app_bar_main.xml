@@ -35,7 +35,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_calendar_noti_activate" />
+        app:srcCompat="@drawable/ic_noti_star_checked" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabToBeCancelled"
@@ -47,7 +47,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_calendar_noti_deactivate" />
+        app:srcCompat="@drawable/ic_noti_star_unchecked" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabToBeDeleted"
@@ -59,7 +59,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_calendar_minus" />
+        app:srcCompat="@drawable/ic_dday_trash_can" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabToBeCreated"
@@ -67,6 +67,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_calendar_plus" />
+        app:srcCompat="@drawable/ic_dday_add_to_collection" />
 
 </android.support.design.widget.CoordinatorLayout>

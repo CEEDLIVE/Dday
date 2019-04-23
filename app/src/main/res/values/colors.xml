@@ -10,4 +10,8 @@
     <color name="colorYellow1">#FFF00D</color>
     <color name="colorYellow2">#FF9900</color>
     <color name="colorWhite">#FFFFFF</color>
+
+    <color name="colorLightGray">#D3D3D3</color>
+    <color name="colorWhiteSmoke">#F5F5F5</color>
+
 </resources>

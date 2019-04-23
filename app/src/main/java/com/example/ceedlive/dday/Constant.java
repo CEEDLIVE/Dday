@@ -33,6 +33,12 @@ public class Constant {
         public static class REQUEST_CODE {
             public static final int MAIN_ACTIVITY = 10;
         }
+        public static class EXTRA {
+            public static class KEY {
+                public static final String SQLITE_TABLE_CLT_DDAY_ROWID = "dday_id";
+                public static final String SQLITE_TABLE_CLT_DDAY_ITEM = "ddayitem";
+            }
+        }
     }
 
     public static class SHARED_PREFERENCES {
