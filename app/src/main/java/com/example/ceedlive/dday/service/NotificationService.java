@@ -124,10 +124,10 @@ public class NotificationService extends Service {
             public void run() {
                 synchronized (this) {
                     try {
-                        if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID) ) {
-                            int mId = intent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
+                        if ( intent.getExtras() != null && intent.getExtras().containsKey(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID) ) {
+                            int mId = intent.getIntExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, 0);
                             if (mId > 0) {
-                                DdayItem ddayItem = intent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
+                                DdayItem ddayItem = intent.getParcelableExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM);
                                 Message message = handler.obtainMessage();
                                 message.obj = ddayItem;
                                 handler.sendMessage(message);
@@ -226,8 +226,8 @@ public class NotificationService extends Service {
 
             // 알림 클릭시 MergeActivity 화면에 띄운다.
             Intent intent = new Intent(NotificationService.this, MergeActivity.class);
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
             PendingIntent pendingIntent = PendingIntent.getActivity(NotificationService.this, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             // TODO Notification 개념 더 알아보기
@@ -272,7 +272,7 @@ public class NotificationService extends Service {
                     .setLargeIcon(BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher_round))
                     .setSmallIcon(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ?
                             R.drawable.ic_notification_star_white : R.mipmap.ic_launcher)
-                    .setBadgeIconType(R.drawable.ic_calendar_noti_activate)
+                    .setBadgeIconType(R.drawable.ic_noti_star_checked)
 //                    .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent))
                     .setOngoing(true)
                     .setShowWhen(true)
@@ -295,7 +295,7 @@ public class NotificationService extends Service {
 
             // Set Date
             String selectedDate = ddayItem.getDate();
-            String[] arrDate = selectedDate.split("/");
+            String[] arrDate = selectedDate.split(Constant.REGEX.SLASH);
 
             String strYear = arrDate[0];
             String strMonth = arrDate[1];

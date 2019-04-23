@@ -33,6 +33,9 @@ import com.example.ceedlive.dday.service.NotificationService;
 import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.example.ceedlive.dday.util.CalendarUtil;
 import com.example.ceedlive.dday.validation.ValidationHelper;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -65,6 +68,8 @@ public class MergeActivity extends BaseActivity {
 
     private TextWatcher mTextWatcher;
 
+    private AdView mAdView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,12 @@ public class MergeActivity extends BaseActivity {
 
         initialize();
         setEvent();
+
+        MobileAds.initialize(this, getString(R.string.admob_banner_id));
+
+        mAdView = findViewById(R.id.merge_adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     @Override
@@ -99,12 +110,12 @@ public class MergeActivity extends BaseActivity {
         mCheckBoxAddNoti = findViewById(R.id.detail_checkbox_add_noti);
 
         DdayItem ddayItem = null;
-        mId = mIntent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
+        mId = mIntent.getIntExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, 0);
 
 //        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES)) {
         if ( mIntent.getExtras() != null
-                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID)
-                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM) ) {
+                && mIntent.getExtras().containsKey(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID)
+                && mIntent.getExtras().containsKey(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM) ) {
 //            mSharedPreferencesDataKey = mIntent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
 
 //            SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
@@ -115,7 +126,7 @@ public class MergeActivity extends BaseActivity {
 //            String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
 //            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
 
-            ddayItem = mIntent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
+            ddayItem = mIntent.getParcelableExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM);
         }
 
         if (null != ddayItem) {
@@ -418,8 +429,8 @@ public class MergeActivity extends BaseActivity {
         if (null != ddayItem) {
 //            int createdUserId = (int) mDatabaseHelper.getLastAutoIncrementedId();
             Intent intent = new Intent(this, NotificationService.class);
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
             startService(intent);
         }
 

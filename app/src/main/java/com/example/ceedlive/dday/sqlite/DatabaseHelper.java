@@ -54,9 +54,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static DatabaseHelper getInstance(Context context) {
         if (mDatabaseHelper == null) {
             mDatabaseHelper = new DatabaseHelper(context.getApplicationContext(),
-                    Constant.SQLITE_DB_FILE_NAME,
+                    Constant.SQLITE.DB_FILE_NAME,
                     null,
-                    Constant.SQLITE_DB_VERSION);
+                    Constant.SQLITE.DB_VERSION);
         }
         return mDatabaseHelper;
     }
@@ -120,7 +120,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super.onDowngrade(db, oldVersion, newVersion);
 
         Toast.makeText(mContext, "버전이 내려갔습니다..", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "onDowngrade 버전이 올라갔습니다.");
+        Log.d(TAG, "onDowngrade 버전이 내려갔습니다.");
     }
 
     /**

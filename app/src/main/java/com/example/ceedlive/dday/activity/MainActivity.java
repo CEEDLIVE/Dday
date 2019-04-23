@@ -38,6 +38,9 @@ import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.service.NotificationService;
 import com.example.ceedlive.dday.sqlite.DatabaseHelper;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,12 +89,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private BroadcastReceiver mBroadcastReceiver;
 
+    private AdView mBottomAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         initialize();// 변수 초기화
+
+        MobileAds.initialize(this, getString(R.string.admob_banner_id));
+        mBottomAdView = findViewById(R.id.main_adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mBottomAdView.loadAd(adRequest);
+
         setEvent();// 이벤트 설정
         setSQLiteData(); // (SQLite)
     }
@@ -301,8 +312,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (_id > 0) {
 //            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, _id);
             DdayItem ddayItem = mDatabaseHelper.getDday(_id);
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, _id);
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, _id);
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
         }
 
         // 인텐트 실행
@@ -322,8 +333,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (_id > 0) {
 //            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, _id);
             DdayItem ddayItem = mDatabaseHelper.getDday(_id);
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, _id);
-            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, _id);
+            intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
         }
 
         // 인텐트 실행
@@ -507,8 +518,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
                     if (mDatabaseHelper.updateDday(ddayItem) > 0) {
                         Intent intent = new Intent(this, NotificationService.class);
-                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, rowId); //전달할 값
-                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+                        intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, rowId); //전달할 값
+                        intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
                         startService(intent);
                         // 간혹 앱이 죽는 현상 발생, NullPointerException
 
@@ -699,15 +710,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     mNotificationManager.cancel(_id);
                     mDatabaseHelper.updateDday(ddayItem);
-
                     Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_remove_notification), Snackbar.LENGTH_SHORT).show();
                 } else {
                     Intent intent = new Intent(this, NotificationService.class);
 //                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
                     ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
                     if (mDatabaseHelper.updateDday(ddayItem) > 0) {
-                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
-                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+                        intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+                        intent.putExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
                         startService(intent);
                     }
 
@@ -717,6 +727,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_add_notification), Snackbar.LENGTH_SHORT).show();
                 }
 
+                handleFabVisibility(false);
                 setSQLiteData();
 
                 // intent 객체

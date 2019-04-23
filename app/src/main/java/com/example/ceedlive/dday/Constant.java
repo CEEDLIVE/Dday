@@ -15,19 +15,15 @@ public class Constant {
 
     public static final String INTENT_DATA_NAME_SHARED_PREFERENCES = "sharedPreferencesDataKey";
 
-    public static final String KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID = "dday_id";
-
-    public static final String KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM = "ddayitem";
-
     public static final String ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND = "ddayitem";
 
     public static final String CALENDAR_STRING_FORMAT_SLASH = "%d/%d/%d";
 
     public static final String NOTIFICATION_CHANNEL_ID = "my_channel_id_01";
 
-    public static final String SQLITE_DB_FILE_NAME = "dday.db";
-
-    public static final int SQLITE_DB_VERSION = 2;
+    public static class ADMOB {
+        public static final String APP_ID = "ca-app-pub-3687086103436819~2067765843";
+    }
 
     public static class INTENT {
         public static class REQUEST_CODE {
@@ -48,7 +44,7 @@ public class Constant {
 
     public static class SQLITE {
         public static final String DB_FILE_NAME = "dday.db";
-        public static final int DB_VERSION = 2;
+        public static final int DB_VERSION = 1;
     }
 
     public static class SIMPLE_DATE_FORMAT {
