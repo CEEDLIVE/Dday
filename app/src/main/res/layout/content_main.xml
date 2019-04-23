@@ -27,9 +27,9 @@
 
             <ImageView
                 android:id="@+id/main_iv_icon"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_marginBottom="36dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginBottom="24dp"
                 android:gravity="center"
                 android:scaleType="fitXY"
                 app:srcCompat="@drawable/ic_icons8_sun" />
@@ -41,7 +41,7 @@
                 android:layout_marginBottom="24dp"
                 android:gravity="center"
                 android:text="@string/main_no_content_header"
-                android:textSize="24sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -52,7 +52,6 @@
                 android:gravity="center"
                 android:text="@string/main_no_content_header_sub"
                 android:textSize="12sp" />
-
         </LinearLayout>
 
     </FrameLayout>

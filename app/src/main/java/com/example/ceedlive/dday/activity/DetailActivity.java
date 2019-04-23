@@ -17,6 +17,9 @@ import com.example.ceedlive.dday.R;
 import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.util.CalendarUtil;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,12 +55,20 @@ public class DetailActivity extends BaseActivity {
 
     private int mCalcWeight;
 
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
         initialize();
+
+        MobileAds.initialize(this, getString(R.string.admob_banner_id));
+
+        mAdView = findViewById(R.id.detail_adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     @Override
@@ -77,13 +88,13 @@ public class DetailActivity extends BaseActivity {
 
         mIntent = getIntent();
 
-        mId = mIntent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
+        mId = mIntent.getIntExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID, 0);
 
         if ( mIntent.getExtras() != null
-                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID)
-                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM) ) {
+                && mIntent.getExtras().containsKey(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ROWID)
+                && mIntent.getExtras().containsKey(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM) ) {
 
-            mDdayItem = mIntent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
+            mDdayItem = mIntent.getParcelableExtra(Constant.INTENT.EXTRA.KEY.SQLITE_TABLE_CLT_DDAY_ITEM);
 
             setSimpleListItem2Adapter();
         }
