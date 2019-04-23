@@ -1,7 +1,6 @@
 package com.example.ceedlive.dday.activity;
 
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -45,6 +44,8 @@ public class LoadingActivity extends BaseActivity {
 
     private PackageEventReceiver mPackageEventReceiver;
 
+    private NotificationManager mNotificationManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,12 +53,13 @@ public class LoadingActivity extends BaseActivity {
 
 //        registerPackageEventReceiver();
 
+        initialize();
+
         createTable();
         loadWiseSaying();
         startLoading();
 
-        mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
-        mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
+
 
 //        mPackageEventReceiver.callback(new PackageEventReceiver.ReceiveListener() {
 //            @Override
@@ -77,6 +79,12 @@ public class LoadingActivity extends BaseActivity {
 //        retrofitCreate();
 //        retrofitUpdate();
 //        retrofitDelete();
+    }
+
+    @Override
+    protected void initialize() {
+        mRetrofit = RetrofitConnection.getInstance(RetrofitApiService.API_URL);
+        mRetrofitApiService = mRetrofit.create(RetrofitApiService.class);
     }
 
     private void registerPackageEventReceiver() {

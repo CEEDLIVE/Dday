@@ -150,10 +150,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("TITLE", ddayItem.getTitle()); // TITLE 필드명
-        values.put("DESCRIPTION", ddayItem.getDescription()); // DESCRIPTION 필드명
-        values.put("DATE", ddayItem.getDate()); // DATE 필드명
-        values.put("NOTIFICATION", ddayItem.getNotification()); // NOTIFICATION 필드명
+        values.put( "TITLE", ddayItem.getTitle() ); // TITLE 필드명
+        values.put( "DESCRIPTION", ddayItem.getDescription() ); // DESCRIPTION 필드명
+        values.put( "DATE", ddayItem.getDate() ); // DATE 필드명
+        values.put( "NOTIFICATION", ddayItem.getNotification() ); // NOTIFICATION 필드명
+        values.put( "DIFF_DAYS", ddayItem.getDiffDays() ); // DIFF_DAYS 필드명
 
         try {
             // 새로운 Row 추가
@@ -167,6 +168,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         Log.e("addDday", "INSERT 완료");
+        Log.e("addDday", ddayItem.toString());
 
         return result;
     }
@@ -244,17 +246,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query("CLT_DDAY", null, null, null, null, null, null);
             if (cursor != null) {
-                while ( cursor.moveToNext() ) {
-                    int id = cursor.getInt(cursor.getColumnIndex("_ID"));
-                    String date = cursor.getString(cursor.getColumnIndex("DATE"));
-                    String title = cursor.getString(cursor.getColumnIndex("TITLE"));
-                    String description = cursor.getString(cursor.getColumnIndex("DESCRIPTION"));
-                    int notification = cursor.getInt(cursor.getColumnIndex("NOTIFICATION"));
+                String date, title, description;
+                String diffDays;
+                int id, notification;
 
-                    ddayItem = new DdayItem(id, date, title, description, notification);
+                while ( cursor.moveToNext() ) {
+                    date = cursor.getString(cursor.getColumnIndex("DATE"));
+                    title = cursor.getString(cursor.getColumnIndex("TITLE"));
+                    description = cursor.getString(cursor.getColumnIndex("DESCRIPTION"));
+
+                    diffDays = cursor.getString(cursor.getColumnIndex("DIFF_DAYS"));
+                    id = cursor.getInt(cursor.getColumnIndex("_ID"));
+                    notification = cursor.getInt(cursor.getColumnIndex("NOTIFICATION"));
+
+                    ddayItem = new DdayItem.Builder(date, title, description)
+                            .rowId(id)
+                            .diffDays(diffDays)
+                            .notification(notification)
+                            .build();
+
                     ddayItemList.add(ddayItem);
 
-                    Log.e("getDdayList", "id: " + id + ", date: " + date + ", title: " + title + ", description: " + description);
+                    Log.e("getDdayList", ddayItem.toString());
                 }
             }
         } catch (Exception e) {
@@ -291,13 +304,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     new String[] { String.valueOf(_id) }, null, null, null, null);
 
             if (cursor.moveToFirst()) {
-
-                int id = cursor.getInt(cursor.getColumnIndex("_ID"));
                 String date = cursor.getString(cursor.getColumnIndex("DATE"));
                 String title = cursor.getString(cursor.getColumnIndex("TITLE"));
                 String description = cursor.getString(cursor.getColumnIndex("DESCRIPTION"));
+
+                String diffDays = cursor.getString(cursor.getColumnIndex("DIFF_DAYS"));
+                int id = cursor.getInt(cursor.getColumnIndex("_ID"));
                 int notification = cursor.getInt(cursor.getColumnIndex("NOTIFICATION"));
-                ddayItem = new DdayItem(id, date, title, description, notification);
+
+                ddayItem = new DdayItem.Builder(date, title, description)
+                        .rowId(id)
+                        .diffDays(diffDays)
+                        .notification(notification)
+                        .build();
             }
 
         } catch (Exception e) {
@@ -324,19 +343,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.e("DbHelper updateDday", ddayItem.toString());
 
         SQLiteDatabase db = this.getWritableDatabase();
+        int result = 0;
 
-        // SQLite in Android How to update a specific row
-        // This is the cleanes solution to update a specific row.
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("DATE", ddayItem.getDate());
-        contentValues.put("TITLE", ddayItem.getTitle());
-        contentValues.put("DESCRIPTION", ddayItem.getDescription());
-        contentValues.put("NOTIFICATION", ddayItem.getNotification());
+        try {
+            // SQLite in Android How to update a specific row
+            // This is the cleanes solution to update a specific row.
+            ContentValues contentValues = new ContentValues();
+            contentValues.put( "DATE", ddayItem.getDate() );
+            contentValues.put( "TITLE", ddayItem.getTitle() );
+            contentValues.put( "DESCRIPTION", ddayItem.getDescription() );
+            contentValues.put( "NOTIFICATION", ddayItem.getNotification() );
+            contentValues.put( "DIFF_DAYS", ddayItem.getDiffDays() );
 
-        int result = db.update("CLT_DDAY",
-                contentValues,
-                "_ID = ?",
-                new String[] { String.valueOf(ddayItem.get_id()) });
+            result = db.update("CLT_DDAY",
+                    contentValues,
+                    "_ID = ?",
+                    new String[] { String.valueOf(ddayItem.get_id()) });
 
 //        StringBuffer sb = new StringBuffer();
 //        sb.append(" UPDATE CLT_DDAY ");
@@ -355,6 +377,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //                });
 
 //        db.execSQL("update mytable set name='Park' where id=5;");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
 
         // updating row
         return result;

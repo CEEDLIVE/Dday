@@ -102,6 +102,14 @@
             android:gravity="end">
 
             <ImageView
+                android:id="@+id/listview_group_btn_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="18dp"
+                android:text="@string/btn_detail"/>
+
+            <ImageView
                 android:id="@+id/listview_group_btn_noti"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

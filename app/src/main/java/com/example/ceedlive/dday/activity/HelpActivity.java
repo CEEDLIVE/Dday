@@ -48,7 +48,6 @@ public class HelpActivity extends BaseActivity {
 
     @Override
     protected void initialize() {
-        super.initialize();
         mViewPager = findViewById(R.id.help_pager);
         mViewPager.setAdapter( new CustomPagerAdapter( getApplicationContext() ) );
 

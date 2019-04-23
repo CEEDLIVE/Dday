@@ -1,16 +1,20 @@
 <resources>
     <string name="app_name">Dday</string>
 
+    <string name="btn_detail">상세</string>
     <string name="btn_noti">노티</string>
     <string name="btn_save">저장</string>
     <string name="btn_edit">수정</string>
     <string name="btn_delete">삭제</string>
     <string name="btn_cancel">취소</string>
+    <string name="btn_deactivate">해제</string>
+    <string name="btn_activate">고정</string>
 
     <string name="main_no_content_header">처음으로 디데이를 입력해주세요.</string>
     <!--<string name="main_no_content_header_sub">훗날 기억을 되새겨 봄으로써 순간이나마\n그 시절의 감상을 느낄 수 있는 추억은,\n그 자체로 축복이다.</string>-->
-    <string name="main_no_content_header_sub">기억이랑 인간의 진정한 재산이다.\n기억 속에서 인간은 가장 부유하면서 또 가장 빈곤하다.</string>
+    <string name="main_no_content_header_sub">기억이란 인간의 진정한 재산이다.\n기억 속에서 인간은 가장 부유하면서 또 가장 빈곤하다.</string>
 
+    <string name="hint_date_detail">디데이 날짜를 선택하세요.</string>
     <string name="hint_title_detail">디데이 제목을 입력하세요.</string>
     <string name="hint_description_detail">디데이 내용을 입력하세요.</string>
 
@@ -19,6 +23,12 @@
 
     <string name="alert_title_delete_dday_checked">선택 일정 삭제</string>
     <string name="alert_message_delete_dday_checked">선택한 일정을 삭제하시겠습니까?</string>
+
+    <string name="alert_title_deactivate_dday_checked">선택 일정 해제</string>
+    <string name="alert_message_deactivate_dday_checked">선택한 일정이 상단바에 고정되어 있으면 해제합니다.</string>
+
+    <string name="alert_title_activate_dday_checked">선택 일정 고정</string>
+    <string name="alert_message_activate_dday_checked">선택한 일정이 상단바에 없으면 고정합니다.</string>
 
     <string name="dday_valid_prefix">D-</string>
     <string name="dday_invalid_prefix">D+</string>
@@ -31,13 +41,70 @@
     <string name="snackbar_msg_add_dday">디데이가 업데이트 되었습니다.</string>
     <string name="snackbar_msg_delete_dday">디데이가 삭제 되었습니다.</string>
 
+    <string name="snackbar_msg_deactivate_dday">상단바에 고정된 디데이가 해제 되었습니다.</string>
+    <string name="snackbar_msg_no_deactivate_dday">고정 해제할 디데이가 없습니다.\n먼저 일정을 등록해보세요.</string>
+
+    <string name="snackbar_msg_activate_dday">상단바에 디데이가 고정 되었습니다.</string>
+    <string name="snackbar_msg_no_activate_dday">고정할 디데이가 없습니다.</string>
+
+    <string name="toolbar_title_detail">Dday 상세보기</string>
+    <string name="toolbar_title_merge_create">Dday 추가하기</string>
+    <string name="toolbar_title_merge_update">Dday 수정하기</string>
+
     <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Dday</string>
+    <string name="nav_header_subtitle">Powered By C:\EEDLIVE</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="drawer_body_text">
+    자주 그리고 많이 웃는 것,\n
+    현명한 이에게 존경을 받고,\n
+    아이들에게서 사랑을 받는 것,\n
+    정직한 비평가의 찬사를 듣고\n
+    친구의 배반을 참아내는 것,\n
+    아름다움을 식별할 줄 알며\n
+    다른 사람에게서 최선의 것을 발견하는 것,\n
+    건강한 아이를 낳든,\n
+    한 뙈기의 정원을 가꾸든,\n
+    사회환경을 개선하든\n
+    자기가 태어나기 전보다,\n
+    세상을 조금이라도 살기 좋은 곳으로\n
+    만들어 놓고 떠나는 것,\n
+    자신이 한때 이곳에서 살았음으로 해서\n
+    단 한 사람의 인생이라도 행복해지는 것,\n
+    이것이 진정한 성공이다.\n
+    \n
+    랄프 왈도 에머슨(Ralph Waldo Emerson)
+    </string>
+
+    <string name="drawer_body_text2">
+    자주 그리고 많이 웃는 것,\n
+    현명한 이에게 존경을 받고, 아이들에게서 사랑을 받는 것,\n
+    정직한 비평가의 찬사를 듣고 친구의 배반을 참아내는 것,\n
+    아름다움을 식별할 줄 알며\n
+    다른 사람에게서 최선의 것을 발견하는 것,\n
+    건강한 아이를 낳든, 한 뙈기의 정원을 가꾸든,\n
+    사회환경을 개선하든 자기가 태어나기 전보다,\n
+    세상을 조금이라도 살기 좋은 곳으로 만들어 놓고 떠나는 것,\n
+    자신이 한때 이곳에서 살았음으로 해서\n
+    단 한 사람의 인생이라도 행복해지는 것,\n
+    이것이 진정한 성공이다.\n
+    \n
+    To laugh much;\n
+    To win respect of intelligent persons and the affections of children;\n
+    To earn the approbation of honest critics and endure the betrayal of false friends;\n
+    To appreciate beauty;\n
+    To find the best in others;\n
+    To give one\'s self;\n
+    To leave the world a little better, whether by a healthy child, a garden patch, or a redeemed social condition.;\n
+    To have played and laughed with enthusiasm, and sung with exultation;\n
+    To know even one life has breathed easier because you have lived;\n
+    This is to have succeeded.\n
+    \n
+    랄프 왈도 에머슨(Ralph Waldo Emerson)
+    </string>
 
 </resources>

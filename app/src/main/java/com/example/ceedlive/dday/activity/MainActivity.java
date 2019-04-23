@@ -2,9 +2,11 @@ package com.example.ceedlive.dday.activity;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -12,11 +14,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
@@ -51,13 +56,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private TextView mTvNavBody;
 
     private DatabaseHelper mDatabaseHelper;
 
     private LinearLayout mLayoutNoContent;
     private ListView mListViewContent;
-    private FloatingActionButton mFabBtn;
-    private FloatingActionButton mFabBtn2;
+
+    private FloatingActionButton mFabToBeCreated;
+    private FloatingActionButton mFabToBeDeleted;
+    private FloatingActionButton mFabToBeCancelled;
+    private FloatingActionButton mFabToBeNotified;
 
     private List<DdayItem> mDdayItemList;
     private String mAnniversaryInfoKey;
@@ -75,6 +84,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private NotificationManager mNotificationManager;
 
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,44 +97,101 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+    }
+
+    @Override
     protected void initialize() {
         mLayoutNoContent = findViewById(R.id.main_ll_no_content);
         mListViewContent = findViewById(R.id.expandableListView);
 
-        mFabBtn = findViewById(R.id.fab);
-        mFabBtn2 = findViewById(R.id.fab2);
+        mFabToBeCreated = findViewById(R.id.fabToBeCreated);
+        mFabToBeDeleted = findViewById(R.id.fabToBeDeleted);
+        mFabToBeCancelled = findViewById(R.id.fabToBeCancelled);
+        mFabToBeNotified = findViewById(R.id.fabToBeNotified);
 
         // https://stackoverflow.com/questions/30969455/android-changing-floating-action-button-color
-        mFabBtn.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
-        mFabBtn2.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+//        mFabBtn.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+        mFabToBeDeleted.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+        mFabToBeCancelled.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
+        mFabToBeNotified.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mTvNavBody = findViewById(R.id.nav_body_text);
+        mTvNavBody.setMovementMethod(new ScrollingMovementMethod());
+
+        mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
         mDdayItemList = new ArrayList<>();
         mDynamicCheckedItemIdList = new CopyOnWriteArrayList<>();
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // intent ..
+
+                // 2019-04-19 금요일 발견한 버그 해결 내용 정리
+
+                // 버그 발생 시나리오
+                // MainActivity -> MergeActivity
+                // 신규로 디데이 일정 등록, 이때 상단바 디데이 고정 선택
+                // 저장
+                // 알림 메시지 내려옴
+                // 해당 알림 메시지 터치 == 노티피케이션에 등록된 알림 터치
+                // MergeActivity 로 이동
+                // 날짜 변경
+                // 저장
+                // MainActivity에 반영 안 됨
+                // 로그캣을 보면
+                // MainActivity onCreate 메소드 호출 안됨
+                // NotificationService 클래스의 onStartCommand 호출
+                // InnerNotificationServiceHandler > handleMessage: 핸들러 메시지큐에 있는 작업을 처리 ( 실제 처리 메소드)
+
+                // 그래서
+                // 서비스 내 해당 코드 말미에 브로드캐스트 리시버 추가, onReceive 메소드 안에 다음 코드 추가
+                // 버그 해결
+
+                setSQLiteData();
+            }
+        };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver( mBroadcastReceiver,
+                new IntentFilter(Constant.ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND) );
     }
 
     private void setEvent() {
         onClickFabButtonCreate();
         onClickLayoutNoContent();
 
-
-        mFabBtn2.setOnClickListener(new OnClickListener() {
+        mFabToBeDeleted.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
-                Log.e("삭제 FAB 클릭", "삭제삭제");
                 onClickFabDelete();
+            }
+        });
+
+        mFabToBeCancelled.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickFabNotification(Constant.NOTIFICATION.TO_BE_CANCELLED);
+            }
+        });
+
+        mFabToBeNotified.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickFabNotification(Constant.NOTIFICATION.TO_BE_NOTIFIED);
             }
         });
     }
@@ -138,8 +205,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if ( drawer.isDrawerOpen(GravityCompat.START) ) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -148,8 +215,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        // Inflate the menu_main; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -188,7 +255,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -203,10 +270,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      * Floating Action Button Click Event
      */
     private void onClickFabButtonCreate() {
-        mFabBtn.setOnClickListener(new OnClickListener() {
+        mFabToBeCreated.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                moveDetailActivity(0);
+                goMergeActivity(Constant.DDAY.NEW);
             }
         });
     }
@@ -216,7 +283,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mLayoutNoContent.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                moveDetailActivity(0);
+                goMergeActivity(Constant.DDAY.NEW);
             }
         });
     }
@@ -225,7 +292,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      * 상세화면 액티비티로 이동
      * @param _id
      */
-    private void moveDetailActivity(int _id) {
+    private void goDetailActivity(int _id) {
         // 액티비티 전환 코드
         // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
@@ -233,11 +300,34 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         // 수정/삭제
         if (_id > 0) {
 //            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, _id);
-            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, _id);
+            DdayItem ddayItem = mDatabaseHelper.getDday(_id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, _id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
         }
 
         // 인텐트 실행
-        startActivityForResult(intent, Constant.REQUEST_CODE_MAIN_ACTIVITY);
+        startActivityForResult(intent, Constant.INTENT.REQUEST_CODE.MAIN_ACTIVITY);
+    }
+
+    /**
+     * 상세화면 액티비티로 이동
+     * @param _id
+     */
+    private void goMergeActivity(int _id) {
+        // 액티비티 전환 코드
+        // 인텐트 선언 -> 현재 액티비티, 넘어갈 액티비티
+        Intent intent = new Intent(MainActivity.this, MergeActivity.class);
+
+        // 수정/삭제
+        if (_id > 0) {
+//            intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, _id);
+            DdayItem ddayItem = mDatabaseHelper.getDday(_id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, _id);
+            intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem);
+        }
+
+        // 인텐트 실행
+        startActivityForResult(intent, Constant.INTENT.REQUEST_CODE.MAIN_ACTIVITY);
     }
 
     /**
@@ -307,27 +397,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void setSQLiteData() {
-        // TODO SQLite
-        // ==================================================
-
         mDatabaseHelper = DatabaseHelper.getInstance(this);
-
         mDdayItemList.clear();
 
         List<DdayItem> ddayItemList = mDatabaseHelper.getDdayList();
-
         for (DdayItem ddayItem : ddayItemList) {
-            Log.e("SQLite item.toString()", ddayItem.toString());
             mDdayItemList.add(ddayItem);
         }
 
         SortDescending sortDescending = new SortDescending();
         Collections.sort(mDdayItemList, sortDescending);
 
-        if (mDdayItemList.isEmpty()) {
+        if ( mDdayItemList.isEmpty() ) {
             mLayoutNoContent.setVisibility(View.VISIBLE);
             mListViewContent.setVisibility(View.INVISIBLE);
-            mFabBtn2.setVisibility(View.GONE);
+            mFabToBeDeleted.setVisibility(View.GONE);
+            mFabToBeCancelled.setVisibility(View.GONE);
+            mFabToBeNotified.setVisibility(View.GONE);
         } else {
             mListViewContent.setVisibility(View.VISIBLE);
             mLayoutNoContent.setVisibility(View.INVISIBLE);
@@ -347,20 +433,149 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             int first = ddayItem1.get_id();
             int second = ddayItem2.get_id();
 
-            int compareValue = 0;
+//            int compareValue = 0;
+//            compareValue = second > first ? 1 : second == first ? 0 : -1;
+//            if (second > first) {
+//                compareValue = 1;
+//            }
+//            if (second == first) {
+//                compareValue = 0;
+//            }
+//            if (second < first) {
+//                compareValue = -1;
+//            }
 
-            if (second > first) {
-                compareValue = 1;
-            }
-            if (second == first) {
-                compareValue = 0;
-            }
-            if (second < first) {
-                compareValue = -1;
-            }
-
-            return compareValue;
+            return Integer.compare(second, first);
         }
+    }
+
+    public void onClickFabNotification(boolean isToBeNotified) {
+        Log.e("MainActivity", "onClickFabNotification");
+
+        // 다이얼로그
+        mAlertDialogBuilder = new AlertDialog.Builder(this);
+
+        // 다이얼로그 값/옵션 세팅
+        mAlertDialogBuilder
+                .setTitle(isToBeNotified ?
+                        R.string.alert_title_activate_dday_checked :
+                        R.string.alert_title_deactivate_dday_checked)
+                .setMessage(isToBeNotified ?
+                        R.string.alert_message_activate_dday_checked :
+                        R.string.alert_message_deactivate_dday_checked)
+                .setCancelable(false)
+                .setPositiveButton(isToBeNotified ? R.string.btn_activate : R.string.btn_deactivate,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (isToBeNotified) {
+                                    handleClickCheckedItemNotify();
+                                } else {
+                                    handleClickCheckedItemCancel();
+                                }
+                            }
+                        })
+                .setNegativeButton(R.string.btn_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // 다이얼로그를 취소한다.
+                                dialog.cancel();
+                            }
+                        });
+
+        mAlertDialog = mAlertDialogBuilder.create();
+        mAlertDialog.show();
+    }
+
+    private void handleClickCheckedItemNotify() {
+        // 일정 수정
+        if ( !mDynamicCheckedItemIdList.isEmpty() ) {
+            int count = 0;
+            int updated = 0;
+            int total = mDynamicCheckedItemIdList.size();
+
+            for (Integer rowId : mDynamicCheckedItemIdList) {
+                count++;
+
+                DdayItem ddayItem = mDatabaseHelper.getDday(rowId);
+
+                if (ddayItem != null) {
+                    if ( Constant.NOTIFICATION.REGISTERED == ddayItem.getNotification() ) {
+                        continue;
+                    }
+
+                    ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
+
+                    if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                        Intent intent = new Intent(this, NotificationService.class);
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, rowId); //전달할 값
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+                        startService(intent);
+                        // 간혹 앱이 죽는 현상 발생, NullPointerException
+
+                        updated++;
+                    }
+                }
+
+                if (count == total) { // last item
+                    Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_activate_dday), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            if (updated == 0) {
+                Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_activate_dday), Snackbar.LENGTH_SHORT).show();
+            }
+
+        } else {
+            Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_activate_dday), Snackbar.LENGTH_SHORT).show();
+        }
+
+        handleFabVisibility(false);
+        setSQLiteData();
+    }
+
+    private void handleClickCheckedItemCancel() {
+        // 일정 수정
+        if ( !mDynamicCheckedItemIdList.isEmpty() ) {
+            int count = 0;
+            int updated = 0;
+            int total = mDynamicCheckedItemIdList.size();
+
+            for (Integer rowId : mDynamicCheckedItemIdList) {
+                count++;
+
+                DdayItem ddayItem = mDatabaseHelper.getDday(rowId);
+
+                if ( Constant.NOTIFICATION.UNREGISTERED == ddayItem.getNotification() ) {
+                    continue;
+                }
+
+                ddayItem.setNotification(Constant.NOTIFICATION.UNREGISTERED);
+
+                if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                    try {
+                        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                        mNotificationManager.cancel(rowId);
+                        updated++;
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (count == total) { // last item
+                    Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_deactivate_dday), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            if (updated == 0) {
+                Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_deactivate_dday), Snackbar.LENGTH_SHORT).show();
+            }
+
+        } else {
+            Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_no_deactivate_dday), Snackbar.LENGTH_SHORT).show();
+        }
+
+        handleFabVisibility(false);
+        setSQLiteData();
     }
 
     public void onClickFabDelete() {
@@ -379,8 +594,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             public void onClick(DialogInterface dialog, int id) {
                                 // 일정 삭제
                                 if ( !mDynamicCheckedItemIdList.isEmpty() ) {
-                                    for (Integer _id : mDynamicCheckedItemIdList) {
-                                        doDeleteItem(_id);
+                                    for (Integer rowId : mDynamicCheckedItemIdList) {
+                                        doDeleteItem(rowId);
                                     }
                                     Snackbar.make(getWindow().getDecorView().getRootView(), getString(R.string.snackbar_msg_delete_dday), Snackbar.LENGTH_SHORT).show();
                                     handleFabVisibility(false);
@@ -416,7 +631,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 mDynamicCheckedItemIdList.remove(index);
             }
         }
-        Log.e("MainActivity", "removeChecked: " + mDynamicCheckedItemIdList.toString());
     }
 
     /**
@@ -425,9 +639,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     public void handleFabVisibility(boolean visible) {
         if (visible) {
-            mFabBtn2.setVisibility(View.VISIBLE);
+            mFabToBeDeleted.setVisibility(View.VISIBLE);
+            mFabToBeCancelled.setVisibility(View.VISIBLE);
+            mFabToBeNotified.setVisibility(View.VISIBLE);
+
+            mFabToBeCreated.setEnabled(false);
+            mFabToBeCreated.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorWhite) ));
         } else {
-            mFabBtn2.setVisibility(View.GONE);
+            mFabToBeDeleted.setVisibility(View.GONE);
+            mFabToBeCancelled.setVisibility(View.GONE);
+            mFabToBeNotified.setVisibility(View.GONE);
+
+            mFabToBeCreated.setEnabled(true);
+            mFabToBeCreated.setBackgroundTintList(ColorStateList.valueOf( getResources().getColor(R.color.colorBrigntRed) ));
+
+            mDynamicCheckedItemIdList.clear();
+        }
+    }
+
+    /**
+     * 수정 버튼 클릭 시 이벤트 핸들러
+     * @param _id
+     */
+    public void onClickDetail(int _id) {
+        try {
+            if (_id > 0) {
+                goDetailActivity(_id);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -464,10 +704,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 } else {
                     Intent intent = new Intent(this, NotificationService.class);
 //                intent.putExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES, ddayItem.getUniqueKey()); //전달할 값
-                    intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, ddayItem.get_id()); //전달할 값
-                    startService(intent);
                     ddayItem.setNotification(Constant.NOTIFICATION.REGISTERED);
-                    mDatabaseHelper.updateDday(ddayItem);
+                    if (mDatabaseHelper.updateDday(ddayItem) > 0) {
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, ddayItem.get_id()); //전달할 값
+                        intent.putExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM, ddayItem); //전달할 값
+                        startService(intent);
+                    }
 
                     // 우리는 보통 알림을 띄울때 Toast를 이용해서 많이 이용했을 겁니다.
                     // 하지만 안드로이드 오레오부터 알림을 끄게되면 Toast가 보이지 않습니다.
@@ -494,7 +736,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         try {
 //            mSharedPreferencesDataKey = uniqueKey;
             if (_id > 0) {
-                moveDetailActivity(_id);
+                goMergeActivity(_id);
             }
         } catch (NullPointerException e) {
             e.printStackTrace();

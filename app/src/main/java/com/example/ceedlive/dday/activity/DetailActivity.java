@@ -1,53 +1,56 @@
 package com.example.ceedlive.dday.activity;
 
-import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.DatePicker;
-import android.widget.EditText;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
+import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.data.DdayItem;
-import com.example.ceedlive.dday.sqlite.DatabaseHelper;
-import com.example.ceedlive.dday.service.NotificationService;
+import com.example.ceedlive.dday.util.CalendarUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class DetailActivity extends BaseActivity {
+    private Toolbar mToolbar;
+    private ListView mListView;
 
-    private DatabaseHelper mDatabaseHelper;
-
-    private TextView mTvToday, mTvDate;
-    private int mYear, mMonth, mDay;
-    private Button mBtnSave;
-    private EditText mEtTitle, mEtDescription;
-    private CheckBox mCheckBoxAddNoti;
-
-    private String mSharedPreferencesDataKey;
     private int mId;
-
-    private Calendar mTargetCalendar, mBaseCalendar;
     private Intent mIntent;
-    private String mDiffDays;
+
+    private DdayItem mDdayItem;
+    private SimpleAdapter mSimpleAdapter;
+
+    private Calendar mTargetCalendar, mBaseCalendar, mCalendar;
+    private Date mDdayDate, mTargetDate;
+
+    private SimpleDateFormat mSimpleDateFormat;
+
+    private List<Map<String, String>> mList = new ArrayList<>();
+    private Map<String, String> mItem;
+
+    private TextView mTvDiffDays;
+    private TextView mTvTargetDay;
+
+    private int mCalcWeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,363 +58,149 @@ public class DetailActivity extends BaseActivity {
         setContentView(R.layout.activity_detail);
 
         initialize();
-        setEvent();
     }
 
     @Override
     protected void initialize() {
+        mToolbar = findViewById(R.id.detail_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle(R.string.toolbar_title_detail); // it works.
 
-        Log.e("DetailActivity", "initialize");
-
-        mDatabaseHelper = DatabaseHelper.getInstance(DetailActivity.this);
-
-        mIntent = getIntent();
+        mList = new ArrayList();
+        mListView = findViewById(R.id.detail_lv_detail);
+        mTvDiffDays = findViewById(R.id.detail_tv_diff_days);
+        mTvTargetDay = findViewById(R.id.detail_tv_target_day);
 
         // 날짜와 시간을 가져오기위한 Calendar 인스턴스 선언
         mTargetCalendar = new GregorianCalendar();
         mBaseCalendar = new GregorianCalendar();
 
-        mTvToday = findViewById(R.id.detail_tv_today);
-        mTvDate = findViewById(R.id.detail_tv_date);
-        mEtTitle = findViewById(R.id.detail_et_title);
-        mEtDescription = findViewById(R.id.detail_et_description);
+        mIntent = getIntent();
 
-        mCheckBoxAddNoti = findViewById(R.id.detail_checkbox_add_noti);
+        mId = mIntent.getIntExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID, 0);
 
-//        if (mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES)) {
-        if ( mIntent.getExtras() != null && mIntent.getExtras().containsKey(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID)) {
-//            mSharedPreferencesDataKey = mIntent.getStringExtra(Constant.INTENT_DATA_NAME_SHARED_PREFERENCES);
+        if ( mIntent.getExtras() != null
+                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID)
+                && mIntent.getExtras().containsKey(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM) ) {
 
-//            SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
-//            // TODO SharedPreferences 더 알아보기
-//            // 첫번째 인자 name 은 해당 SharedPreferences 의 이름입니다.
-//            // 특정 이름으로 생성할수 있고 해당 이름으로 xml 파일이 생성된다고 생각하시면 됩니다.
-//
-//            String jsonStringValue = sharedPreferences.getString(mSharedPreferencesDataKey, "");
-//            DdayItem ddayItem = gson.fromJson(jsonStringValue, DdayItem.class);
+            mDdayItem = mIntent.getParcelableExtra(Constant.KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM);
 
-            mId = mIntent.getIntExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, 0);
+            setSimpleListItem2Adapter();
+        }
+//        setSimpleListItem1Adapter();// TEST
+    }
+
+    private void setSimpleListItem1Adapter() {
+        // [1] 데이터 준비 : 배열에 저장된 데이터
+        String[] fruits = {"사과","배","딸기","수박","참외","파인애플","포도","바나나","키위","귤","망고"};
+
+        // [2] 어댑터 생성
+        // public ArrayAdapter (Context context, int textViewResourceId, T[] objects)
+        // 보여줄곳(현재애플리케이션 컨텍스트), 보여줄모양(레이아웃아이디), 데이터(배열)
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,fruits);
+        // android.R.layout.simple_list_item_checked : 항목당 체크표시
+
+        // [3] 어댑터뷰인 ListView에 생성된 어댑터를 설정.
+
+        // 레이아웃 파일에서 정의된 ListView객체를 찾기위하여 R.id.listview1 이라는 ID를 가지고 findViewByID()를 호출한다.
+//        ListView listView = (ListView) findViewById(R.id.lv_detail);
+        mListView.setAdapter(adapter); //리스트 뷰에 어댑터 설정.
+    }
+
+    private void setSimpleListItem2Adapter() {
+
+        mSimpleDateFormat = new SimpleDateFormat(
+                Constant.SIMPLE_DATE_FORMAT.PATTERN.YYYY년_MM월_DD일_E요일,
+                Locale.KOREA);
+
+        mCalendar = Calendar.getInstance();
+
+        String selectedDate = mDdayItem.getDate();
+        String[] arrDate = selectedDate.split(Constant.REGEX.SLASH);
+        String yearStr = arrDate[0];
+        String monthStr = arrDate[1];
+        String dayStr = arrDate[2];
+
+        monthStr = Integer.parseInt(monthStr) < 10 ? "0" + monthStr : monthStr;
+        String yyyyMMddStr = String.format("%s%s%s", yearStr, monthStr, dayStr); // 선택한 날짜
+
+        Log.e("DA yyyyMMddStr", yyyyMMddStr);
+
+        String diffDays = CalendarUtil.getDiffDays(this,
+                mTargetCalendar,
+                mBaseCalendar,
+                Integer.parseInt(yearStr),
+                Integer.parseInt(monthStr),
+                Integer.parseInt(dayStr),
+                Constant.DIRECTION.FORWARD);
+
+        Log.e("diffDays", diffDays);
+
+
+        if ( diffDays.equals( getString(R.string.dday_today) ) ) {
+            // D-DAY
+            mCalcWeight = 0;
+
+        } else if ( diffDays.startsWith( getString(R.string.dday_valid_prefix) ) ) {
+            // D-
+            String minusStr = diffDays.substring( getString(R.string.dday_valid_prefix).length() );
+            mCalcWeight = -Integer.parseInt(minusStr);
+
+        } else if ( diffDays.startsWith( getString(R.string.dday_invalid_prefix) ) ) {
+            // D+
+            String plusStr = diffDays.substring( getString(R.string.dday_invalid_prefix).length() );
+            mCalcWeight = Integer.parseInt(plusStr);
         }
 
-        DdayItem ddayItem = mId > 0 ? mDatabaseHelper.getDday(mId) : null;
-        if (null != ddayItem) {
-            // Set Date
+        mSimpleDateFormat = new SimpleDateFormat(
+                Constant.SIMPLE_DATE_FORMAT.PATTERN.YYYY년_MM월_DD일_E요일,
+                Locale.KOREA);
 
-            Log.e("DetailActicity toString", ddayItem.toString());
+        mTargetDate = CalendarUtil.getNextDate(0, yyyyMMddStr);
 
-            String selectedDate = ddayItem.getDate();
-            String[] arrDate = selectedDate.split("/");
-            String year = arrDate[0], month = arrDate[1], day = arrDate[2];
+        mTvDiffDays.setText(diffDays);
+        mTvTargetDay.setText( mSimpleDateFormat.format(mTargetDate) );
 
-            mTargetCalendar.set(Calendar.YEAR, Integer.parseInt(year));
-            mTargetCalendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
-            mTargetCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(day));
+        int interval = 100;
+        int nextDateInt = 0;
+        for (int i=-10; i<11; i++) {
+            Log.e("tag", i + "");
+            nextDateInt = (i * interval);
+            Date nextDate = CalendarUtil.getNextDate(nextDateInt, yyyyMMddStr);
 
-            // Set Title
-            mEtTitle.setText( ddayItem.getTitle() );
+//            mSimpleDateFormat = new SimpleDateFormat(
+//                    Constant.SIMPLE_DATE_FORMAT.PATTERN.YYYY년_MM월_DD일_E요일,
+//                    Locale.KOREA);
 
-            // Set Description
-            mEtDescription.setText( ddayItem.getDescription() );
+            Log.e("mSimpleDateFormat", mSimpleDateFormat.format(nextDate));
 
-            boolean isChecked = ddayItem.getNotification() == 1 ? true : false;
-            mCheckBoxAddNoti.setChecked(isChecked);
+            mCalendar.setTime(nextDate);
+            int year = mCalendar.get(Calendar.YEAR);
+            int month = mCalendar.get(Calendar.MONTH) + 1;
+            int day = mCalendar.get(Calendar.DAY_OF_MONTH) + mCalcWeight;
+
+            Log.e("calendar", String.format("%d %d %d", year, month, day));
+
+            String targetDiffDays = CalendarUtil.getDiffDays(this,
+                    mTargetCalendar,
+                    mBaseCalendar,
+                    year,
+                    month,
+                    day,
+                    Constant.DIRECTION.REVERSE);
+
+            mItem = new HashMap<>();
+            mItem.put("item 1", targetDiffDays);
+            mItem.put("item 2", mSimpleDateFormat.format(nextDate));
+            mList.add(mItem);
         }
 
-        mYear = mTargetCalendar.get(Calendar.YEAR);
-        mMonth = mTargetCalendar.get(Calendar.MONTH);
-        mDay = mTargetCalendar.get(Calendar.DAY_OF_MONTH);
+        mSimpleAdapter = new SimpleAdapter(this, mList,
+                android.R.layout.simple_list_item_2,
+                new String[] {"item 1","item 2"},
+                new int[] {android.R.id.text1, android.R.id.text2});
 
-        mBtnSave = findViewById(R.id.detail_btn_save);
-
-        // 텍스트뷰의 값을 업데이트함
-        doUpdateText(mYear, mMonth, mDay);
-    }
-
-    private void setEvent() {
-        onClickDate();
-        onClickSave();
-    }
-
-    private void onClickDate() {
-        // 날짜 텍스트뷰 클릭 시 이벤트
-        mTvDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new DatePickerDialog(
-                        DetailActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                // 사용자가 입력한 값을 가져온뒤
-                                mYear = year;
-                                mMonth = monthOfYear;
-                                mDay = dayOfMonth;
-
-                                // 텍스트뷰의 값을 업데이트함
-                                doUpdateText(mYear, mMonth, mDay);
-                            }
-                        }, mYear, mMonth, mDay).show();
-            }
-        });
-    }
-
-    /**
-     * 저장 버튼 클릭 시 이벤트
-     */
-    private void onClickSave() {
-        mBtnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // 사용자가 입력한 저장할 데이터
-                final String date = mTvDate.getText().toString();
-                final String title = mEtTitle.getText().toString();
-                final String description = mEtDescription.getText().toString();
-                final int notification = mCheckBoxAddNoti.isChecked() ? 1 : 0;
-
-                // 데이터 유효성 검사
-                if ( "".equals( title.trim() ) ) {
-                    showDialog("경고", "디데이 제목을 입력하세요.");
-                    return;
-                }
-
-                DdayItem ddayItem = doSaveSQLite(date, title, description, notification);
-//                DdayItem ddayItem = doSaveSharedPreferencesData(date, title, description);
-
-                if ( mCheckBoxAddNoti.isChecked() ) {
-                    NotificationDday(ddayItem);
-                }
-
-                Intent intent = new Intent();
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
-    }
-
-    /**
-     * SQLite
-     * @param date
-     * @param title
-     * @param description
-     * @return
-     */
-    private DdayItem doSaveSQLite(String date, String title, String description, int notification) {
-        DdayItem ddayItem;
-
-        if (mId > 0) {
-            // update
-            ddayItem = mDatabaseHelper.getDday(mId);
-            ddayItem.setDate(date);
-            ddayItem.setTitle(title);
-            ddayItem.setDescription(description);
-            ddayItem.setNotification(notification);
-
-            int result = mDatabaseHelper.updateDday(ddayItem);
-            if (result > 0) {
-                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                mNotificationManager.cancel(mId);
-            }
-
-        } else {
-            // create
-            ddayItem = new DdayItem(date, title, description, notification);
-            mDatabaseHelper.addDday(ddayItem);
-        }
-
-        return ddayItem;
-    }
-
-    /**
-     * SharedPreferences
-     * @param date
-     * @param title
-     * @param description
-     * @return
-     */
-    @SuppressWarnings("unused")
-    private DdayItem doSaveSharedPreferencesData(String date, String title, String description) {
-
-        // SharedPreferences 를 ceedliveAppDday 이름, 기본모드로 설정
-        SharedPreferences sharedPreferences = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
-
-        // How to get all keys of SharedPreferences programmatically in Android?
-        // reference: https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
-        Map<String, ?> allEntries = sharedPreferences.getAll();
-        String eachKey = "";
-        int eachKeyNumber;
-        int maxKeyNumber;
-        List<Integer> keyNumberList = new ArrayList<>();
-        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            eachKey = entry.getKey();
-            if (!"".equals(eachKey) && eachKey.startsWith(Constant.SHARED_PREFERENCES_KEY_PREFIX)) {
-                // ceedlive 디데이 앱에서 사용하는 SharedPreferences
-                eachKeyNumber = Integer.parseInt(eachKey.replace(Constant.SHARED_PREFERENCES_KEY_PREFIX, ""));
-                keyNumberList.add(eachKeyNumber);
-                continue;
-            }
-            keyNumberList.clear();
-            keyNumberList.add(0);
-            break;
-        }
-
-        // IndexOutOfBoundsException 방지
-        if (keyNumberList.isEmpty()) {
-            keyNumberList.add(0);
-        }
-
-        // 리스트 역순으로 뒤집기
-        Collections.sort(keyNumberList);
-        Collections.reverse(keyNumberList);
-        maxKeyNumber = keyNumberList.get(0);
-
-        // 저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        final String uniqueKey = mSharedPreferencesDataKey == null ? Constant.SHARED_PREFERENCES_KEY_PREFIX + (maxKeyNumber + 1) : mSharedPreferencesDataKey;
-
-        DdayItem ddayItem = new DdayItem();
-        ddayItem.setDate(date);
-        ddayItem.setTitle(title);
-        ddayItem.setDescription(description);
-        ddayItem.setUniqueKey(uniqueKey);
-        ddayItem.setDiffDays(mDiffDays);
-
-        // JSON 으로 변환
-        final String jsonStringAnniversaryInfo = gson.toJson(ddayItem, DdayItem.class);
-
-        // key/value pair 로 값을 저장하는 형태
-        editor.putString(uniqueKey, jsonStringAnniversaryInfo);
-        editor.apply();
-
-        // ? editor.commit(); 최종 커밋
-        // Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background less... (Ctrl+F1)
-        // Inspection info:Consider using apply() instead of commit on shared preferences. Whereas commit blocks and writes its data to persistent storage immediately, apply will handle it in the background.
-
-        Intent intent = new Intent();
-        intent.putExtra("newItem", jsonStringAnniversaryInfo);
-        setResult(Activity.RESULT_OK, intent);
-
-        return ddayItem;
-    }
-
-    /**
-     * 다이얼로그 출력
-     */
-    private void showDialog(String title, String message) {
-        // 다이얼로그
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-        // 다이얼로그 값/옵션 세팅
-        alertDialogBuilder
-                .setTitle(title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setNegativeButton("확인",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // 다이얼로그를 취소한다.
-                                dialog.cancel();
-                            }
-                        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-        // reference: https://mainia.tistory.com/2017
-        // reference: https://m.blog.naver.com/PostView.nhn?blogId=sgepyh2916&logNo=221176134263&proxyReferer=https%3A%2F%2Fwww.google.com%2F
-    }
-
-    /**
-     * 두 날짜 간 차이 구하기
-     * @param year
-     * @param month
-     * @param day
-     * @return
-     */
-    private String getDiffDays(int year, int month, int day) {
-        mTargetCalendar.set(Calendar.YEAR, year);
-        mTargetCalendar.set(Calendar.MONTH, month);
-        mTargetCalendar.set(Calendar.DAY_OF_MONTH, day);
-
-        // 밀리초(1000분의 1초) 단위로 두 날짜 간 차이를 변환 후 초 단위로 다시 변환
-        long diffSec = (mTargetCalendar.getTimeInMillis() - mBaseCalendar.getTimeInMillis()) / 1000;
-        // 1분(60초), 1시간(60분), 1일(24시간) 이므로 다음과 같이 나누어 1일 단위로 다시 변환
-        long diffDays = diffSec / (60 * 60 * 24);
-
-        int flag = diffDays > 0 ? 1 : diffDays < 0 ? -1 : 0;
-
-        String msg = "";
-
-        switch (flag) {
-            case 1:
-                msg = getString(R.string.dday_valid_prefix) + Math.abs(diffDays);
-                break;
-            case 0:
-                msg = getString(R.string.dday_today);
-                break;
-            case -1:
-                msg = getString(R.string.dday_invalid_prefix) + Math.abs(diffDays);
-                break;
-            default:
-                msg = "";
-        }
-
-        return msg;
-    }
-
-    /**
-     *
-     */
-    private void doUpdateText(int year, int month, int day) {
-        mTvDate.setText(String.format(Locale.getDefault(),
-                Constant.CALENDAR_STRING_FORMAT_SLASH, mYear, mMonth + 1, mDay));
-
-        mDiffDays = getDiffDays(year, month, day);
-        mTvToday.setText(mDiffDays);
-    }
-
-    public void NotificationDday(DdayItem ddayItem) {
-        if (null != ddayItem) {
-            int createdUserId = (int) mDatabaseHelper.getLastAutoIncrementedId();
-            Intent intent = new Intent(this, NotificationService.class);
-            intent.putExtra(Constant.INTENT_DATA_SQLITE_TABLE_DDAY_ID, createdUserId); //전달할 값
-            startService(intent);
-        }
-
-        // FIXME 2019-04-09 Tue
-        // Task 연동을 통해서 Github 와 연동 (Jetbrains의 IDE 사용 시 적극 권장) 테스트용 주석입니다.
-        // Issue 기반 Branch 생성 및 커밋 테스트용 주석입니다.
-
-        // TODO 개별 PendingIntent 생성 더 알아보기
-        // 핵심은 getActivity 파라메터중 두번째 requestCode 와 마지막 flags 이다.
-        // 흔히 requestCode = 0, flags = FLAG_UPDATE_CURRENT 를 사용한다.
-        // 개별적인 작업을 하기 위해서는 pendingIntent를 생성할때마다 requestCode를 다르게 할당하고
-        // 서로의 충돌을 피하기 위해서 flags는 FLAG_CANCEL_CURRENT 로 호출해야 한다.
-
-        // PendingIntent
-        // 인텐트를 포함하는 인텐트, 사용하는 목적은 현재 앱이 아닌 외부의 앱(노티피케이션, 알람 등)이 현재 내가 개발한 앱을 열 수 있도록 허락할 수 있는 인텐트
-        // 펜딩 인텐트 안에는 실제 데이터를 가지고 열 액티비티를 저장한 인텐트를 갖고 있는 것과 같다.
-
-        // 내가 개발한 앱 안에서 A라는 액티비티에서 B라는 액티비티를 열려면 Intent intent = new Intent(A.this, B.class) 로 하여 startActivity(intent) 를 함.
-        // 외부에서는 이 intent 를 포함하고 있는 PendingIntent 를 선언하여 intent 를 품게 한 뒤 사용하게 하는 것이다.
-
-
-        // TODO Notification 개념 더 알아보기
-        // 별로 중요하지 않은 알림은 소리나 진동없이 왔으면 좋겠고 중요하다고 생각하는 알림은 잠금화면에서도 알려준다면?!
-        // 이럴때 유용한게 알림채널(Notification Channel)입니다.
-        // Notification Channel을 통해 Notification을 여러가지 용도로 나누어서 관리할 수 있게 만들어 줍니다.
-        // 사용자가 직접 각 채널별로 알림중요도나 기타 설정을 변경할 수도 있습니다.
-        // 오레오에서부터는 이 Notification Channel을 필수로 만들어 주어야 합니다.
-        // 오레오에서 Notification Channel을 만들어 주지 않으면 알림이 오지 않습니다.
-
-        // 해당 기기의 OS 버전이 오레오 이상일때 Notification Channel 을 만들어주고 필요한 설정을 해준뒤
-        // NotificationManager의 createNotificationChannel()을 호출해주면 됩니다.
-
-        // TODO 의미 다시 한번 살펴보기
-        // 채널은 한번만 만들면 되기때문에 Notification이 올때마다 만들어줄 필요가 없습니다.
-        // Application Class에서 만들어 줘 되고 SharedPreference를 이용해서 한번 만든적이 있다면 그다음부터는 만들지 않도록 해주어도 됩니다.
-
+        mListView.setAdapter(mSimpleAdapter);
     }
 
 }

@@ -15,7 +15,11 @@ public class Constant {
 
     public static final String INTENT_DATA_NAME_SHARED_PREFERENCES = "sharedPreferencesDataKey";
 
-    public static final String INTENT_DATA_SQLITE_TABLE_DDAY_ID = "dday_id";
+    public static final String KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ROWID = "dday_id";
+
+    public static final String KEY_INTENT_DATA_SQLITE_TABLE_CLT_DDAY_ITEM = "ddayitem";
+
+    public static final String ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND = "ddayitem";
 
     public static final String CALENDAR_STRING_FORMAT_SLASH = "%d/%d/%d";
 
@@ -25,8 +29,59 @@ public class Constant {
 
     public static final int SQLITE_DB_VERSION = 2;
 
+    public static class INTENT {
+        public static class REQUEST_CODE {
+            public static final int MAIN_ACTIVITY = 10;
+        }
+        public static class EXTRA {
+            public static class KEY {
+                public static final String SQLITE_TABLE_CLT_DDAY_ROWID = "dday_id";
+                public static final String SQLITE_TABLE_CLT_DDAY_ITEM = "ddayitem";
+            }
+        }
+    }
+
+    public static class SHARED_PREFERENCES {
+        public static final String NAME = "ceedliveAppDday";
+        public static final String KEY_PREFIX = "ceedlive.dday";
+    }
+
+    public static class SQLITE {
+        public static final String DB_FILE_NAME = "dday.db";
+        public static final int DB_VERSION = 2;
+    }
+
+    public static class SIMPLE_DATE_FORMAT {
+        public static class PATTERN {
+            public static final String YYYY년_MM월_DD일_E요일 = "yyyy년 MM월 dd일 E요일";
+            public static final String YYYYMMDD = "yyyyMMdd";
+        }
+    }
+
     public static class NOTIFICATION {
         public static final int UNREGISTERED = 0;
         public static final int REGISTERED = 1;
+
+        public static final boolean TO_BE_NOTIFIED = true;
+        public static final boolean TO_BE_CANCELLED = false;
     }
+
+    public static class FLOATING_ACTION_BUTTON {
+        public static final boolean VISIBLE = true;
+        public static final boolean INVISIBLE = false;
+    }
+
+    public static class DDAY {
+        public static final int NEW = 0;
+    }
+
+    public static class DIRECTION {
+        public static final int FORWARD = 1;
+        public static final int REVERSE = 0;
+    }
+
+    public static class REGEX {
+        public static final String SLASH = "/";
+    }
+
 }

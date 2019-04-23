@@ -26,7 +26,31 @@
      The background color of this view defaults to the your theme's colorAccent. If you wish to change this at runtime then you can do so via setBackgroundTintList(ColorStateList).
      -->
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab2"
+        android:id="@+id/fabToBeNotified"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="208dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_noti_star_checked" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabToBeCancelled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="144dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_noti_star_unchecked" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabToBeDeleted"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -35,14 +59,14 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_twotone_delete_24px" />
+        app:srcCompat="@drawable/ic_dday_trash_can" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fabToBeCreated"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_weekly_calendar" />
+        app:srcCompat="@drawable/ic_dday_add_to_collection" />
 
 </android.support.design.widget.CoordinatorLayout>
