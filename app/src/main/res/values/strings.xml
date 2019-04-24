@@ -2,6 +2,7 @@
     <string name="app_name">CEEDAY</string>
 
     <string name="admob_app_id">ca-app-pub-3687086103436819~2067765843</string>
+    <string name="admob_app_id_test">ca-app-pub-3940256099942544/6300978111</string>
 
     <!-- 운영 광고 단위 -->
     <!-- 배너 광고 -->
@@ -72,10 +73,9 @@
     <string name="toolbar_title_merge_create">Dday 추가하기</string>
     <string name="toolbar_title_merge_update">Dday 수정하기</string>
 
-    <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Dday</string>
+    <string name="nav_header_title">CEEDAY</string>
     <string name="nav_header_subtitle">Powered By C:\EEDLIVE</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>

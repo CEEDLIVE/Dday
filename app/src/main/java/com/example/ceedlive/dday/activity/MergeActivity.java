@@ -21,9 +21,7 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
@@ -35,7 +33,6 @@ import com.example.ceedlive.dday.util.CalendarUtil;
 import com.example.ceedlive.dday.validation.ValidationHelper;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,8 +75,6 @@ public class MergeActivity extends BaseActivity {
 
         initialize();
         setEvent();
-
-        MobileAds.initialize(this, getString(R.string.admob_banner_id));
 
         mAdView = findViewById(R.id.merge_adView);
         AdRequest adRequest = new AdRequest.Builder().build();

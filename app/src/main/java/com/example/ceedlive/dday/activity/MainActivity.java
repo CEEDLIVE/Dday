@@ -8,8 +8,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -26,6 +30,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,7 +46,6 @@ import com.example.ceedlive.dday.service.NotificationService;
 import com.example.ceedlive.dday.sqlite.DatabaseHelper;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,11 +60,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     /*
      * 디데이 프로젝트 관련 내용은 Dday 프로젝트 README.md 에 정리
      */
+    private PackageInfo mPackageInfo;// 패키지에 대한 전반적인 정보
 
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
-    private TextView mTvNavBody;
+
+    private ListView mNavBodyListView;
+    private TextView mNavBodyTv;
 
     private DatabaseHelper mDatabaseHelper;
 
@@ -98,10 +106,30 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         initialize();// 변수 초기화
 
-        MobileAds.initialize(this, getString(R.string.admob_banner_id));
+        Log.e("getAppVersionCode", getAppVersionCode() + "");
+
         mBottomAdView = findViewById(R.id.main_adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("8A807912B473B630ADD61488024D05EB") // This request is sent from a test device.
+                .addTestDevice("5E52A824C274C8491B1CA21E1FD6E82F") // This request is sent from a test device.
+                .build();
+
         mBottomAdView.loadAd(adRequest);
+
+        mBottomAdView.setAdListener(new com.google.android.gms.ads.AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                Log.e("onAdLoaded","AdLoaded");
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                super.onAdFailedToLoad(errorCode);
+                Log.e("onAdFailedToLoad",""+errorCode);
+
+            }
+        });
 
         setEvent();// 이벤트 설정
         setSQLiteData(); // (SQLite)
@@ -138,8 +166,29 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        mTvNavBody = findViewById(R.id.nav_body_text);
-        mTvNavBody.setMovementMethod(new ScrollingMovementMethod());
+        // Array of strings...
+        String[] menuArray = {"버전"};
+
+        mNavBodyListView = findViewById(R.id.nav_body_listview);
+        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                TextView view = (TextView) super.getView(position, convertView, parent);
+                switch (position) {
+                    case 0:
+                        view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_dday_info, 0, 0, 0);
+                        view.setText(String.format("%s (%s)", "버전 ", getAppVersionName()));
+                        break;
+                }
+
+                return view;
+            }
+        };
+        mNavBodyListView.setAdapter(adapter);
+
+        mNavBodyTv = findViewById(R.id.nav_body_text);
+        mNavBodyTv.setMovementMethod(new ScrollingMovementMethod());
 
         mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
@@ -179,6 +228,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         LocalBroadcastManager.getInstance(this).registerReceiver( mBroadcastReceiver,
                 new IntentFilter(Constant.ACTION_INTENT_FILTER_NOTIFICATION_ON_START_COMMAND) );
+    }
+
+    /**
+     * 앱버전 코드
+     * @return
+     */
+    public int getAppVersionCode(){
+        // PackageInfo 초기화
+        try{
+            mPackageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        }catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return mPackageInfo.versionCode;
+    }
+    /**
+     * 앱버전 코드
+     * @return
+     */
+    public String getAppVersionName(){
+        // PackageInfo 초기화
+        try{
+            mPackageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        }catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return "";
+        }
+        return mPackageInfo.versionName;
     }
 
     private void setEvent() {

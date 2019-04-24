@@ -25,6 +25,15 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
             <include layout="@layout/nav_header_main" />
+
+            <ListView
+                android:id="@+id/nav_body_listview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </ListView>
+
+            <View style="@style/Divider"/>
+
             <TextView
                 android:id="@+id/nav_body_text"
                 android:text="@string/drawer_body_text"

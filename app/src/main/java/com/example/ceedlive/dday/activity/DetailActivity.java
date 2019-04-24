@@ -1,11 +1,9 @@
 package com.example.ceedlive.dday.activity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -14,17 +12,14 @@ import android.widget.TextView;
 import com.example.ceedlive.dday.BaseActivity;
 import com.example.ceedlive.dday.Constant;
 import com.example.ceedlive.dday.R;
-import com.example.ceedlive.dday.adapter.DdayListAdapter;
 import com.example.ceedlive.dday.data.DdayItem;
 import com.example.ceedlive.dday.util.CalendarUtil;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -63,8 +58,6 @@ public class DetailActivity extends BaseActivity {
         setContentView(R.layout.activity_detail);
 
         initialize();
-
-        MobileAds.initialize(this, getString(R.string.admob_banner_id));
 
         mAdView = findViewById(R.id.detail_adView);
         AdRequest adRequest = new AdRequest.Builder().build();

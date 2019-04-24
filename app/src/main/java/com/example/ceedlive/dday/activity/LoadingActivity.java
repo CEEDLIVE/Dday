@@ -16,6 +16,7 @@ import com.example.ceedlive.dday.http.RetrofitApiService;
 import com.example.ceedlive.dday.http.RetrofitConnection;
 import com.example.ceedlive.dday.receiver.PackageEventReceiver;
 import com.example.ceedlive.dday.sqlite.DatabaseHelper;
+import com.google.android.gms.ads.MobileAds;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -59,7 +60,13 @@ public class LoadingActivity extends BaseActivity {
         loadWiseSaying();
         startLoading();
 
+        // MobileAds 클래스의 정적 메소드 initialize()에 제공된 두 번째 인수는 Ad Mob에 가입할 때 얻은 Ad Mob 애플리케이션 ID 여야 합니다.
+        // 이 경우 데모 용도로 Google에서 제공하는 공개 애플리케이션 ID를 사용하고 있습니다.
+        // This method should be called as early as possible, and only once per application launch
+        MobileAds.initialize(this, getString(R.string.admob_app_id));
 
+        // reference: https://code.tutsplus.com/ko/tutorials/how-to-monetize-your-android-apps-with-admob--cms-29255
+        // reference: https://stackoverflow.com/questions/37418663/what-is-the-proper-way-to-call-mobileads-initialize
 
 //        mPackageEventReceiver.callback(new PackageEventReceiver.ReceiveListener() {
 //            @Override
