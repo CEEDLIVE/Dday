@@ -106,12 +106,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         initialize();// 변수 초기화
 
-        Log.e("getAppVersionCode", getAppVersionCode() + "");
-
         mBottomAdView = findViewById(R.id.main_adView);
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice("8A807912B473B630ADD61488024D05EB") // This request is sent from a test device.
                 .addTestDevice("5E52A824C274C8491B1CA21E1FD6E82F") // This request is sent from a test device.
+                .addTestDevice("02BAA7172204A562C207F49284761F2A") // This request is sent from a test device.
                 .build();
 
         mBottomAdView.loadAd(adRequest);
@@ -126,7 +125,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onAdFailedToLoad(int errorCode) {
                 super.onAdFailedToLoad(errorCode);
-                Log.e("onAdFailedToLoad",""+errorCode);
+                Log.e("onAdFailedToLoad","" + errorCode);
 
             }
         });
@@ -135,10 +134,32 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setSQLiteData(); // (SQLite)
     }
 
+    /** Called when leaving the activity */
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        if (mBottomAdView != null) {
+            mBottomAdView.pause();
+        }
+        super.onPause();
+    }
+
+    /** Called when returning to the activity */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mBottomAdView != null) {
+            mBottomAdView.resume();
+        }
+    }
+
+    /** Called before the activity is destroyed */
+    @Override
+    public void onDestroy() {
+        if (mBottomAdView != null) {
+            mBottomAdView.destroy();
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+        super.onDestroy();
     }
 
     @Override
