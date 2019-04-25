@@ -16,11 +16,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
+import com.ceedlive.ceeday.Constant;
 import com.ceedlive.ceeday.R;
 import com.ceedlive.ceeday.activity.MergeActivity;
-import com.ceedlive.ceeday.Constant;
 import com.ceedlive.ceeday.data.DdayItem;
 import com.ceedlive.ceeday.receiver.NotificationReceiver;
 
