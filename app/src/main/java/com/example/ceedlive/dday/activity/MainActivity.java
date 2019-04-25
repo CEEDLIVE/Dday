@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -199,7 +198,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 switch (position) {
                     case 0:
                         view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_dday_info, 0, 0, 0);
-                        view.setText(String.format("%s (%s)", "버전 ", getAppVersionName()));
+                        view.setText(String.format("%s(%s)", "버전 ", getAppVersionName()));
                         break;
                 }
 

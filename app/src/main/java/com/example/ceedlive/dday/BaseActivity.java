@@ -11,8 +11,6 @@ import com.google.gson.GsonBuilder;
 public abstract class BaseActivity extends AppCompatActivity {
     protected final Gson gson = new GsonBuilder().create();
 
-    protected OkHttpConnection httpConnection;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

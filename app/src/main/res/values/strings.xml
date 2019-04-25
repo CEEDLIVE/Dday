@@ -3,10 +3,13 @@
 
     <string name="admob_app_id">ca-app-pub-3687086103436819~2067765843</string>
     <string name="admob_app_id_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_app_id_dear_yhs">ca-app-pub-8963004081529205~4649008570</string>
 
     <!-- 운영 광고 단위 -->
     <!-- 배너 광고 -->
+    <!-- 배너 광고 -->
     <string name="admob_banner_id">ca-app-pub-3687086103436819/5801984965</string>
+    <string name="admob_banner_id_dear_yhs">ca-app-pub-8963004081529205/6125741772</string>
 
     <!-- 샘플 광고 단위 -->
     <!-- 배너 광고 -->
@@ -76,7 +79,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">CEEDAY</string>
-    <string name="nav_header_subtitle">Powered By C:\EEDLIVE</string>
+    <string name="nav_header_subtitle">Powered By CEEDLIVE</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
