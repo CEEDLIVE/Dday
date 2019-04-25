@@ -5,20 +5,18 @@
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MainActivity">
+    tools:context="com.ceedlive.ceeday.activity.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
-
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorBrigntRed"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
-
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_main" />
@@ -78,7 +76,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="?actionBarSize">
-
         <com.google.android.gms.ads.AdView
             xmlns:ads="http://schemas.android.com/apk/res-auto"
             android:id="@+id/main_adView"
@@ -88,7 +85,6 @@
             android:layout_alignParentBottom="true"
             ads:adSize="SMART_BANNER"
             ads:adUnitId="@string/admob_banner_id" />
-
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

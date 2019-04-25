@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.ceedlive.dday">
+    package="com.ceedlive.ceeday">
     <!-- HTTP -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -18,20 +18,24 @@
         tools:replace="android:allowBackup"
         >
 
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <!-- AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id"/>
 
-        <activity android:name=".activity.DetailActivity"></activity>
+        <activity android:name="com.ceedlive.ceeday.activity.DetailActivity"></activity>
 
         <service
-            android:name=".service.NotificationService"
+            android:name="com.ceedlive.ceeday.service.NotificationService"
             android:enabled="true"
             android:exported="true" />
 
         <receiver
-            android:name=".receiver.NotificationReceiver"
+            android:name="com.ceedlive.ceeday.receiver.NotificationReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="0">
@@ -47,7 +51,7 @@
         </receiver>
 
         <activity
-            android:name=".activity.LoadingActivity"
+            android:name="com.ceedlive.ceeday.activity.LoadingActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,11 +60,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.HelpActivity"
+            android:name="com.ceedlive.ceeday.activity.HelpActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.MainActivity" />
+        <activity android:name="com.ceedlive.ceeday.activity.MainActivity" />
         <activity
-            android:name=".activity.MergeActivity"
+            android:name="com.ceedlive.ceeday.activity.MergeActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
