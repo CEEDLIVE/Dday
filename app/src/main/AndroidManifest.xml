@@ -15,35 +15,43 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:allowBackup"
-        >
+        tools:replace="android:allowBackup">
+        <activity android:name=".firebase.FireBaseActivity"></activity>
 
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-
-        <!-- AdMob App ID -->
+            android:value="@integer/google_play_services_version" /> <!-- AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id"/>
+            android:value="@string/admob_app_id" />
 
-        <activity android:name="com.ceedlive.ceeday.activity.DetailActivity"></activity>
+        <activity android:name=".activity.DetailActivity" />
 
         <service
-            android:name="com.ceedlive.ceeday.service.NotificationService"
+            android:name=".service.NotificationService"
             android:enabled="true"
             android:exported="true" />
+        <!--
+ FirebaseInstanceIdService performs security checks at runtime,
+      no need for explicit permissions despite exported="true"
+        -->
         <service
-            android:name="com.ceedlive.ceeday.firebase.CustomFireBaseMessagingService"
-            android:enabled="true"
-            android:exported="true" >
+            android:name=".firebase.CustomFireBaseMessagingService"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".firebase.CustomFireBaseJobService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
 
         <receiver
-            android:name="com.ceedlive.ceeday.receiver.NotificationReceiver"
+            android:name=".receiver.NotificationReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="0">
@@ -59,7 +67,7 @@
         </receiver>
 
         <activity
-            android:name="com.ceedlive.ceeday.activity.LoadingActivity"
+            android:name=".activity.LoadingActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -68,11 +76,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.ceedlive.ceeday.activity.HelpActivity"
+            android:name=".activity.HelpActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name="com.ceedlive.ceeday.activity.MainActivity" />
+        <activity android:name=".activity.MainActivity" />
         <activity
-            android:name="com.ceedlive.ceeday.activity.MergeActivity"
+            android:name=".activity.MergeActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 

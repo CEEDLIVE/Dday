@@ -45,6 +45,9 @@ import com.ceedlive.ceeday.service.NotificationService;
 import com.ceedlive.ceeday.sqlite.DatabaseHelper;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,18 +101,26 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private AdView mBottomAdView;
 
+    /**
+     * onCreate()는 Activity가 최초 생성할 때 호출됩니다.
+     * 초기화 설정을 하는 곳으로 보관된 상태의 Activity가 있으면, 그 상태를 저장중인 Bundle객체를 받아서 사용합니다.
+     * onCreate()가 호출된 후에는 onStart()가 호출되는데 이 때에는 강제종료가 불가능합니다.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.e("CFBM", "MainActivity onCreate");
+
         initialize();// 변수 초기화
 
         mBottomAdView = findViewById(R.id.main_adView);
         AdRequest adRequest = new AdRequest.Builder()
-//                .addTestDevice("8A807912B473B630ADD61488024D05EB") // This request is sent from a test device.
-//                .addTestDevice("5E52A824C274C8491B1CA21E1FD6E82F") // This request is sent from a test device.
-//                .addTestDevice("02BAA7172204A562C207F49284761F2A") // This request is sent from a test device.
+                .addTestDevice("8A807912B473B630ADD61488024D05EB") // This request is sent from a test device.
+                .addTestDevice("5E52A824C274C8491B1CA21E1FD6E82F") // This request is sent from a test device.
+                .addTestDevice("02BAA7172204A562C207F49284761F2A") // This request is sent from a test device.
                 .build();
         mBottomAdView.loadAd(adRequest);
 
@@ -128,29 +139,82 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         setEvent();// 이벤트 설정
         setSQLiteData(); // (SQLite)
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String newToken = instanceIdResult.getToken();
+                Log.e("MainActivity", "onSuccess > newToken: " + newToken);
+            }
+        });
     }
 
-    /** Called when leaving the activity */
+    /**
+     * onStart()는 Activity가 사용자에게 보여지기 직전에 호출됩니다.
+     * Activity 화면을 표시하는 메소드입니다.
+     * 이후, onResume()으로 이어집니다. 이 때에는 강제종료가 불가능합니다.
+     */
     @Override
-    public void onPause() {
-        if (mBottomAdView != null) {
-            mBottomAdView.pause();
-        }
-        super.onPause();
+    protected void onStart() {
+        Log.e("CFBM", "MainActivity onStart");
+        super.onStart();
     }
 
     /** Called when returning to the activity */
+    /**
+     * onResume()은 Activity가 사용자와 상호작용을 하기 직전에 호출됩니다.
+     * 스택의 최상위에 위치하여 Activity를 활성화시키는데,
+     * 활성화 상태에 있다가 다른 Activity가 활성화되면 onResume()이 실행됩니다.
+     * 실행중 다른 Activity가 활성화되었을 때, 기존 Activity가 화면에 보이면 onPause()에서 처리하고
+     * 보이지 않으면 onStop()으로 이어져 처리하게 됩니다.
+     * 이 때에도 강제종료가 불가능합니다.
+     */
     @Override
     public void onResume() {
+
+        Log.e("CFBM", "MainActivity onResume");
+
         super.onResume();
         if (mBottomAdView != null) {
             mBottomAdView.resume();
         }
     }
 
+    /** Called when leaving the activity */
+    /**
+     * onPause()는 다른 Activity가 활성화 되었을 때 호출됩니다.
+     * 다시 Activity가 활성화되면 onResume()이 호출되어 Activity를 활성화 하지만,
+     * onPause()상태에 있다가 메모리가 부족하면 Process Kill을 하여 메모리를 반환하게 됩니다.
+     * onPause()는 Activity화면이 조금이라도 남아있을 때 진행되지만 다른 Activity가 기존 Activity를 가려서 보이지 않게 되면 onStop()을 호출합니다.
+     * 이 때에는 강제종료가 가능한데 이 때에는 Process Kill로 종료하는 것입니다.
+     */
+    @Override
+    public void onPause() {
+
+        Log.e("CFBM", "MainActivity onPause");
+
+        if (mBottomAdView != null) {
+            mBottomAdView.pause();
+        }
+        super.onPause();
+    }
+
+    /**
+     * onRestart()는 Activity가 정지된 후(onStop() 후) 다시 시작하기 전에 호출됩니다.
+     * onRestart()가 호출된 후에는 onStart()가 호출되는데 이 때에는 강제종료가 불가능합니다.
+     */
+    @Override
+    protected void onRestart() {
+        Log.e("CFBM", "MainActivity onRestart");
+        super.onRestart();
+    }
+
     /** Called before the activity is destroyed */
     @Override
     public void onDestroy() {
+
+        Log.e("CFBM", "MainActivity onDestroy");
+
         if (mBottomAdView != null) {
             mBottomAdView.destroy();
         }
