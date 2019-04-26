@@ -16,7 +16,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".firebase.FireBaseActivity"></activity>
+        <activity android:name=".firebase.FireBaseActivity">
+            <intent-filter>
+                <action android:name=".FireBaseActivity"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="com.google.android.gms.version"

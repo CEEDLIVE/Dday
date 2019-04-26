@@ -179,7 +179,7 @@ public class CustomFireBaseMessagingService extends FirebaseMessagingService {
 
     private void sendNotification(Map<String, String> dataMap) {
         Log.e(TAG, "CustomFireBaseMessagingService sendNotification: " + dataMap);
-        Intent intent = new Intent(CustomFireBaseMessagingService.this, MainActivity.class);
+        Intent intent = new Intent(CustomFireBaseMessagingService.this, FireBaseActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
