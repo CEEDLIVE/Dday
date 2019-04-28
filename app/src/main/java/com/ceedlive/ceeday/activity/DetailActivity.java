@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.ceedlive.ceeday.BaseActivity;
 import com.ceedlive.ceeday.Constant;
 import com.ceedlive.ceeday.R;
+import com.ceedlive.ceeday.admob.AdMobManager;
 import com.ceedlive.ceeday.data.DdayItem;
 import com.ceedlive.ceeday.util.CalendarUtil;
 import com.google.android.gms.ads.AdRequest;
@@ -59,12 +60,7 @@ public class DetailActivity extends BaseActivity {
         initialize();
 
         mAdView = findViewById(R.id.detail_adView);
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("8A807912B473B630ADD61488024D05EB") // This request is sent from a test device.
-                .addTestDevice("5E52A824C274C8491B1CA21E1FD6E82F") // This request is sent from a test device.
-                .addTestDevice("02BAA7172204A562C207F49284761F2A") // This request is sent from a test device.
-                .build();
-        mAdView.loadAd(adRequest);
+        AdMobManager.setAds(mAdView);
     }
 
     @Override
