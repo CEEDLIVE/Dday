@@ -44,7 +44,7 @@ import com.ceedlive.ceeday.admob.AdMobManager;
 import com.ceedlive.ceeday.data.DdayItem;
 import com.ceedlive.ceeday.service.NotificationService;
 import com.ceedlive.ceeday.sqlite.DatabaseHelper;
-import com.google.android.gms.ads.AdRequest;
+import com.ceedlive.ceeday.webview.WebViewActivity;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -244,7 +244,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toggle.syncState();
 
         // Array of strings...
-        String[] menuArray = {"버전"};
+        String[] menuArray = {"버전", "공지사항"};
 
         mNavBodyListView = findViewById(R.id.nav_body_listview);
         ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray) {
@@ -256,6 +256,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     case 0:
                         view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_dday_info, 0, 0, 0);
                         view.setText(String.format("%s(%s)", "버전 ", getAppVersionName()));
+                        break;
+                    case 1:
+                        view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_dday_info, 0, 0, 0);
+                        view.setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                // TODO 코드 공통화
+                                WebViewActivity.loadPage(getApplicationContext(), "https://www.naver.com");
+
+//                                final Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+//                                intent.putExtra("url", "https://m.naver.com");
+//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                                getApplicationContext().startActivity(intent);
+                            }
+                        });
+
                         break;
                 }
 

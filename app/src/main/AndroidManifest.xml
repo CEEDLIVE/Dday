@@ -87,6 +87,9 @@
         <activity
             android:name=".activity.MergeActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity android:name=".webview.WebViewActivity" />
+
     </application>
 
 </manifest>
