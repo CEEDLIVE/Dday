@@ -92,6 +92,16 @@ public class NotificationService extends Service {
     // Service는 앱이 사용자와 상호작용하지 않아도 계속 수행되어야 하는 Background 작업에 적합하다고 볼 수 있다.
     // 물론 Service 내부에서 Thread가 사용되어야 하지만 큰 틀에서 봤을 때 위와 같은 개념으로 나눌 수 있을 것이다.
 
+    // 백그라운드 서비스
+    // 시스템이 리소스가 부족한 경우 임의로 중단할 수 있음
+    // onStartCommand()에서 종료시 다음 동작을 정의
+    // START_NOT_STICKY : 서비스 재 실행하지 안함
+    // START_STICKY : 재생성과 onStartCommand() 호출 (null intent)
+    // START_REDELIVER_INTENT : 재생성과 onStartCommand() 호출 (same intent)
+    // 포그라운드 서비스
+    // 서비스의 동작을 사용자가 명시적으로 인지하는 대신 메모리 부족시 시스템에 의한 종료 대상에서 제외됨
+    // 상태바에 진행중(on-going)이라는 알림이 표시
+
     /**
      * 시작 서비스를 구현하고 비동기 태스크 실행을 초기화하기 위한 중요한 메서드
      * 백그라운드에서 실행되는 동작들이 들어가는 곳

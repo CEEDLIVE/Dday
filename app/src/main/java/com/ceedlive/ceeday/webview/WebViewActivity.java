@@ -63,6 +63,12 @@ public class WebViewActivity extends AbstractWebViewActivity {
                 // 대한 적절한 핸들러를 선택하려고 Activity Manager에게 물어봅니다. WebViewClient가
                 // 제공되면, 호스트 응용 프로그램이 URL을 처리한다는 의미인 true를 반환거나 현재
                 // WebView가 URL을 처리한다는 의미인 false를 반환합니다.
+
+                // WebView를 이용한 APP 간 통신
+                // Native와 WebView 사이의 데이터를 주고 받는 것
+                // 1) Native의 값을 WebView로 넘기는 것
+                //     기본 개념은 WebView의 loadUrl() 메소드를 통해 javascript를 실행하는 것
+                // 2) 반대로 WebView의 값을 Native로 넘기는 것
                 @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
                     WebViewActivity.this.onPageStarted();
                     return WebViewActivity.this.shouldOverrideUrlLoading(view, url);
