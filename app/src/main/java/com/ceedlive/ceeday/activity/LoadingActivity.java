@@ -115,7 +115,7 @@ public class LoadingActivity extends BaseActivity {
     }
 
     /**
-     * android.app.IntentReceiverLeaked: Activity com.example.ceedlive.dday.activity.LoadingActivity has leaked IntentReceiver com.example.ceedlive.dday.receiver.PackageEventReceiver@eac196 that was originally registered here. Are you missing a call to unregisterReceiver()?
+     * Are you missing a call to unregisterReceiver()?
      */
     @Override
     protected void onDestroy() {

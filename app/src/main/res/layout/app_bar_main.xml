@@ -71,20 +71,4 @@
         android:layout_marginTop="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_dday_add_to_collection" />
 
-    <!-- Footer aligned to bottom -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="?actionBarSize">
-        <com.google.android.gms.ads.AdView
-            xmlns:ads="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/main_adView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            ads:adSize="SMART_BANNER"
-            ads:adUnitId="@string/admob_banner_id" />
-    </RelativeLayout>
-
 </android.support.design.widget.CoordinatorLayout>
