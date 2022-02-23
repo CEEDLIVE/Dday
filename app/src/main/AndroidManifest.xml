@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.ceedlive.ceeday">
+    package="com.ceedlive.dday">
     <!-- HTTP -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".firebase.FireBaseActivity">
+        <activity android:name="com.ceedlive.dday.firebase.FireBaseActivity">
             <intent-filter>
                 <action android:name=".FireBaseActivity"/>
                 <category android:name="android.intent.category.DEFAULT" />
@@ -30,10 +30,10 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />
 
-        <activity android:name=".activity.DetailActivity" />
+        <activity android:name="com.ceedlive.dday.activity.DetailActivity" />
 
         <service
-            android:name=".service.NotificationService"
+            android:name="com.ceedlive.dday.service.NotificationService"
             android:enabled="true"
             android:exported="true" />
         <!--
@@ -41,22 +41,22 @@
       no need for explicit permissions despite exported="true"
         -->
         <service
-            android:name=".firebase.CustomFireBaseMessagingService"
+            android:name="com.ceedlive.dday.firebase.CustomFireBaseMessagingService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".firebase.CustomFireBaseJobService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
-            </intent-filter>
-        </service>
+<!--        <service-->
+<!--            android:name="com.ceedlive.dday.firebase.CustomFireBaseJobService"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
 
         <receiver
-            android:name=".receiver.NotificationReceiver"
+            android:name="com.ceedlive.dday.receiver.NotificationReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="0">
@@ -72,20 +72,28 @@
         </receiver>
 
         <activity
-            android:name=".activity.LoadingActivity"
+            android:name="com.ceedlive.dday.activity.LoadingActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="ceedlive2022.web.app" android:scheme="https" />
+            </intent-filter>
+
         </activity>
         <activity
-            android:name=".activity.HelpActivity"
+            android:name="com.ceedlive.dday.activity.HelpActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.MainActivity" />
+        <activity android:name="com.ceedlive.dday.activity.MainActivity" />
         <activity
-            android:name=".activity.MergeActivity"
+            android:name="com.ceedlive.dday.activity.MergeActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
